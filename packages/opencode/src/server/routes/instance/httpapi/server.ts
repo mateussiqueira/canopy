@@ -10,6 +10,7 @@ import {
 } from "effect/unstable/http"
 import * as Socket from "effect/unstable/socket/Socket"
 import { AppFileSystem } from "@opencode-ai/core/filesystem"
+import { Flag } from "@opencode-ai/core/flag/flag"
 import { Account } from "@/account/account"
 import { Agent } from "@/agent/agent"
 import { Auth } from "@/auth"
@@ -54,6 +55,7 @@ import { lazy } from "@/util/lazy"
 import { Vcs } from "@/project/vcs"
 import { Worktree } from "@/worktree"
 import { Workspace } from "@/control-plane/workspace"
+import { SimulationFileSystem } from "@/testing/simulation/filesystem"
 import { CorsConfig, isAllowedCorsOrigin, type CorsOptions } from "@/server/cors"
 import { serveUIEffect } from "@/server/shared/ui"
 import { ServerAuth } from "@/server/auth"
@@ -230,7 +232,7 @@ export function createRoutes(
       Workspace.defaultLayer,
       Worktree.appLayer,
       Bus.layer,
-      AppFileSystem.defaultLayer,
+      Flag.OPENCODE_MOCK ? SimulationFileSystem.layer({ root: "/opencode" }) : AppFileSystem.defaultLayer,
       FetchHttpClient.layer,
       HttpServer.layerServices,
     ]),
