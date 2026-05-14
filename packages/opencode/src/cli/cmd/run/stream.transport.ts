@@ -15,7 +15,7 @@
 // The tick counter prevents stale idle events from resolving the wrong turn.
 // We also re-check live session status before resolving an idle event so a
 // delayed idle from an older turn cannot complete a newer busy turn.
-import type { Event, GlobalEvent, OpencodeClient } from "@opencode-ai/sdk/v2"
+import type { Event, GlobalEvent, OpencodeClient, ToolPart } from "@opencode-ai/sdk/v2"
 import { Context, Deferred, Effect, Exit, Layer, Scope, Stream } from "effect"
 import { makeRuntime } from "@/effect/run-service"
 import {
@@ -505,7 +505,10 @@ function createLayer(input: StreamInput) {
           state.footerView = current
         }
 
-        const recoverQuestion = Effect.fn("RunStreamTransport.recoverQuestion")(function* (partID: string) {
+        const recoverQuestion = Effect.fn("RunStreamTransport.recoverQuestion")(function* (part: ToolPart) {
+          const partID = part.id
+          const matches = (request: SessionData["questions"][number]) =>
+            request.tool?.messageID === part.messageID && request.tool?.callID === part.callID
           if (recovering.has(partID)) {
             return
           }
@@ -513,7 +516,7 @@ function createLayer(input: StreamInput) {
           recovering.add(partID)
           try {
             while (!closed && !abort.signal.aborted && !input.footer.isClosed) {
-              if (state.data.questions.length > 0 || !state.data.tools.has(partID)) {
+              if (state.data.questions.some(matches) || !state.data.tools.has(partID)) {
                 return
               }
 
@@ -521,23 +524,25 @@ function createLayer(input: StreamInput) {
                 Effect.map((item) => (item.data ?? []).filter((request) => request.sessionID === input.sessionID)),
                 Effect.orElseSucceed(() => []),
               )
-              if (state.data.questions.length > 0 || !state.data.tools.has(partID)) {
+              if (state.data.questions.some(matches) || !state.data.tools.has(partID)) {
                 return
               }
 
-              if (questions.length > 0) {
+              const matching = questions.filter(matches)
+              if (matching.length > 0) {
+                state.data.questions = state.data.questions.filter(matches)
                 bootstrapSessionData({
                   data: state.data,
                   messages: [],
                   permissions: [],
-                  questions,
+                  questions: matching,
                 })
-                for (const request of questions) {
+                for (const request of matching) {
                   seedBlocker(request.id)
                 }
                 input.trace?.write("question.recover", {
                   sessionID: input.sessionID,
-                  requests: questions.map((request) => request.id),
+                  requests: matching.map((request) => request.id),
                 })
                 syncFooter([])
                 return
@@ -784,10 +789,9 @@ function createLayer(input: StreamInput) {
                   event.properties.part.sessionID === input.sessionID &&
                   event.properties.part.type === "tool" &&
                   event.properties.part.tool === "question" &&
-                  event.properties.part.state.status === "running" &&
-                  state.data.questions.length === 0
+                  event.properties.part.state.status === "running"
                 ) {
-                  yield* recoverQuestion(event.properties.part.id).pipe(
+                  yield* recoverQuestion(event.properties.part).pipe(
                     Effect.forkIn(scope, { startImmediately: true }),
                     Effect.asVoid,
                   )

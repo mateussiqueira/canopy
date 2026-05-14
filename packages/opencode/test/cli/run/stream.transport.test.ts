@@ -835,12 +835,17 @@ describe("run stream transport", () => {
         callID: "call-question-1",
       },
     }
+    const stale = {
+      ...request,
+      id: "question-old",
+      tool: { messageID: "msg-old", callID: "call-question-old" },
+    }
     const transport = await createSessionTransport({
       sdk: sdk({
         stream: src.stream,
         questions: async () => {
           questionCalls += 1
-          return ok(questionCalls > 1 ? [request] : [])
+          return ok(questionCalls === 1 ? [stale] : [stale, request])
         },
         promptAsync: async () => {
           queueMicrotask(() => {
@@ -885,7 +890,9 @@ describe("run stream transport", () => {
 
       const view = await waitFor(() => {
         const item = ui.events.findLast((event) => event.type === "stream.view")
-        return item?.type === "stream.view" && item.view.type === "question" ? item.view : undefined
+        return item?.type === "stream.view" && item.view.type === "question" && item.view.request.id === request.id
+          ? item.view
+          : undefined
       })
 
       expect(view).toEqual({
