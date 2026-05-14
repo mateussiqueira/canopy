@@ -3,7 +3,7 @@ import { createDefaultOpenTuiKeymap } from "@opentui/keymap/opentui"
 import * as Clipboard from "@tui/util/clipboard"
 import * as Selection from "@tui/util/selection"
 import * as TuiAudio from "@tui/util/audio"
-import { createCliRenderer, MouseButton, type CliRendererConfig } from "@opentui/core"
+import { createCliRenderer, MouseButton, type CliRenderer, type CliRendererConfig } from "@opentui/core"
 import { RouteProvider, useRoute } from "@tui/context/route"
 import {
   Switch,
@@ -165,6 +165,9 @@ export function tui(input: {
   fetch?: typeof fetch
   headers?: RequestInit["headers"]
   events?: EventSource
+  renderer?: CliRenderer
+  mode?: "dark" | "light"
+  onReady?: (ctx: { renderer: CliRenderer }) => void
 }) {
   // promise to prevent immediate exit
   // oxlint-disable-next-line no-async-promise-executor -- intentional: async executor used for sequential setup before resolve
@@ -182,10 +185,10 @@ export function tui(input: {
       TuiAudio.dispose()
     }
 
-    const renderer = await createCliRenderer(rendererConfig(input.config))
+    const renderer = input.renderer ?? (await createCliRenderer(rendererConfig(input.config)))
     // Prewarm palette before ThemeProvider mounts so `system` theme avoids a first-paint fallback flash.
     void renderer.getPalette({ size: 16 }).catch(() => undefined)
-    const mode = (await renderer.waitForThemeMode(1000)) ?? "dark"
+    const mode = input.mode ?? (await renderer.waitForThemeMode(1000)) ?? "dark"
 
     const keymap = createDefaultOpenTuiKeymap(renderer)
     const offKeymap = registerOpencodeKeymap(keymap, renderer, input.config)
@@ -256,6 +259,7 @@ export function tui(input: {
         </ErrorBoundary>
       )
     }, renderer)
+    input.onReady?.({ renderer })
   })
 }
 

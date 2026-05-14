@@ -64,6 +64,7 @@ import { Workspace } from "@/control-plane/workspace"
 import { SimulationFileSystem } from "@/testing/simulation/filesystem"
 import { SimulationNetwork } from "@/testing/simulation/network"
 import { SimulationNetworkRoutes } from "@/testing/simulation/network-routes"
+import { SimulationProvider } from "@/testing/simulation/provider"
 import { Simulation } from "@/testing/simulation/service"
 import { CorsConfig, isAllowedCorsOrigin, type CorsOptions } from "@/server/cors"
 import { serveUIEffect } from "@/server/shared/ui"
@@ -284,7 +285,7 @@ export function createSimulatedRoutes(corsOptions?: CorsOptions): ReturnType<typ
     Plugin.layer,
     Project.layer,
     ProviderAuth.layer,
-    Provider.layer,
+    SimulationProvider.layer,
     Pty.layer,
     PtyTicket.layer,
     Question.layer,

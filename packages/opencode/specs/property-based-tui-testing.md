@@ -199,7 +199,9 @@ Implementation shape:
 - First pass uses a raw route wrapper at `packages/opencode/src/server/routes/instance/httpapi/simulation.ts` to avoid SDK regeneration while the API shape is still moving.
 - Current control service can reset state, seed filesystem files, register static network responses, and return a snapshot.
 - Register/configure a local mock provider/model through the normal provider path.
-- The mock model reads scripts from simulation control state.
+- The simulated route graph replaces `Provider.Service` with `SimulationProvider.layer`.
+- The mock model reads queued scripts from simulation control state.
+- Current mock provider supports text/thinking/error actions for the first step only. Tool calls and multi-round step selection are still pending.
 - No JSON-in-prompt fallback.
 - Missing script means typed simulation error.
 
@@ -236,10 +238,11 @@ Todos:
 - [x] Add simulation control state and reset semantics.
 - [x] Add gated simulation endpoints for reset, filesystem seed, network register, and snapshot.
 - [x] Decide raw route vs typed HttpApi route. Raw route for first pass; no SDK regeneration yet.
-- [ ] Implement mock provider/model on the normal provider path.
-- [ ] Port the useful stream chunk behavior from the old branch to the current AI SDK interface.
-- [ ] Make missing scripts fail with a typed simulation error.
-- [ ] Record consumed script step in simulation snapshot.
+- [x] Implement mock provider/model on the normal provider path.
+- [x] Make missing scripts fail with a typed simulation error.
+- [x] Record consumed script count in simulation snapshot.
+- [ ] Support tool-call script actions.
+- [ ] Support multi-step script selection after tool result rounds.
 - [ ] Verify `session.prompt_async` exercises real `SessionPrompt` and `SessionProcessor`.
 
 ## OpenTUI Fake Renderer And Interactable Elements
@@ -255,6 +258,8 @@ Known starting points:
 Implementation shape:
 
 - Add a renderer factory/testing hook to `tui(...)` so tests can pass a fake renderer.
+- Current first pass checks `OPENCODE_SIMULATION` in `cli/cmd/tui/thread.ts`, starts the normal worker/backend, and injects an OpenTUI test renderer into `tui(...)`.
+- Fake renderer setup lives in `cli/cmd/tui/simulation.ts` and returns `renderOnce`, `screen`, and `spans` helpers for the thread-side simulation runner.
 - Do not render to a real terminal in simulation mode.
 - Investigate OpenTUI APIs for walking the render tree and extracting focusable/clickable/editable elements.
 - Investigate OpenTUI APIs for reading the screen buffer from the fake renderer.
@@ -262,11 +267,11 @@ Implementation shape:
 
 Todos:
 
-- [ ] Inspect `@opentui/core/testing` `createTestRenderer` capabilities.
-- [ ] Inspect `@opentui/solid` `testRender` capabilities.
-- [ ] Determine how to get a screen buffer string/snapshot from the fake renderer.
-- [ ] Determine how to iterate renderables and identify interactable elements.
-- [ ] Add a minimal renderer factory override to `tui(...)` or app startup.
+- [x] Inspect `@opentui/core/testing` `createTestRenderer` capabilities.
+- [x] Inspect `@opentui/solid` `testRender` capabilities.
+- [x] Determine how to get a screen buffer string/snapshot from the fake renderer.
+- [x] Determine first structured capture API for interactable discovery: `captureSpans()`.
+- [x] Add a minimal renderer factory override to `tui(...)` or app startup.
 - [ ] Expose prompt ref, route, sync state, keymap, and renderer to the simulation harness.
 - [ ] Verify TUI starts in fake renderer with no real terminal output.
 - [ ] Verify screen buffer can be captured after a render.

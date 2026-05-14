@@ -21,6 +21,8 @@ import {
   sanitizedProcessEnv,
 } from "@opencode-ai/core/util/opencode-process"
 import { validateSession } from "./validate-session"
+import { Flag } from "@opencode-ai/core/flag/flag"
+import { TuiSimulation } from "./simulation"
 
 declare global {
   const OPENCODE_WORKER_PATH: string
@@ -229,26 +231,38 @@ export const TuiThreadCommand = cmd({
 
       try {
         const { tui } = await import("./app")
-        await tui({
-          url: transport.url,
-          async onSnapshot() {
-            const tui = writeHeapSnapshot("tui.heapsnapshot")
-            const server = await client.call("snapshot", undefined)
-            return [tui, server]
-          },
-          config,
-          directory: cwd,
-          fetch: transport.fetch,
-          events: transport.events,
-          args: {
-            continue: args.continue,
-            sessionID: args.session,
-            agent: args.agent,
-            model: args.model,
-            prompt,
-            fork: args.fork,
-          },
-        })
+        const simulationRenderer = Flag.OPENCODE_SIMULATION ? await TuiSimulation.createSimulationRenderer() : undefined
+        try {
+          await tui({
+            url: transport.url,
+            async onSnapshot() {
+              const tui = writeHeapSnapshot("tui.heapsnapshot")
+              const server = await client.call("snapshot", undefined)
+              return [tui, server]
+            },
+            config,
+            directory: cwd,
+            fetch: transport.fetch,
+            events: transport.events,
+            renderer: simulationRenderer?.renderer,
+            mode: simulationRenderer ? "dark" : undefined,
+            onReady: simulationRenderer
+              ? async () => {
+                  await simulationRenderer.renderOnce()
+                }
+              : undefined,
+            args: {
+              continue: args.continue,
+              sessionID: args.session,
+              agent: args.agent,
+              model: args.model,
+              prompt,
+              fork: args.fork,
+            },
+          })
+        } finally {
+          simulationRenderer?.destroy()
+        }
       } finally {
         await stop()
       }

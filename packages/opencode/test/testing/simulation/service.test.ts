@@ -2,15 +2,18 @@ import { describe, expect } from "bun:test"
 import { AppFileSystem } from "@opencode-ai/core/filesystem"
 import { Effect, Layer } from "effect"
 import { HttpClient, HttpClientRequest } from "effect/unstable/http"
+import { Provider } from "../../../src/provider/provider"
 import { SimulationFileSystem } from "../../../src/testing/simulation/filesystem"
 import { SimulationNetwork } from "../../../src/testing/simulation/network"
+import { SimulationProvider } from "../../../src/testing/simulation/provider"
 import { Simulation } from "../../../src/testing/simulation/service"
 import { testEffect } from "../../lib/effect"
 
 const fsLayer = SimulationFileSystem.layer({ root: "/opencode" })
 const networkLayer = SimulationNetwork.layer({ allowLoopback: false })
 const simulationLayer = Simulation.layer.pipe(Layer.provide(fsLayer), Layer.provide(networkLayer))
-const it = testEffect(Layer.mergeAll(fsLayer, networkLayer, simulationLayer))
+const providerLayer = SimulationProvider.layer.pipe(Layer.provide(simulationLayer))
+const it = testEffect(Layer.mergeAll(fsLayer, networkLayer, simulationLayer, providerLayer))
 
 describe("Simulation", () => {
   it.effect("seeds files into the simulated filesystem", () =>
@@ -62,6 +65,87 @@ describe("Simulation", () => {
       expect((yield* simulation.snapshot()).files).toEqual([])
       const exit = yield* http.execute(HttpClientRequest.get("https://example.com/page")).pipe(Effect.exit)
       expect(exit._tag).toBe("Failure")
+    }),
+  )
+
+  it.effect("queues and consumes LLM scripts", () =>
+    Effect.gen(function* () {
+      const simulation = yield* Simulation.Service
+
+      expect(
+        yield* simulation.enqueueLLM({
+          scripts: [{ steps: [[{ type: "text", content: "hello" }]], finish: "stop" }],
+        }),
+      ).toEqual({ queued: 1 })
+      expect((yield* simulation.snapshot()).llmQueued).toBe(1)
+      expect(yield* simulation.nextLLM()).toEqual({ steps: [[{ type: "text", content: "hello" }]], finish: "stop" })
+      expect((yield* simulation.snapshot()).llmConsumed).toBe(1)
+    }),
+  )
+
+  it.effect("simulation provider consumes queued text scripts", () =>
+    Effect.gen(function* () {
+      const simulation = yield* Simulation.Service
+      const provider = yield* Provider.Service
+      const model = yield* provider.defaultModel().pipe(Effect.flatMap((item) => provider.getModel(item.providerID, item.modelID)))
+      const language = yield* provider.getLanguage(model)
+
+      yield* simulation.enqueueLLM({ scripts: [{ steps: [[{ type: "text", content: "assistant text" }]] }] })
+
+      const result = yield* Effect.promise(() => language.doGenerate({ prompt: [], abortSignal: undefined }))
+      expect(result.content).toEqual([{ type: "text", text: "assistant text" }])
+      expect((yield* simulation.snapshot()).llmConsumed).toBe(1)
+    }),
+  )
+
+  it.effect("simulation provider streams queued script actions", () =>
+    Effect.gen(function* () {
+      const simulation = yield* Simulation.Service
+      const provider = yield* Provider.Service
+      const model = yield* provider.defaultModel().pipe(Effect.flatMap((item) => provider.getModel(item.providerID, item.modelID)))
+      const language = yield* provider.getLanguage(model)
+
+      yield* simulation.enqueueLLM({
+        scripts: [
+          {
+            steps: [
+              [
+                { type: "thinking", content: "thinking" },
+                { type: "text", content: "answer" },
+              ],
+            ],
+          },
+        ],
+      })
+
+      const result = yield* Effect.promise(() => language.doStream({ prompt: [], abortSignal: undefined }))
+      const reader = result.stream.getReader()
+      const parts: unknown[] = []
+      while (true) {
+        const next = yield* Effect.promise(() => reader.read())
+        if (next.done) break
+        parts.push(next.value)
+      }
+
+      expect(parts).toEqual([
+        { type: "stream-start", warnings: [] },
+        { type: "reasoning-start", id: "simulation-thinking-1" },
+        { type: "reasoning-delta", id: "simulation-thinking-1", delta: "thinking" },
+        { type: "reasoning-end", id: "simulation-thinking-1" },
+        { type: "text-start", id: "simulation-text-2" },
+        { type: "text-delta", id: "simulation-text-2", delta: "answer" },
+        { type: "text-end", id: "simulation-text-2" },
+        {
+          type: "finish",
+          finishReason: { unified: "stop", raw: undefined },
+          usage: {
+            inputTokens: { total: 0, noCache: 0, cacheRead: undefined, cacheWrite: undefined },
+            outputTokens: { total: "thinkinganswer".length, text: "thinkinganswer".length, reasoning: undefined },
+            raw: undefined,
+          },
+        },
+      ])
+      expect((yield* simulation.snapshot()).llmConsumed).toBe(1)
     }),
   )
 })

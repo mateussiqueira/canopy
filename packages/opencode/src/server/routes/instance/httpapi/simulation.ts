@@ -38,7 +38,12 @@ export const simulationRoute = HttpRouter.use((router) =>
     )
 
     yield* router.add("POST", "/experimental/simulation/llm/enqueue", () =>
-      json(Effect.succeed({ ok: false, skipped: "mock provider scripts are not implemented yet" })),
+      json(
+        Effect.gen(function* () {
+          const input = yield* HttpServerRequest.schemaBodyJson(Simulation.LLMEnqueueInput)
+          return yield* simulation.enqueueLLM(input)
+        }),
+      ),
     )
 
     yield* router.add("GET", "/experimental/simulation/snapshot", () => json(simulation.snapshot()))
