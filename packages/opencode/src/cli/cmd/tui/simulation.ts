@@ -1,8 +1,11 @@
 import type { CliRenderer } from "@opentui/core"
 import type { CapturedFrame } from "@opentui/core"
+import type { SimulationActions } from "@/testing/simulation/actions"
 
 export interface SimulationRenderer {
   readonly renderer: CliRenderer
+  readonly mockInput: SimulationActions.MockInput
+  readonly mockMouse: SimulationActions.MockMouse
   readonly renderOnce: () => Promise<void>
   readonly screen: () => string
   readonly spans: () => CapturedFrame
@@ -20,6 +23,8 @@ export async function createSimulationRenderer(): Promise<SimulationRenderer> {
 
   return {
     renderer: setup.renderer,
+    mockInput: setup.mockInput,
+    mockMouse: setup.mockMouse,
     renderOnce: setup.renderOnce,
     screen: setup.captureCharFrame,
     spans: setup.captureSpans,

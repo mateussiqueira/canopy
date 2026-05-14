@@ -1,5 +1,5 @@
 import { Prompt, type PromptRef } from "@tui/component/prompt"
-import { createEffect, createSignal, onMount } from "solid-js"
+import { createEffect, createSignal, onMount, Show } from "solid-js"
 import { Logo } from "../component/logo"
 import { useProject } from "../context/project"
 import { useSync } from "../context/sync"
@@ -88,7 +88,10 @@ export function Home() {
         <box flexGrow={1} minHeight={0} />
         <Toast />
       </box>
-      <box width="100%" flexShrink={0}>
+      <box width="100%" flexShrink={0} paddingLeft={2} paddingRight={2}>
+        <Show when={args.simulationMcpUrl?.()}>
+          {(url) => <text fg="yellow">Simulation mode MCP: {url()}</text>}
+        </Show>
         <TuiPluginRuntime.Slot name="home_footer" mode="single_winner" />
       </box>
     </>

@@ -24,6 +24,8 @@
 - `mockInput` supports interactions like `typeText`, `pressEnter`, and `pressArrow`.
 - Implemented `TuiSimulation.createSimulationRenderer(...)` beside `thread.ts`. It creates a test renderer and exposes `renderOnce`, `screen`, `spans`, and `destroy`.
 - `thread.ts` checks `OPENCODE_SIMULATION`, creates the fake renderer there, starts the normal worker/backend, and passes the renderer into `tui(...)`.
+- Backend route assembly checks `OPENCODE_SIMULATION_BACKEND`; `OPENCODE_SIMULATION` implies this flag.
+- `OPENCODE_SIMULATION_BACKEND=1` can run a real frontend against a simulated backend.
 - `tui(...)` now accepts an injected `CliRenderer`, test mode, and an `onReady` callback. Production still creates the real renderer.
 
 ## OpenTUI Action APIs

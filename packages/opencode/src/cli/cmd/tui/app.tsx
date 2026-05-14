@@ -167,7 +167,7 @@ export function tui(input: {
   events?: EventSource
   renderer?: CliRenderer
   mode?: "dark" | "light"
-  onReady?: (ctx: { renderer: CliRenderer }) => void
+  onReady?: (ctx: { renderer: CliRenderer }) => void | Promise<void | { simulationMcpUrl?: string }>
 }) {
   // promise to prevent immediate exit
   // oxlint-disable-next-line no-async-promise-executor -- intentional: async executor used for sequential setup before resolve
@@ -186,6 +186,7 @@ export function tui(input: {
     }
 
     const renderer = input.renderer ?? (await createCliRenderer(rendererConfig(input.config)))
+    const [simulationMcpUrl, setSimulationMcpUrl] = createSignal<string | undefined>()
     // Prewarm palette before ThemeProvider mounts so `system` theme avoids a first-paint fallback flash.
     void renderer.getPalette({ size: 16 }).catch(() => undefined)
     const mode = input.mode ?? (await renderer.waitForThemeMode(1000)) ?? "dark"
@@ -201,7 +202,7 @@ export function tui(input: {
           )}
         >
           <OpencodeKeymapProvider keymap={keymap}>
-            <ArgsProvider {...input.args}>
+            <ArgsProvider {...input.args} simulationMcpUrl={simulationMcpUrl}>
               <ExitProvider onBeforeExit={onBeforeExit} onExit={onExit}>
                 <KVProvider>
                   <ToastProvider>
@@ -259,7 +260,8 @@ export function tui(input: {
         </ErrorBoundary>
       )
     }, renderer)
-    input.onReady?.({ renderer })
+    const ready = await input.onReady?.({ renderer })
+    if (ready?.simulationMcpUrl) setSimulationMcpUrl(ready.simulationMcpUrl)
   })
 }
 

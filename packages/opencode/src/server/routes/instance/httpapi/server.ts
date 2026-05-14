@@ -11,6 +11,7 @@ import {
 } from "effect/unstable/http"
 import * as Socket from "effect/unstable/socket/Socket"
 import { AppFileSystem } from "@opencode-ai/core/filesystem"
+import { Global } from "@opencode-ai/core/global"
 import { Flag } from "@opencode-ai/core/flag/flag"
 import { Account } from "@/account/account"
 import { AccountRepo } from "@/account/repo"
@@ -29,6 +30,7 @@ import { Format } from "@/format"
 import { RuntimeFlags } from "@/effect/runtime-flags"
 import { LSP } from "@/lsp/lsp"
 import { MCP } from "@/mcp"
+import { McpAuth } from "@/mcp/auth"
 import { Permission } from "@/permission"
 import { Installation } from "@/installation"
 import { InstanceLayer } from "@/project/instance-layer"
@@ -45,6 +47,8 @@ import { Question } from "@/question"
 import { Session } from "@/session/session"
 import { SessionCompaction } from "@/session/compaction"
 import { SessionPrompt } from "@/session/prompt"
+import { SessionProcessor } from "@/session/processor"
+import { Instruction } from "@/session/instruction"
 import { SessionRevert } from "@/session/revert"
 import { SessionRunState } from "@/session/run-state"
 import { SessionStatus } from "@/session/status"
@@ -53,10 +57,15 @@ import { Todo } from "@/session/todo"
 import { SessionShare } from "@/share/session"
 import { ShareNext } from "@/share/share-next"
 import { EventV2Bridge } from "@/event-v2-bridge"
+import { LLM } from "@/session/llm"
+import { SystemPrompt } from "@/session/system"
 import { Skill } from "@/skill"
+import { Discovery } from "@/skill/discovery"
 import { Snapshot } from "@/snapshot"
+import { Storage } from "@/storage/storage"
 import { SyncEvent } from "@/sync"
 import { ToolRegistry } from "@/tool/registry"
+import { Truncate } from "@/tool/truncate"
 import { lazy } from "@/util/lazy"
 import { Vcs } from "@/project/vcs"
 import { Worktree } from "@/worktree"
@@ -259,69 +268,90 @@ export function createSimulatedRoutes(corsOptions?: CorsOptions): ReturnType<typ
     SimulationNetwork.layer({ entries: SimulationNetworkRoutes.defaults(), allowLoopback: true }),
   )
 
-  const simulatedServices = Layer.mergeAll(
-    errorLayer,
-    compressionLayer,
-    corsVaryFix,
-    fenceLayer,
-    cors(corsOptions),
-    AccountRepo.layer,
-    Account.layer,
-    Agent.layer,
-    Auth.layer,
-    Command.layer,
-    Config.layer,
-    File.layer,
-    FileWatcher.layer,
-    Format.layer,
-    Git.layer,
-    LSP.layer,
-    Installation.layer,
-    MCP.layer,
-    ModelsDev.layer,
-    Npm.layer,
-    Env.layer,
-    Permission.layer,
-    Plugin.layer,
-    Project.layer,
-    ProviderAuth.layer,
-    SimulationProvider.layer,
-    Pty.layer,
-    PtyTicket.layer,
-    Question.layer,
-    Ripgrep.layer,
-    Session.layer,
-    SessionCompaction.layer,
-    SessionPrompt.layer,
-    SessionRevert.layer,
-    SessionShare.layer,
-    SessionRunState.layer,
-    SessionStatus.layer,
-    SessionSummary.layer,
-    ShareNext.layer,
-    Snapshot.layer,
-    SyncEvent.layer,
-    Skill.layer,
-    Todo.layer,
-    ToolRegistry.layer,
-    Vcs.layer,
-    Workspace.layer,
-    Worktree.layer,
-    Bus.layer,
-    Simulation.layer,
-    HttpServer.layerServices,
-  ).pipe(
+  const simulatedRoutes = Layer.mergeAll(rootApiRoutes, eventApiRoutes, instanceRoutes, docRoute, uiRoute, simulationRoute)
+
+  const withRouteAndLeafServices = simulatedRoutes.pipe(
+    Layer.provideMerge(errorLayer),
+    Layer.provideMerge(compressionLayer),
+    Layer.provideMerge(corsVaryFix),
+    Layer.provideMerge(fenceLayer),
+    Layer.provideMerge(cors(corsOptions)),
+    Layer.provideMerge(runtime),
+    Layer.provideMerge(File.layer),
+    Layer.provideMerge(FileWatcher.layer),
+    Layer.provideMerge(Installation.layer),
+    Layer.provideMerge(ModelsDev.layer),
+  )
+
+  const withEndpointServices = withRouteAndLeafServices.pipe(
+    Layer.provideMerge(ProviderAuth.layer),
+    Layer.provideMerge(Pty.layer),
+    Layer.provideMerge(PtyTicket.layer),
+    Layer.provideMerge(SessionShare.layer),
+    Layer.provideMerge(ShareNext.layer),
+    Layer.provideMerge(Workspace.layer),
+    Layer.provideMerge(Worktree.layer),
+    Layer.provideMerge(HttpServer.layerServices),
+  )
+
+  const withSessionAndToolConsumers = withEndpointServices.pipe(
+    Layer.provideMerge(Project.layer),
+    Layer.provideMerge(SessionPrompt.layer),
+    Layer.provideMerge(SessionRevert.layer),
+    Layer.provideMerge(ToolRegistry.layer),
+    Layer.provideMerge(SessionCompaction.layer),
+    Layer.provideMerge(SessionProcessor.layer),
+    Layer.provideMerge(SessionSummary.layer),
+    Layer.provideMerge(Agent.layer),
+    Layer.provideMerge(Command.layer),
+  )
+
+  const withToolDependencies = withSessionAndToolConsumers.pipe(
+    Layer.provideMerge(Vcs.layer),
+    Layer.provideMerge(Ripgrep.layer),
+    Layer.provideMerge(Format.layer),
+    Layer.provideMerge(Todo.layer),
+    Layer.provideMerge(Question.layer),
+    Layer.provideMerge(Truncate.layer),
+    Layer.provideMerge(Instruction.layer),
+    Layer.provideMerge(Snapshot.layer),
+    Layer.provideMerge(LSP.layer),
+    Layer.provideMerge(MCP.layer),
+    Layer.provideMerge(SyncEvent.layer),
+  )
+
+  const withSessionProviderDependencies = withToolDependencies.pipe(
+    Layer.provideMerge(McpAuth.layer),
+    Layer.provideMerge(SessionRunState.layer),
+    Layer.provideMerge(SessionStatus.layer),
+    Layer.provideMerge(Session.layer),
+    Layer.provideMerge(Storage.layer),
+    Layer.provideMerge(LLM.layer),
+    Layer.provideMerge(SystemPrompt.layer),
+    Layer.provideMerge(Skill.layer),
+    Layer.provideMerge(Discovery.layer),
+  )
+
+  const withCoreAppServices = withSessionProviderDependencies.pipe(
+    Layer.provideMerge(Plugin.layer),
+    Layer.provideMerge(Permission.layer),
+    Layer.provideMerge(SimulationProvider.layer),
+    Layer.provideMerge(Simulation.layer),
+    Layer.provideMerge(Config.layer),
+    Layer.provideMerge(Account.layer),
+    Layer.provideMerge(Auth.layer),
     Layer.provideMerge(AccountRepo.layer),
+  )
+
+  return withCoreAppServices.pipe(
     Layer.provideMerge(Git.layer),
     Layer.provideMerge(Npm.layer),
     Layer.provideMerge(Env.layer),
-    Layer.provide(CrossSpawnSpawner.layer),
-    Layer.provide(NodePath.layer),
+    Layer.provideMerge(Bus.layer),
+    Layer.provideMerge(Global.layer),
+    Layer.provideMerge(CrossSpawnSpawner.layer),
+    Layer.provideMerge(NodePath.layer),
     Layer.provideMerge(simulationBoundary),
-  )
-
-  return Layer.mergeAll(rootApiRoutes, eventApiRoutes, instanceRoutes, docRoute, uiRoute, simulationRoute).pipe(
-    Layer.provide(simulatedServices),
     Layer.provideMerge(Layer.succeed(CorsConfig)(corsOptions)),
     Layer.provideMerge(InstanceLayer.layer),
     Layer.provideMerge(Observability.layer),
@@ -329,7 +359,7 @@ export function createSimulatedRoutes(corsOptions?: CorsOptions): ReturnType<typ
 }
 
 export function createRoutes(corsOptions?: CorsOptions) {
-  if (Flag.OPENCODE_SIMULATION) {
+  if (Flag.OPENCODE_SIMULATION_BACKEND) {
     return createSimulatedRoutes(corsOptions)
   }
 

@@ -4,6 +4,7 @@ export interface Args {
   model?: string
   agent?: string
   prompt?: string
+  simulationMcpUrl?: () => string | undefined
   continue?: boolean
   sessionID?: string
   fork?: boolean

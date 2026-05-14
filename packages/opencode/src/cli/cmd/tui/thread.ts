@@ -232,6 +232,12 @@ export const TuiThreadCommand = cmd({
       try {
         const { tui } = await import("./app")
         const simulationRenderer = Flag.OPENCODE_SIMULATION ? await TuiSimulation.createSimulationRenderer() : undefined
+        const simulationMcpMode = Flag.OPENCODE_SIMULATION
+          ? "stdio"
+          : Flag.OPENCODE_SIMULATION_BACKEND
+            ? "remote"
+            : undefined
+        let simulationMcp: Awaited<ReturnType<typeof import("./simulation-mcp").TuiSimulationMcp.createSimulationMcpServer>> | undefined
         try {
           await tui({
             url: transport.url,
@@ -246,11 +252,26 @@ export const TuiThreadCommand = cmd({
             events: transport.events,
             renderer: simulationRenderer?.renderer,
             mode: simulationRenderer ? "dark" : undefined,
-            onReady: simulationRenderer
-              ? async () => {
-                  await simulationRenderer.renderOnce()
+            onReady: simulationMcpMode
+              ? async (ctx) => {
+                  const module = await import("./simulation-mcp")
+                  const harness = simulationRenderer
+                    ? module.TuiSimulationMcp.harnessFromSimulationRenderer(simulationRenderer)
+                    : module.TuiSimulationMcp.harnessFromRenderer(ctx.renderer)
+                  if (simulationRenderer) await simulationRenderer.renderOnce()
+                  simulationMcp = await module.TuiSimulationMcp.createSimulationMcpServer({
+                    mode: simulationMcpMode,
+                    harness,
+                    controlUrl: transport.url,
+                    controlFetch: transport.fetch,
+                  })
+                  return { simulationMcpUrl: simulationMcp.url }
                 }
-              : undefined,
+              : simulationRenderer
+                ? async () => {
+                    await simulationRenderer.renderOnce()
+                  }
+                : undefined,
             args: {
               continue: args.continue,
               sessionID: args.session,
@@ -261,6 +282,7 @@ export const TuiThreadCommand = cmd({
             },
           })
         } finally {
+          await simulationMcp?.stop()
           simulationRenderer?.destroy()
         }
       } finally {

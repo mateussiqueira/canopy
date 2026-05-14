@@ -14,6 +14,7 @@ Build these pieces first:
 - Mock LLM provider controlled by the endpoint.
 - OpenTUI fake renderer/screen-buffer/interactable-element access.
 - Basic action generator that drives the TUI forward.
+- Simulation-only embedded MCP server that lets agents observe and drive the TUI.
 
 ## Non-Goals
 
@@ -34,6 +35,9 @@ Build these pieces first:
 - Run local simulation under `sandbox-exec` using the old branch setup as the starting point.
 - Use `sandbox-exec` as the safety boundary, not as the normal simulated I/O mechanism.
 - First built-in property: the app does not crash.
+- Only two simulation flags exist: `OPENCODE_SIMULATION` and `OPENCODE_SIMULATION_BACKEND`.
+- `OPENCODE_SIMULATION` starts the frontend-side simulation MCP server over stdio and implies backend simulation.
+- `OPENCODE_SIMULATION_BACKEND` without `OPENCODE_SIMULATION` starts the frontend-side simulation MCP server over loopback HTTP; in the TUI it shows the URL in the home screen.
 
 ## Target End-To-End Flow
 
@@ -59,7 +63,9 @@ Implementation shape:
 - Seed it from JSON fixtures supplied through the simulation endpoint or runner config.
 - Serialize it into replay traces.
 - Fail unsupported operations with typed simulation errors instead of silently falling back to host FS.
-- Enable with `OPENCODE_SIMULATION` for initial startup wiring.
+- Enable the full simulation runner with `OPENCODE_SIMULATION`.
+- Enable only backend simulation with `OPENCODE_SIMULATION_BACKEND`.
+- `OPENCODE_SIMULATION` implies `OPENCODE_SIMULATION_BACKEND`.
 - Use a fixed virtual root, not `process.cwd()`, so host paths are denied by default.
 - Use the old branch's Bun preload/plugin redirection only for code paths that bypass `AppFileSystem.Service`.
 - Let `sandbox-exec` catch any remaining direct `fs`, `Bun.file`, or process-level filesystem access.
@@ -89,7 +95,7 @@ Todos:
 - [x] Define mock filesystem data model and fixture JSON format.
 - [x] Implement the `AppFileSystem.Service` layer.
 - [x] Add typed errors for unsupported operations and host-FS escapes.
-- [x] Add activation path from startup through `OPENCODE_SIMULATION`.
+- [x] Add activation path from startup through `OPENCODE_SIMULATION` / `OPENCODE_SIMULATION_BACKEND`.
 - [x] Add a tiny fixture that includes `opencode.json`, a workspace root, and a few files.
 - [ ] Verify read/glob/grep/write/edit use the mock filesystem.
 - [ ] Verify sandbox denies host writes when a bypass is introduced.
@@ -259,7 +265,9 @@ Implementation shape:
 
 - Add a renderer factory/testing hook to `tui(...)` so tests can pass a fake renderer.
 - Current first pass checks `OPENCODE_SIMULATION` in `cli/cmd/tui/thread.ts`, starts the normal worker/backend, and injects an OpenTUI test renderer into `tui(...)`.
+- `OPENCODE_SIMULATION_BACKEND` leaves the frontend real but makes backend route assembly use simulated services.
 - Fake renderer setup lives in `cli/cmd/tui/simulation.ts` and returns `renderOnce`, `screen`, and `spans` helpers for the thread-side simulation runner.
+- In simulation MCP modes, the TUI side starts an MCP server documented in `simulation-mcp-server.md`.
 - Initial action discovery lives in `packages/opencode/src/testing/simulation/actions.ts`.
 - OpenTUI exposes `renderer.root` for walking renderables, `Renderable.focusable`, `renderer.currentFocusedEditor`, `renderer.hitTest(...)`, and test `mockInput` / `mockMouse` APIs for execution.
 - Do not render to a real terminal in simulation mode.
@@ -278,6 +286,39 @@ Todos:
 - [ ] Expose prompt ref, route, sync state, keymap, and renderer to the simulation harness.
 - [ ] Verify TUI starts in fake renderer with no real terminal output.
 - [ ] Verify screen buffer can be captured after a render.
+
+## Simulation MCP Server
+
+Goal: let agents discover, inspect, and drive the simulated TUI through MCP without adding production remote-control behavior.
+
+Design document:
+
+- `packages/opencode/specs/simulation-mcp-server.md`
+
+Implementation shape:
+
+- Start in one of two modes: local stdio (`OPENCODE_SIMULATION=1`) or remote loopback HTTP (`OPENCODE_SIMULATION_BACKEND=1` without `OPENCODE_SIMULATION`).
+- Live in the TUI/frontend process so it can access the OpenTUI renderer.
+- Use stdio for the local agent-launched MCP mode.
+- Bind remote streamable HTTP MCP servers to `127.0.0.1` on an ephemeral port.
+- Print the URL to stdout for remote headless mode.
+- Show the URL at the bottom of the home screen for remote visible TUI mode.
+- Expose screen/spans/UI-state tools and resources.
+- Execute UI driving through `SimulationActions.execute(...)`, not a second action path.
+- Proxy filesystem/network/LLM/reset/snapshot operations to the backend simulation control endpoint.
+
+Todos:
+
+- [x] Add design doc and first-pass todo list.
+- [x] Implement TUI-side MCP server startup and shutdown.
+- [x] Add local stdio mode.
+- [x] Add remote loopback mode.
+- [x] Print remote headless URL to stdout.
+- [x] Show remote visible TUI URL on the home screen.
+- [x] Expose observation tools/resources.
+- [x] Expose generated action execution tools.
+- [x] Expose backend control proxy tools.
+- [x] Add a smoke test that connects with the MCP client and calls one observation tool.
 
 ## Basic Action Generator
 
@@ -329,6 +370,7 @@ The first milestone is one deterministic run that:
 - Submits an ordinary prompt through the TUI.
 - Receives a mocked model response through the real session pipeline.
 - Captures a screen buffer.
+- Starts the simulation MCP server in the selected transport mode.
 - Passes the no-crash property.
 
 ## First-Pass Todos
@@ -339,6 +381,7 @@ The first milestone is one deterministic run that:
 - [ ] Mock provider/model consumes endpoint scripts through the real LLM path.
 - [ ] TUI runs with fake renderer.
 - [ ] Runner can inspect screen buffer.
+- [x] Simulation MCP server exposes screen/UI/actions/control to agents.
 - [ ] Runner can identify at least one interactable path to submit a prompt.
 - [ ] Basic action generator executes multiple deterministic steps.
 - [ ] No-crash property runs after each step.
