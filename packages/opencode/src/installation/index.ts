@@ -69,16 +69,16 @@ export class UpgradeFailedError extends Schema.TaggedErrorClass<UpgradeFailedErr
 }) {}
 
 // Response schemas for external version APIs
-const GitHubRelease = Schema.Struct({ tag_name: Schema.String })
-const NpmPackage = Schema.Struct({ version: Schema.String })
-const BrewFormula = Schema.Struct({ versions: Schema.Struct({ stable: Schema.String }) })
-const BrewInfoV2 = Schema.Struct({
+export const GitHubRelease = Schema.Struct({ tag_name: Schema.String })
+export const NpmPackage = Schema.Struct({ version: Schema.String })
+export const BrewFormula = Schema.Struct({ versions: Schema.Struct({ stable: Schema.String }) })
+export const BrewInfoV2 = Schema.Struct({
   formulae: Schema.Array(Schema.Struct({ versions: Schema.Struct({ stable: Schema.String }) })),
 })
-const ChocoPackage = Schema.Struct({
+export const ChocoPackage = Schema.Struct({
   d: Schema.Struct({ results: Schema.Array(Schema.Struct({ Version: Schema.String })) }),
 })
-const ScoopManifest = NpmPackage
+export const ScoopManifest = NpmPackage
 
 export interface Interface {
   readonly info: () => Effect.Effect<Info>

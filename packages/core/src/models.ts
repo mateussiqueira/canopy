@@ -104,6 +104,7 @@ export const Provider = Schema.Struct({
 })
 
 export type Provider = Schema.Schema.Type<typeof Provider>
+export const Catalog = Schema.Record(Schema.String, Provider)
 
 export interface Interface {
   readonly get: () => Effect.Effect<Record<string, Provider>>

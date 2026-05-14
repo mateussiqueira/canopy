@@ -1,4 +1,5 @@
 import { Config as EffectConfig, Context, Effect, Layer } from "effect"
+import { NodePath } from "@effect/platform-node"
 import { HttpApiBuilder, OpenApi } from "effect/unstable/httpapi"
 import {
   FetchHttpClient,
@@ -12,14 +13,17 @@ import * as Socket from "effect/unstable/socket/Socket"
 import { AppFileSystem } from "@opencode-ai/core/filesystem"
 import { Flag } from "@opencode-ai/core/flag/flag"
 import { Account } from "@/account/account"
+import { AccountRepo } from "@/account/repo"
 import { Agent } from "@/agent/agent"
 import { Auth } from "@/auth"
 import { Bus } from "@/bus"
+import { CrossSpawnSpawner } from "@opencode-ai/core/cross-spawn-spawner"
 import { Config } from "@/config/config"
 import { Command } from "@/command"
 import * as Observability from "@opencode-ai/core/effect/observability"
 import { File } from "@/file"
 import { FileWatcher } from "@/file/watcher"
+import { Git } from "@/git"
 import { Ripgrep } from "@/file/ripgrep"
 import { Format } from "@/format"
 import { RuntimeFlags } from "@/effect/runtime-flags"
@@ -28,6 +32,8 @@ import { MCP } from "@/mcp"
 import { Permission } from "@/permission"
 import { Installation } from "@/installation"
 import { InstanceLayer } from "@/project/instance-layer"
+import { Npm } from "@opencode-ai/core/npm"
+import { Env } from "@/env"
 import { Plugin } from "@/plugin"
 import { Project } from "@/project/project"
 import { ProviderAuth } from "@/provider/auth"
@@ -57,6 +63,7 @@ import { Worktree } from "@/worktree"
 import { Workspace } from "@/control-plane/workspace"
 import { SimulationFileSystem } from "@/testing/simulation/filesystem"
 import { SimulationNetwork } from "@/testing/simulation/network"
+import { SimulationNetworkRoutes } from "@/testing/simulation/network-routes"
 import { CorsConfig, isAllowedCorsOrigin, type CorsOptions } from "@/server/cors"
 import { serveUIEffect } from "@/server/shared/ui"
 import { ServerAuth } from "@/server/auth"
@@ -182,7 +189,7 @@ type RouteRequirements =
   | HttpRouter.Request<"Requires", unknown>
   | HttpRouter.Request<"GlobalRequires", never>
 
-export function createRoutes(
+function createProductionRoutes(
   corsOptions?: CorsOptions,
 ): Layer.Layer<never, EffectConfig.ConfigError, RouteRequirements> {
   return Layer.mergeAll(rootApiRoutes, eventApiRoutes, instanceRoutes, docRoute, uiRoute).pipe(
@@ -233,14 +240,96 @@ export function createRoutes(
       Workspace.defaultLayer,
       Worktree.appLayer,
       Bus.layer,
-      Flag.OPENCODE_MOCK ? SimulationFileSystem.layer({ root: "/opencode" }) : AppFileSystem.defaultLayer,
-      Flag.OPENCODE_MOCK ? SimulationNetwork.denyUnknownLayer : FetchHttpClient.layer,
+      AppFileSystem.defaultLayer,
+      FetchHttpClient.layer,
       HttpServer.layerServices,
     ]),
     Layer.provide(Layer.succeed(CorsConfig)(corsOptions)),
     Layer.provide(InstanceLayer.layer),
     Layer.provide(Observability.layer),
   )
+}
+
+export function createSimulatedRoutes(corsOptions?: CorsOptions): ReturnType<typeof createProductionRoutes> {
+  const simulationBoundary = Layer.mergeAll(
+    SimulationFileSystem.layer({ root: "/opencode" }),
+    SimulationNetwork.layer({ entries: SimulationNetworkRoutes.defaults(), allowLoopback: true }),
+  )
+
+  const simulatedServices = Layer.mergeAll(
+    errorLayer,
+    compressionLayer,
+    corsVaryFix,
+    fenceLayer,
+    cors(corsOptions),
+    AccountRepo.layer,
+    Account.layer,
+    Agent.layer,
+    Auth.layer,
+    Command.layer,
+    Config.layer,
+    File.layer,
+    FileWatcher.layer,
+    Format.layer,
+    Git.layer,
+    LSP.layer,
+    Installation.layer,
+    MCP.layer,
+    ModelsDev.layer,
+    Npm.layer,
+    Env.layer,
+    Permission.layer,
+    Plugin.layer,
+    Project.layer,
+    ProviderAuth.layer,
+    Provider.layer,
+    Pty.layer,
+    PtyTicket.layer,
+    Question.layer,
+    Ripgrep.layer,
+    Session.layer,
+    SessionCompaction.layer,
+    SessionPrompt.layer,
+    SessionRevert.layer,
+    SessionShare.layer,
+    SessionRunState.layer,
+    SessionStatus.layer,
+    SessionSummary.layer,
+    ShareNext.layer,
+    Snapshot.layer,
+    SyncEvent.layer,
+    Skill.layer,
+    Todo.layer,
+    ToolRegistry.layer,
+    Vcs.layer,
+    Workspace.layer,
+    Worktree.layer,
+    Bus.layer,
+    HttpServer.layerServices,
+  ).pipe(
+    Layer.provideMerge(AccountRepo.layer),
+    Layer.provideMerge(Git.layer),
+    Layer.provideMerge(Npm.layer),
+    Layer.provideMerge(Env.layer),
+    Layer.provide(CrossSpawnSpawner.layer),
+    Layer.provide(NodePath.layer),
+    Layer.provideMerge(simulationBoundary),
+  )
+
+  return Layer.mergeAll(rootApiRoutes, eventApiRoutes, instanceRoutes, docRoute, uiRoute).pipe(
+    Layer.provide(simulatedServices),
+    Layer.provideMerge(Layer.succeed(CorsConfig)(corsOptions)),
+    Layer.provideMerge(InstanceLayer.layer),
+    Layer.provideMerge(Observability.layer),
+  ) as ReturnType<typeof createProductionRoutes>
+}
+
+export function createRoutes(corsOptions?: CorsOptions) {
+  if (Flag.OPENCODE_SIMULATION) {
+    return createSimulatedRoutes(corsOptions)
+  }
+
+  return createProductionRoutes(corsOptions)
 }
 
 export const routes = createRoutes()

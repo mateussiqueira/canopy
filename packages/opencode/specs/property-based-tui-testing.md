@@ -59,7 +59,7 @@ Implementation shape:
 - Seed it from JSON fixtures supplied through the simulation endpoint or runner config.
 - Serialize it into replay traces.
 - Fail unsupported operations with typed simulation errors instead of silently falling back to host FS.
-- Enable with `OPENCODE_MOCK` for initial startup wiring.
+- Enable with `OPENCODE_SIMULATION` for initial startup wiring.
 - Use a fixed virtual root, not `process.cwd()`, so host paths are denied by default.
 - Use the old branch's Bun preload/plugin redirection only for code paths that bypass `AppFileSystem.Service`.
 - Let `sandbox-exec` catch any remaining direct `fs`, `Bun.file`, or process-level filesystem access.
@@ -89,7 +89,7 @@ Todos:
 - [x] Define mock filesystem data model and fixture JSON format.
 - [x] Implement the `AppFileSystem.Service` layer.
 - [x] Add typed errors for unsupported operations and host-FS escapes.
-- [x] Add activation path from startup through `OPENCODE_MOCK`.
+- [x] Add activation path from startup through `OPENCODE_SIMULATION`.
 - [x] Add a tiny fixture that includes `opencode.json`, a workspace root, and a few files.
 - [ ] Verify read/glob/grep/write/edit use the mock filesystem.
 - [ ] Verify sandbox denies host writes when a bypass is introduced.
@@ -145,11 +145,17 @@ Registration model:
 
 - `SimulationNetwork.Service` owns a registry keyed by method + URL matcher.
 - Registry entries should include a `source`/`kind` so failures explain why a URL was allowed or denied.
+- Rough implementation exists at `packages/opencode/src/testing/simulation/network.ts`.
+- Current rough registry supports exact URL, regex URL, or predicate matchers, optional method filters, parsed request bodies, static responses, dynamic response functions, and full handlers.
+- `SimulationNetworkRoutes` imports known schemas from the services that own HTTP call sites and registers schema-backed routes for hardcoded/configurable URL families.
+- Configurable/client-provided URLs should be registered through route-family helpers, e.g. `account(baseUrl)`, `models(baseUrl)`, `share(baseUrl)`, `skills(baseUrl)`, and `installation(registryUrl)`.
+- Some production schemas are too broad for `Schema.toArbitrary()` today, such as provider catalog fields containing arbitrary mutable JSON. For those cases, the first-pass route can use a narrower generated schema whose values still decode under the production schema.
 - Supported entry kinds for the first pass:
   - `jsonSchema`: generate JSON from an Effect `Schema` via `toArbitrary()`.
   - `text`: return deterministic text/html/markdown content for exact URLs.
   - `bytes`: return deterministic binary content for exact URLs.
   - `status`: return empty/status-only responses.
+  - `handler`: inspect method, URL, headers, and parsed body to build a custom response.
   - `mcp`: handle JSON-RPC/SSE MCP protocol for a configured MCP server URL.
   - `loopback`: allow local app/TUI traffic only.
 - Prefer explicit registration at configuration/control boundaries over guessing from arbitrary URLs:
@@ -159,15 +165,24 @@ Registration model:
   - Provider model responses come from the mock provider script registry, not generic provider SDK HTTP.
 - Unknown non-loopback URLs fail with a typed simulation network error.
 
+Layering caveat:
+
+- Several `defaultLayer`s still provide `FetchHttpClient.layer` internally (`Account`, `ModelsDev`, `ToolRegistry`, `ShareNext`, `SkillDiscovery`, `Instruction`, `Installation`, `Ripgrep`, `Workspace`). A top-level `HttpClient.HttpClient` mock does not necessarily affect those self-contained default layers.
+- First-pass startup wiring must either use non-default service layers and provide `SimulationNetwork.layer` once, or make these default layers explicitly mock-aware.
+- The same caveat already exists for `AppFileSystem.defaultLayer` in some default layers, so the final simulation startup needs an explicit “normal app with narrow mock boundaries” layer assembly rather than blindly using all default layers.
+
 Todos:
 
 - [x] Locate all backend uses of `HttpClient.HttpClient`, raw `fetch`, provider SDK fetches, webfetch/websearch/share/update paths.
 - [x] Classify first-pass network call families into schema-generated, text/bytes, MCP protocol, loopback, and denied.
-- [ ] Decide where `toArbitrary()` lives or which package exports it.
+- [x] Decide where `toArbitrary()` lives or which package exports it.
 - [x] Define rough request matcher shape: exact URL, regex URL, or predicate.
+- [x] Add method-aware matching and parsed request body support.
+- [x] Define rough schema registration shape for generated responses.
+- [x] Add schema-backed route helpers for hardcoded and configurable URL families.
 - [ ] Define final schema registration shape for generated responses.
 - [ ] Define MCP URL registration from `config.mcp.<name>.url` to an MCP protocol handler.
-- [ ] Implement seeded response generation with `toArbitrary()`.
+- [x] Implement rough seeded response generation with `Schema.toArbitrary()`.
 - [x] Add loopback allowlist handling.
 - [x] Add typed simulation error for unregistered non-loopback request.
 - [ ] Verify sandbox also blocks external network if mock client is bypassed.

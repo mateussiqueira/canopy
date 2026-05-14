@@ -65,24 +65,24 @@ export type ActiveOrg = {
   org: Org
 }
 
-class RemoteConfig extends Schema.Class<RemoteConfig>("RemoteConfig")({
+export class RemoteConfig extends Schema.Class<RemoteConfig>("RemoteConfig")({
   config: Schema.Record(Schema.String, Schema.Json),
 }) {}
 
-const DurationFromSeconds = Schema.Number.pipe(
+export const DurationFromSeconds = Schema.Number.pipe(
   Schema.decodeTo(Schema.Duration, {
     decode: SchemaGetter.transform((n) => Duration.seconds(n)),
     encode: SchemaGetter.transform((d) => Duration.toSeconds(d)),
   }),
 )
 
-class TokenRefresh extends Schema.Class<TokenRefresh>("TokenRefresh")({
+export class TokenRefresh extends Schema.Class<TokenRefresh>("TokenRefresh")({
   access_token: AccessToken,
   refresh_token: RefreshToken,
   expires_in: DurationFromSeconds,
 }) {}
 
-class DeviceAuth extends Schema.Class<DeviceAuth>("DeviceAuth")({
+export class DeviceAuth extends Schema.Class<DeviceAuth>("DeviceAuth")({
   device_code: DeviceCode,
   user_code: UserCode,
   verification_uri_complete: Schema.String,
@@ -90,14 +90,14 @@ class DeviceAuth extends Schema.Class<DeviceAuth>("DeviceAuth")({
   interval: DurationFromSeconds,
 }) {}
 
-class DeviceTokenSuccess extends Schema.Class<DeviceTokenSuccess>("DeviceTokenSuccess")({
+export class DeviceTokenSuccess extends Schema.Class<DeviceTokenSuccess>("DeviceTokenSuccess")({
   access_token: AccessToken,
   refresh_token: RefreshToken,
   token_type: Schema.Literal("Bearer"),
   expires_in: DurationFromSeconds,
 }) {}
 
-class DeviceTokenError extends Schema.Class<DeviceTokenError>("DeviceTokenError")({
+export class DeviceTokenError extends Schema.Class<DeviceTokenError>("DeviceTokenError")({
   error: Schema.String,
   error_description: Schema.String,
 }) {
@@ -110,22 +110,22 @@ class DeviceTokenError extends Schema.Class<DeviceTokenError>("DeviceTokenError"
   }
 }
 
-const DeviceToken = Schema.Union([DeviceTokenSuccess, DeviceTokenError])
+export const DeviceToken = Schema.Union([DeviceTokenSuccess, DeviceTokenError])
 
-class User extends Schema.Class<User>("User")({
+export class User extends Schema.Class<User>("User")({
   id: AccountID,
   email: Schema.String,
 }) {}
 
-class ClientId extends Schema.Class<ClientId>("ClientId")({ client_id: Schema.String }) {}
+export class ClientId extends Schema.Class<ClientId>("ClientId")({ client_id: Schema.String }) {}
 
-class DeviceTokenRequest extends Schema.Class<DeviceTokenRequest>("DeviceTokenRequest")({
+export class DeviceTokenRequest extends Schema.Class<DeviceTokenRequest>("DeviceTokenRequest")({
   grant_type: Schema.String,
   device_code: DeviceCode,
   client_id: Schema.String,
 }) {}
 
-class TokenRefreshRequest extends Schema.Class<TokenRefreshRequest>("TokenRefreshRequest")({
+export class TokenRefreshRequest extends Schema.Class<TokenRefreshRequest>("TokenRefreshRequest")({
   grant_type: Schema.String,
   refresh_token: RefreshToken,
   client_id: Schema.String,

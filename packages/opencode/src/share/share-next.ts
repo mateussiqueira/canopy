@@ -31,7 +31,7 @@ export type Req = {
   baseUrl: string
 }
 
-const ShareSchema = Schema.Struct({
+export const ShareSchema = Schema.Struct({
   id: Schema.String,
   url: Schema.String,
   secret: Schema.String,

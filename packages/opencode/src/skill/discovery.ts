@@ -9,12 +9,12 @@ import * as Log from "@opencode-ai/core/util/log"
 const skillConcurrency = 4
 const fileConcurrency = 8
 
-class IndexSkill extends Schema.Class<IndexSkill>("IndexSkill")({
+export class IndexSkill extends Schema.Class<IndexSkill>("IndexSkill")({
   name: Schema.String,
   files: Schema.Array(Schema.String),
 }) {}
 
-class Index extends Schema.Class<Index>("Index")({
+export class Index extends Schema.Class<Index>("Index")({
   skills: Schema.Array(IndexSkill),
 }) {}
 
