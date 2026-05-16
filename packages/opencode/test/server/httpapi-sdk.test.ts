@@ -1,5 +1,5 @@
 import { afterEach, describe, expect } from "bun:test"
-import { ConfigProvider, Effect, Layer } from "effect"
+import { ConfigProvider, Deferred, Effect, Layer } from "effect"
 import type * as Scope from "effect/Scope"
 import { HttpRouter } from "effect/unstable/http"
 import { ChildProcessSpawner } from "effect/unstable/process"
@@ -22,7 +22,7 @@ import { TestLLMServer } from "../lib/llm-server"
 import path from "path"
 import { resetDatabase } from "../fixture/db"
 import { disposeAllInstances, TestInstance, tmpdirScoped } from "../fixture/fixture"
-import { testEffect } from "../lib/effect"
+import { awaitWithTimeout, testEffect } from "../lib/effect"
 
 const noopBootstrap = Layer.succeed(InstanceBootstrap.Service, InstanceBootstrap.Service.of({ run: Effect.void }))
 const it = testEffect(
@@ -359,6 +359,23 @@ function seedMessage(directory: string, sessionID: string) {
   )
 }
 
+function collectPartUpdated(
+  events: Awaited<ReturnType<Sdk["event"]["subscribe"]>>,
+  ready: Deferred.Deferred<void>,
+  received: Deferred.Deferred<unknown>,
+) {
+  return call(async () => {
+    for await (const event of events.stream) {
+      const payload = record(event).payload ?? event
+      if (record(payload).type === "server.connected") Deferred.doneUnsafe(ready, Effect.void)
+      if (record(payload).type === MessageV2.Event.PartUpdated.type) {
+        Deferred.doneUnsafe(received, Effect.succeed(payload))
+        return
+      }
+    }
+  })
+}
+
 afterEach(async () => {
   Flag.OPENCODE_SERVER_PASSWORD = original.OPENCODE_SERVER_PASSWORD
   Flag.OPENCODE_SERVER_USERNAME = original.OPENCODE_SERVER_USERNAME
@@ -436,6 +453,47 @@ describe("HttpApi SDK", () => {
       firstEvent((signal) => sdk.event.subscribe(undefined, { signal })).pipe(
         Effect.map((event) => ({ type: record(record(event).payload).type })),
       ),
+    ),
+  )
+
+  serverPathParity("streams sync-backed part updates on SDK instance events", (serverPath) =>
+    withStandardProject(serverPath, ({ sdk }) =>
+      Effect.gen(function* () {
+        const session = yield* capture(() => sdk.session.create({ title: "reasoning part event" }))
+        const sessionID = String(record(session.data).id)
+        const messageID = MessageID.ascending()
+        const partID = PartID.ascending()
+        const controller = new AbortController()
+        yield* Effect.addFinalizer(() => Effect.sync(() => controller.abort()))
+        const events = yield* call(() => sdk.event.subscribe(undefined, { signal: controller.signal }))
+        yield* Effect.addFinalizer(() =>
+          call(async () => void (await events.stream.return?.(undefined))).pipe(Effect.ignore),
+        )
+
+        const ready = yield* Deferred.make<void>()
+        const received = yield* Deferred.make<unknown>()
+        yield* collectPartUpdated(events, ready, received).pipe(Effect.forkScoped)
+        yield* awaitWithTimeout(Deferred.await(ready), "timed out waiting for /event connection")
+
+        const updated = yield* capture(() =>
+          sdk.part.update({
+            sessionID,
+            messageID,
+            partID,
+            part: {
+              id: partID,
+              sessionID,
+              messageID,
+              type: "reasoning",
+              text: "updated reasoning",
+              time: { start: Date.now() },
+            },
+          }),
+        )
+        expect(updated.status).toBe(200)
+        const event = yield* awaitWithTimeout(Deferred.await(received), "timed out waiting for message.part.updated")
+        expect(record(record(event).properties).part).toMatchObject({ id: partID, type: "reasoning" })
+      }),
     ),
   )
 

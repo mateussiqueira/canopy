@@ -518,6 +518,11 @@ export const layer: Layer.Layer<
     const storage = yield* Storage.Service
     const sync = yield* SyncEvent.Service
     const flags = yield* RuntimeFlags.Service
+    const syncRun = <Def extends SyncEvent.Definition>(
+      def: Def,
+      data: SyncEvent.Event<Def>["data"],
+      options?: { publish?: boolean },
+    ) => sync.run(def, data, { ...options, publishBus: bus })
 
     const createNext = Effect.fn("Session.createNext")(function* (input: {
       id?: SessionID
@@ -553,7 +558,7 @@ export const layer: Layer.Layer<
       }
       log.info("created", result)
 
-      yield* sync.run(Event.Created, { sessionID: result.id, info: result })
+      yield* syncRun(Event.Created, { sessionID: result.id, info: result })
 
       if (!flags.experimentalWorkspaces) {
         // This only exist for backwards compatibility. We should not be
@@ -607,7 +612,7 @@ export const layer: Layer.Layer<
           yield* remove(child.id)
         }
 
-        yield* sync.run(Event.Deleted, { sessionID, info: session }, { publish: hasInstance })
+        yield* syncRun(Event.Deleted, { sessionID, info: session }, { publish: hasInstance })
         yield* sync.remove(sessionID)
       } catch (e) {
         log.error(e)
@@ -616,13 +621,13 @@ export const layer: Layer.Layer<
 
     const updateMessage = <T extends MessageV2.Info>(msg: T): Effect.Effect<T> =>
       Effect.gen(function* () {
-        yield* sync.run(MessageV2.Event.Updated, { sessionID: msg.sessionID, info: msg })
+        yield* syncRun(MessageV2.Event.Updated, { sessionID: msg.sessionID, info: msg })
         return msg
       }).pipe(Effect.withSpan("Session.updateMessage"))
 
     const updatePart = <T extends MessageV2.Part>(part: T): Effect.Effect<T> =>
       Effect.gen(function* () {
-        yield* sync.run(MessageV2.Event.PartUpdated, {
+        yield* syncRun(MessageV2.Event.PartUpdated, {
           sessionID: part.sessionID,
           part: structuredClone(part),
           time: Date.now(),
@@ -717,7 +722,7 @@ export const layer: Layer.Layer<
       return session
     })
 
-    const patch = (sessionID: SessionID, info: Patch) => sync.run(Event.Updated, { sessionID, info })
+    const patch = (sessionID: SessionID, info: Patch) => syncRun(Event.Updated, { sessionID, info })
 
     const touch = Effect.fn("Session.touch")(function* (sessionID: SessionID) {
       yield* patch(sessionID, { time: { updated: Date.now() } })
@@ -788,7 +793,7 @@ export const layer: Layer.Layer<
       sessionID: SessionID
       messageID: MessageID
     }) {
-      yield* sync.run(MessageV2.Event.Removed, {
+      yield* syncRun(MessageV2.Event.Removed, {
         sessionID: input.sessionID,
         messageID: input.messageID,
       })
@@ -800,7 +805,7 @@ export const layer: Layer.Layer<
       messageID: MessageID
       partID: PartID
     }) {
-      yield* sync.run(MessageV2.Event.PartRemoved, {
+      yield* syncRun(MessageV2.Event.PartRemoved, {
         sessionID: input.sessionID,
         messageID: input.messageID,
         partID: input.partID,

@@ -11,9 +11,10 @@ import type { InstanceContext } from "@/project/instance-context"
 import { EventSequenceTable, EventTable } from "./event.sql"
 import type { WorkspaceID } from "@/control-plane/schema"
 import { EventID } from "./schema"
-import { Context, Effect, Layer, Schema as EffectSchema } from "effect"
+import { Context, Effect, Layer, Option, Schema as EffectSchema } from "effect"
 import type { DeepMutable } from "@opencode-ai/core/schema"
 import { EventV2 } from "@opencode-ai/core/event"
+import { EffectBridge } from "@/effect/bridge"
 import { serviceUse } from "@/effect/service-use"
 import { InstanceState } from "@/effect/instance-state"
 import { RuntimeFlags } from "@/effect/runtime-flags"
@@ -54,12 +55,13 @@ type PublishContext = {
   instance?: InstanceContext
   workspace?: WorkspaceID
 }
+type Publish = <Def extends Definition>(def: Def, data: Properties<Def>, eventID: string) => void
 
 export interface Interface {
   readonly run: <Def extends Definition>(
     def: Def,
     data: Event<Def>["data"],
-    options?: { publish?: boolean },
+    options?: { publish?: boolean; publishBus?: ProjectBus.Interface },
   ) => Effect.Effect<void>
   readonly replay: (event: SerializedEvent, options?: { publish: boolean; ownerID?: string }) => Effect.Effect<void>
   readonly replayAll: (
@@ -113,6 +115,7 @@ export const layer = Layer.effect(Service)(
         : undefined
       process(def, event, {
         publish,
+        publishWith: publish ? yield* makePublish() : undefined,
         context,
         ownerID: options?.ownerID,
         experimentalWorkspaces: flags.experimentalWorkspaces,
@@ -157,7 +160,9 @@ export const layer = Layer.effect(Service)(
             workspace: yield* InstanceState.workspaceID,
           }
         : undefined
-
+      const publishWith = publish
+        ? yield* makePublish(options?.publishBus)
+        : undefined
       // Note that this is an "immediate" transaction which is critical.
       // We need to make sure we can safely read and write with nothing
       // else changing the data from under us
@@ -172,7 +177,7 @@ export const layer = Layer.effect(Service)(
           const seq = row?.seq != null ? row.seq + 1 : 0
 
           const event = { id, seq, aggregateID: agg, data }
-          process(def, event, { publish, context, experimentalWorkspaces: flags.experimentalWorkspaces })
+          process(def, event, { publish, publishWith, context, experimentalWorkspaces: flags.experimentalWorkspaces })
         },
         {
           behavior: "immediate",
@@ -303,7 +308,13 @@ function register(def: Definition) {
 function process<Def extends Definition>(
   def: Def,
   event: Event<Def>,
-  options: { publish: boolean; context?: PublishContext; ownerID?: string; experimentalWorkspaces: boolean },
+  options: {
+    publish: boolean
+    publishWith?: Publish
+    context?: PublishContext
+    ownerID?: string
+    experimentalWorkspaces: boolean
+  },
 ) {
   if (projectors == null) {
     throw new Error("No projectors available. Call `SyncEvent.init` to install projectors")
@@ -348,7 +359,10 @@ function process<Def extends Definition>(
         }
 
         const result = convertEvent(def.type, event.data)
-        const publish = (data: unknown) => ProjectBus.publish(def, data as Properties<Def>, { id: event.id })
+        const publish = (data: unknown) =>
+          options.publishWith
+            ? options.publishWith(def, data as Properties<Def>, event.id)
+            : ProjectBus.publish(def, data as Properties<Def>, { id: event.id })
         if (result instanceof Promise) {
           void result.then(publish)
         } else {
@@ -369,6 +383,16 @@ function process<Def extends Definition>(
         })
       }
     })
+  })
+}
+
+function makePublish(bus?: ProjectBus.Interface) {
+  return Effect.gen(function* () {
+    const activeBus = bus ?? Option.getOrUndefined(yield* Effect.serviceOption(ProjectBus.Service))
+    if (!activeBus) return undefined
+    const bridge = yield* EffectBridge.make()
+    return (<Def extends Definition>(def: Def, data: Properties<Def>, eventID: string) =>
+      bridge.fork(activeBus.publish(def, data, { id: eventID }))) satisfies Publish
   })
 }
 
