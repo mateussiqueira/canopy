@@ -1,5 +1,7 @@
 import { afterEach, describe, expect, test } from "bun:test"
+import http from "node:http"
 import net from "node:net"
+import path from "node:path"
 import { Flag } from "@opencode-ai/core/flag/flag"
 import * as Log from "@opencode-ai/core/util/log"
 import { Server } from "../../src/server/server"
@@ -285,6 +287,25 @@ describe("HttpApi Server.listen", () => {
     ).rejects.toThrow()
   })
 
+  test("listens on a socket path", async () => {
+    await using tmp = await tmpdir({ git: true, config: { formatter: false, lsp: false } })
+    const socket =
+      process.platform === "win32"
+        ? `\\\\.\\pipe\\opencode-test-${process.pid}-${Date.now()}`
+        : path.join(tmp.path, "opencode.sock")
+    const listener = await Server.listen({ hostname: "127.0.0.1", port: 0, socket })
+    try {
+      expect(listener.port).toBe(0)
+      expect(listener.socket).toBe(socket)
+
+      const response = await requestSocketRoot(socket)
+      expect(response.statusCode).toBe(200)
+      expect(response.body).toContain("OpenCode")
+    } finally {
+      await stop(listener, "timed out cleaning up socket listener")
+    }
+  })
+
   test("default in-process handler does not emit Effect HTTP response logs", async () => {
     let output = ""
     // oxlint-disable-next-line typescript-eslint/unbound-method -- restored in finally after temporarily capturing stderr.
@@ -431,5 +452,20 @@ function occupyPort(port: number) {
     const server = net.createServer()
     server.once("error", () => resolve(undefined))
     server.listen(port, "127.0.0.1", () => resolve(server))
+  })
+}
+
+function requestSocketRoot(socket: string) {
+  return new Promise<{ statusCode?: number; body: string }>((resolve, reject) => {
+    const request = http.request(
+      { socketPath: socket, path: "/", method: "GET" },
+      (response) => {
+        const chunks: Buffer[] = []
+        response.on("data", (chunk: Buffer) => chunks.push(chunk))
+        response.on("end", () => resolve({ statusCode: response.statusCode, body: Buffer.concat(chunks).toString() }))
+      },
+    )
+    request.on("error", reject)
+    request.end()
   })
 }
