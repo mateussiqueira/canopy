@@ -37,7 +37,7 @@ async function startListener() {
   Flag.OPENCODE_SERVER_USERNAME = auth.username
   process.env.OPENCODE_SERVER_PASSWORD = auth.password
   process.env.OPENCODE_SERVER_USERNAME = auth.username
-  return Server.listen({ hostname: "127.0.0.1", port: 0 })
+  return Server.listen({ type: "tcp", hostname: "127.0.0.1", port: 0 })
 }
 
 async function startNoAuthListener() {
@@ -45,7 +45,7 @@ async function startNoAuthListener() {
   Flag.OPENCODE_SERVER_USERNAME = auth.username
   delete process.env.OPENCODE_SERVER_PASSWORD
   process.env.OPENCODE_SERVER_USERNAME = auth.username
-  return Server.listen({ hostname: "127.0.0.1", port: 0 })
+  return Server.listen({ type: "tcp", hostname: "127.0.0.1", port: 0 })
 }
 
 function authorization() {

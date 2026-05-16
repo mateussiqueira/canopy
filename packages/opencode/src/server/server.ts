@@ -42,7 +42,7 @@ type ServerApp = {
 }
 
 export type TcpListenOptions = CorsOptions & {
-  type?: "tcp"
+  type: "tcp"
   port: number
   hostname: string
   mdns?: boolean
@@ -119,7 +119,17 @@ export async function listen(opts: ListenOptions): Promise<Listener> {
 const listenEffect: (opts: ListenOptions) => Effect.Effect<EffectListener, unknown> = Effect.fn("Server.listen")(
   function* (opts: ListenOptions) {
     const state = yield* startWithPortFallback(opts)
-    if (opts.type === "socket") return yield* makeSocketListener(state, opts.socket)
+    if (opts.type === "socket") {
+      const listenerUrl = makeURL("localhost", 0)
+      url = listenerUrl
+
+      return {
+        type: "socket" as const,
+        socket: opts.socket,
+        url: listenerUrl,
+        stop: yield* makeStop(state, Effect.void),
+      }
+    }
 
     const address = yield* tcpAddress(state)
     const listenerUrl = makeURL(opts.hostname, address.port)
@@ -175,20 +185,6 @@ function startListener(opts: ListenOptions) {
       }),
     ),
   )
-}
-
-function makeSocketListener(state: ListenerState, socket: string) {
-  return Effect.gen(function* () {
-    const listenerUrl = makeURL("localhost", 0)
-    url = listenerUrl
-
-    return {
-      type: "socket" as const,
-      socket,
-      url: listenerUrl,
-      stop: yield* makeStop(state, Effect.void),
-    }
-  })
 }
 
 function tcpAddress(state: ListenerState) {
