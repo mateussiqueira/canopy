@@ -137,14 +137,14 @@ const listenEffect: (opts: ListenOptions) => Effect.Effect<EffectListener, unkno
   },
 )
 
-function listenerLayer(opts: ListenOptions, port: number) {
+function listenerLayer(opts: ListenOptions) {
   return HttpRouter.serve(HttpApiApp.createRoutes(opts), {
     middleware: disposeMiddleware,
     disableLogger: true,
     disableListenLog: true,
   }).pipe(
     Layer.provideMerge(WebSocketTracker.layer),
-    Layer.provideMerge(serverLayer(opts, port)),
+    Layer.provideMerge(serverLayer(opts)),
     // Install a fresh `ConfigProvider` per listener so `Config.string(...)`
     // reads reflect the current `process.env`. Effect's default
     // `ConfigProvider` snapshots `process.env` on first read and caches the
@@ -155,16 +155,15 @@ function listenerLayer(opts: ListenOptions, port: number) {
 }
 
 function startWithPortFallback(opts: ListenOptions) {
-  if (opts.type === "socket") return startListener(opts, 0)
-  if (opts.port !== 0) return startListener(opts, opts.port)
+  if (opts.type === "socket" || opts.port !== 0) return startListener(opts)
   // Match the legacy listener port-resolution behavior: explicit `0` prefers
   // 4096 first, then any free port.
-  return startListener(opts, 4096).pipe(Effect.catch(() => startListener(opts, 0)))
+  return startListener({ ...opts, port: 4096 }).pipe(Effect.catch(() => startListener(opts)))
 }
 
-function startListener(opts: ListenOptions, port: number) {
+function startListener(opts: ListenOptions) {
   const scope = Scope.makeUnsafe()
-  return Layer.buildWithMemoMap(listenerLayer(opts, port), Layer.makeMemoMapUnsafe(), scope).pipe(
+  return Layer.buildWithMemoMap(listenerLayer(opts), Layer.makeMemoMapUnsafe(), scope).pipe(
     Effect.provide(HttpApiApp.context),
     Effect.onError(() => Scope.close(scope, Exit.void).pipe(Effect.ignore)),
     Effect.map(
@@ -240,7 +239,7 @@ function forceClose(state: ListenerState) {
   return Effect.all([state.http.closeAll, state.websockets.closeAll], { concurrency: "unbounded", discard: true })
 }
 
-function serverLayer(opts: ListenOptions, port: number) {
+function serverLayer(opts: ListenOptions) {
   const server = createServer()
   const serverRef = { closeStarted: false, forceStop: false }
   const close = server.close.bind(server)
@@ -255,7 +254,7 @@ function serverLayer(opts: ListenOptions, port: number) {
   }) as typeof server.close
 
   return Layer.mergeAll(
-    NodeHttpServer.layer(() => server, nodeListenOptions(opts, port)),
+    NodeHttpServer.layer(() => server, nodeListenOptions(opts)),
     Layer.succeed(ListenerServerService)(
       ListenerServerService.of({
         closeAll: Effect.sync(() => {
@@ -267,9 +266,9 @@ function serverLayer(opts: ListenOptions, port: number) {
   )
 }
 
-function nodeListenOptions(opts: ListenOptions, port: number) {
+function nodeListenOptions(opts: ListenOptions) {
   if (opts.type === "socket") return { path: opts.socket, gracefulShutdownTimeout: "1 second" as const }
-  return { port, host: opts.hostname, gracefulShutdownTimeout: "1 second" as const }
+  return { port: opts.port, host: opts.hostname, gracefulShutdownTimeout: "1 second" as const }
 }
 
 export * as Server from "./server"
