@@ -77,6 +77,18 @@ jobs:
             echo "dialog-prompt targeted run $i"
             bun test --timeout 30000 test/cli/tui/dialog-prompt.test.tsx
           done
+          set +e
+          run_case() {
+            name="$1"
+            shift
+            echo "OpenTUI subset diagnostics: $name"
+            bun test --timeout 30000 "$@"
+            code=$?
+            echo "OpenTUI subset diagnostics exit code for $name: $code"
+          }
+          run_case "cli/run + dialog" test/cli/run test/cli/tui/dialog-prompt.test.tsx
+          run_case "cli/cmd/tui + cli/run + dialog" test/cli/cmd/tui test/cli/run test/cli/tui/dialog-prompt.test.tsx
+          run_case "cli + dialog" test/cli test/cli/tui/dialog-prompt.test.tsx
 
       - name: Run unit tests
         run: bun turbo test:ci
