@@ -13,8 +13,6 @@ import { InstanceState } from "@/effect/instance-state"
 import { containsPath } from "@/project/instance-context"
 import { NonNegativeInt } from "@opencode-ai/core/schema"
 import { RuntimeFlags } from "@/effect/runtime-flags"
-import { InstanceRef } from "@/effect/instance-ref"
-import { makeRuntime } from "@/effect/run-service"
 import { AppFileSystem } from "@opencode-ai/core/filesystem"
 
 const log = Log.create({ service: "lsp" })
@@ -303,9 +301,7 @@ export const makeLayer = (supported: LSPServer.Info[]) =>
             if (!client) continue
 
             result.push(client)
-            void busRuntime.runPromise((bus) =>
-              bus.publish(Event.Updated, {}).pipe(Effect.provideService(InstanceRef, ctx)),
-            )
+            await Bus.publish(ctx, Event.Updated, {})
           }
 
           return result
