@@ -627,6 +627,26 @@ function providerMeta(metadata: Record<string, any> | undefined) {
   return Object.keys(rest).length > 0 ? rest : undefined
 }
 
+function fileSourceContext(part: FilePart) {
+  const source = part.source
+  if (!source) return
+  if (source.type === "resource") return
+
+  const filepath = source.path.trim()
+  if (!filepath) return
+  if (filepath === "clipboard" && part.filename === "clipboard") return
+
+  const name = part.filename?.trim()
+  const reference = source.text.value.trim()
+  return [
+    `Attached ${part.mime.startsWith("image/") ? "image" : "file"}${name ? `: ${name}` : ""}`,
+    `Source path: ${filepath}`,
+    reference ? `Prompt reference: ${reference}` : undefined,
+  ]
+    .filter((item): item is string => !!item)
+    .join("\n")
+}
+
 export const toModelMessagesEffect = Effect.fnUntraced(function* (
   input: WithParts[],
   model: Provider.Model,
@@ -707,6 +727,13 @@ export const toModelMessagesEffect = Effect.fnUntraced(function* (
           })
         // text/plain and directory files are converted into text parts, ignore them
         if (part.type === "file" && part.mime !== "text/plain" && part.mime !== "application/x-directory") {
+          const context = fileSourceContext(part)
+          if (context) {
+            userMessage.parts.push({
+              type: "text",
+              text: context,
+            })
+          }
           if (options?.stripMedia && isMedia(part.mime)) {
             userMessage.parts.push({
               type: "text",

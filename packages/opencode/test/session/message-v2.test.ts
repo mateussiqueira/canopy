@@ -316,6 +316,105 @@ describe("session.message-v2.toModelMessage", () => {
     ])
   })
 
+  test("includes source paths for user media attachments", async () => {
+    const messageID = "m-user-source"
+
+    const result = await MessageV2.toModelMessages(
+      [
+        {
+          info: userInfo(messageID),
+          parts: [
+            {
+              ...basePart(messageID, "p1-source"),
+              type: "text",
+              text: "copy this image",
+            },
+            {
+              ...basePart(messageID, "p2-source"),
+              type: "file",
+              mime: "image/png",
+              filename: "screenshot.png",
+              url: "data:image/png;base64,AAA",
+              source: {
+                type: "file",
+                path: "/repo/assets/screenshot.png",
+                text: {
+                  value: "[Image 1]",
+                  start: 16,
+                  end: 25,
+                },
+              },
+            },
+          ] as MessageV2.Part[],
+        },
+      ],
+      model,
+    )
+
+    expect(result).toMatchObject([
+      {
+        role: "user",
+        content: [
+          { type: "text", text: "copy this image" },
+          {
+            type: "text",
+            text: "Attached image: screenshot.png\nSource path: /repo/assets/screenshot.png\nPrompt reference: [Image 1]",
+          },
+          {
+            type: "file",
+            mediaType: "image/png",
+            filename: "screenshot.png",
+          },
+        ],
+      },
+    ])
+  })
+
+  test("does not expose clipboard placeholder as a source path", async () => {
+    const messageID = "m-user-clipboard"
+
+    expect(
+      await MessageV2.toModelMessages(
+        [
+          {
+            info: userInfo(messageID),
+            parts: [
+              {
+                ...basePart(messageID, "p1-clipboard"),
+                type: "file",
+                mime: "image/png",
+                filename: "clipboard",
+                url: "data:image/png;base64,AAA",
+                source: {
+                  type: "file",
+                  path: "clipboard",
+                  text: {
+                    value: "[Image 1]",
+                    start: 0,
+                    end: 9,
+                  },
+                },
+              },
+            ] as MessageV2.Part[],
+          },
+        ],
+        model,
+      ),
+    ).toStrictEqual([
+      {
+        role: "user",
+        content: [
+          {
+            type: "file",
+            mediaType: "image/png",
+            filename: "clipboard",
+            data: "data:image/png;base64,AAA",
+          },
+        ],
+      },
+    ])
+  })
+
   test("converts assistant tool completion into tool-call + tool-result messages with attachments", async () => {
     const userID = "m-user"
     const assistantID = "m-assistant"
