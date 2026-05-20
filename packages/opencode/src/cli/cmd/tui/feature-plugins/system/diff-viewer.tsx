@@ -73,7 +73,10 @@ function DiffViewer(props: { api: TuiPluginApi }) {
     if (input.mode === "last-turn") {
       const sessionID = input.sessionID
       if (!sessionID) return []
-      const result = await props.api.client.session.diff({ sessionID, messageID: input.messageID }, { throwOnError: true })
+      const result = await props.api.client.session.diff(
+        { sessionID, messageID: input.messageID },
+        { throwOnError: true },
+      )
       return normalizeDiffs(result.data ?? [])
     }
 
@@ -121,7 +124,10 @@ function DiffViewer(props: { api: TuiPluginApi }) {
     const highlighted = highlightedFileNode()
     if (highlighted !== undefined && fileRows().some((row) => row.id === highlighted)) return
     const lastHighlighted = lastHighlightedFileNode()
-    const next = lastHighlighted !== undefined && fileRows().some((row) => row.id === lastHighlighted) ? lastHighlighted : fileRows()[0]?.id
+    const next =
+      lastHighlighted !== undefined && fileRows().some((row) => row.id === lastHighlighted)
+        ? lastHighlighted
+        : fileRows()[0]?.id
     setHighlightedFileNode(next)
   }
 
@@ -130,7 +136,8 @@ function DiffViewer(props: { api: TuiPluginApi }) {
     if (node !== undefined) setLastHighlightedFileNode(node)
   }
 
-  const moveFileSelection = (offset: number) => setHighlighted(moveFileTreeSelection(fileRows(), highlightedFileNode(), offset))
+  const moveFileSelection = (offset: number) =>
+    setHighlighted(moveFileTreeSelection(fileRows(), highlightedFileNode(), offset))
 
   const clearFileTreePatchState = () => {
     setHighlightedFileNode(undefined)
@@ -182,14 +189,17 @@ function DiffViewer(props: { api: TuiPluginApi }) {
 
   const jumpRelativePatchFile = (offset: number) => {
     const current = focus() === "files" ? highlightedFileNode() : undefined
-    const nextFromSelection = current === undefined ? undefined : moveFileTreeSelectionToFile(fileRows(), current, offset)
+    const nextFromSelection =
+      current === undefined ? undefined : moveFileTreeSelectionToFile(fileRows(), current, offset)
     if (nextFromSelection !== undefined) {
       jumpToFileIndex(fileRows().find((row) => row.id === nextFromSelection)?.fileIndex)
       return
     }
     const currentFileIndex = activePatchFileIndex() ?? currentPatchFileIndex()
     const currentRow = fileRows().find((row) => row.fileIndex === currentFileIndex)
-    scrollToFileIndex(fileRows().find((row) => row.id === moveFileTreeSelectionToFile(fileRows(), currentRow?.id, offset))?.fileIndex)
+    scrollToFileIndex(
+      fileRows().find((row) => row.id === moveFileTreeSelectionToFile(fileRows(), currentRow?.id, offset))?.fileIndex,
+    )
   }
 
   const highlightedPatchFileIndex = () => fileRows().find((row) => row.id === highlightedFileNode())?.fileIndex
@@ -243,166 +253,170 @@ function DiffViewer(props: { api: TuiPluginApi }) {
         props.api.route.navigate("home")
       },
     },
-      {
-        name: "diff.down",
-        title: "Move diff viewer down",
-        category: "VCS",
-        run: focusRunner({
-          files() {
-            moveFileSelection(1)
-          },
-          patches() {
-            clearFileTreePatchState()
-            scroll?.scrollBy(1)
-          },
-        }),
-      },
-      {
-        name: "diff.up",
-        title: "Move diff viewer up",
-        category: "VCS",
-        run: focusRunner({
-          files() {
-            moveFileSelection(-1)
-          },
-          patches() {
-            clearFileTreePatchState()
-            scroll?.scrollBy(-1)
-          },
-        }),
-      },
-      {
-        name: "diff.page.down",
-        title: "Page diff viewer down",
-        category: "VCS",
-        run: focusRunner({
-          files() {
-            moveFileSelection(8)
-          },
-          patches() {
-            clearFileTreePatchState()
-            if (scroll) scroll.scrollBy(scroll.height)
-          },
-        }),
-      },
-      {
-        name: "diff.page.up",
-        title: "Page diff viewer up",
-        category: "VCS",
-        run: focusRunner({
-          files() {
-            moveFileSelection(-8)
-          },
-          patches() {
-            clearFileTreePatchState()
-            if (scroll) scroll.scrollBy(-scroll.height)
-          },
-        }),
-      },
-      {
-        name: "diff.toggle",
-        title: "Toggle diff viewer item",
-        category: "VCS",
-        run: focusRunner({
-          files() {
-            toggleSelectedFileTreeRow()
-          },
-          patches() {},
-        }),
-      },
-      {
-        name: "diff.expand",
-        title: "Expand diff viewer item",
-        category: "VCS",
-        run: focusRunner({
-          files() {
-            setExpandedFileNodes((expanded) => setFileTreeDirectoryExpanded(fileTree(), expanded, highlightedFileNode(), true))
-          },
-          patches() {},
-        }),
-      },
-      {
-        name: "diff.collapse",
-        title: "Collapse diff viewer item",
-        category: "VCS",
-        run: focusRunner({
-          files() {
-            setExpandedFileNodes((expanded) => setFileTreeDirectoryExpanded(fileTree(), expanded, highlightedFileNode(), false))
-          },
-          patches() {},
-        }),
-      },
-      {
-        name: "diff.next_file",
-        title: "Jump to next diff file",
-        category: "VCS",
-        run() {
-          jumpRelativePatchFile(1)
+    {
+      name: "diff.down",
+      title: "Move diff viewer down",
+      category: "VCS",
+      run: focusRunner({
+        files() {
+          moveFileSelection(1)
         },
-      },
-      {
-        name: "diff.previous_file",
-        title: "Jump to previous diff file",
-        category: "VCS",
-        run() {
-          jumpRelativePatchFile(-1)
+        patches() {
+          clearFileTreePatchState()
+          scroll?.scrollBy(1)
         },
-      },
-      {
-        name: "diff.switch_focus",
-        title: "Switch diff viewer focus",
-        category: "VCS",
-        run() {
-          if (!showFileTree()) return
-          setFocus((current) => {
-            if (current === "files") return "patches"
-            ensureHighlightedFileNode()
-            return "files"
-          })
+      }),
+    },
+    {
+      name: "diff.up",
+      title: "Move diff viewer up",
+      category: "VCS",
+      run: focusRunner({
+        files() {
+          moveFileSelection(-1)
         },
-      },
-      {
-        name: "diff.toggle_file_tree",
-        title: "Toggle diff viewer file tree",
-        category: "VCS",
-        run() {
-          setShowFileTree((value) => {
-            if (value) setFocus("patches")
-            return !value
-          })
+        patches() {
+          clearFileTreePatchState()
+          scroll?.scrollBy(-1)
         },
-      },
-      {
-        name: "diff.single_patch",
-        title: "Toggle single patch view",
-        category: "VCS",
-        run() {
-          setSinglePatch((value) => {
-            const next = !value
-            if (next) ensureHighlightedPatchFile()
-            else scrollToHighlightedPatchFile()
-            return next
-          })
+      }),
+    },
+    {
+      name: "diff.page.down",
+      title: "Page diff viewer down",
+      category: "VCS",
+      run: focusRunner({
+        files() {
+          moveFileSelection(8)
         },
-      },
-      {
-        name: "diff.switch_diff",
-        title: "Switch diff viewer source",
-        category: "VCS",
-        run() {
-          openSwitchDiffDialog()
+        patches() {
+          clearFileTreePatchState()
+          if (scroll) scroll.scrollBy(scroll.height)
         },
-      },
-      {
-        name: "diff.toggle_view",
-        title: "Toggle diff viewer split or unified view",
-        category: "VCS",
-        run() {
-          if (!splitAvailable()) return
-          setViewOverride(view() === "split" ? "unified" : "split")
+      }),
+    },
+    {
+      name: "diff.page.up",
+      title: "Page diff viewer up",
+      category: "VCS",
+      run: focusRunner({
+        files() {
+          moveFileSelection(-8)
         },
+        patches() {
+          clearFileTreePatchState()
+          if (scroll) scroll.scrollBy(-scroll.height)
+        },
+      }),
+    },
+    {
+      name: "diff.toggle",
+      title: "Toggle diff viewer item",
+      category: "VCS",
+      run: focusRunner({
+        files() {
+          toggleSelectedFileTreeRow()
+        },
+        patches() {},
+      }),
+    },
+    {
+      name: "diff.expand",
+      title: "Expand diff viewer item",
+      category: "VCS",
+      run: focusRunner({
+        files() {
+          setExpandedFileNodes((expanded) =>
+            setFileTreeDirectoryExpanded(fileTree(), expanded, highlightedFileNode(), true),
+          )
+        },
+        patches() {},
+      }),
+    },
+    {
+      name: "diff.collapse",
+      title: "Collapse diff viewer item",
+      category: "VCS",
+      run: focusRunner({
+        files() {
+          setExpandedFileNodes((expanded) =>
+            setFileTreeDirectoryExpanded(fileTree(), expanded, highlightedFileNode(), false),
+          )
+        },
+        patches() {},
+      }),
+    },
+    {
+      name: "diff.next_file",
+      title: "Jump to next diff file",
+      category: "VCS",
+      run() {
+        jumpRelativePatchFile(1)
       },
-    ]
+    },
+    {
+      name: "diff.previous_file",
+      title: "Jump to previous diff file",
+      category: "VCS",
+      run() {
+        jumpRelativePatchFile(-1)
+      },
+    },
+    {
+      name: "diff.switch_focus",
+      title: "Switch diff viewer focus",
+      category: "VCS",
+      run() {
+        if (!showFileTree()) return
+        setFocus((current) => {
+          if (current === "files") return "patches"
+          ensureHighlightedFileNode()
+          return "files"
+        })
+      },
+    },
+    {
+      name: "diff.toggle_file_tree",
+      title: "Toggle diff viewer file tree",
+      category: "VCS",
+      run() {
+        setShowFileTree((value) => {
+          if (value) setFocus("patches")
+          return !value
+        })
+      },
+    },
+    {
+      name: "diff.single_patch",
+      title: "Toggle single patch view",
+      category: "VCS",
+      run() {
+        setSinglePatch((value) => {
+          const next = !value
+          if (next) ensureHighlightedPatchFile()
+          else scrollToHighlightedPatchFile()
+          return next
+        })
+      },
+    },
+    {
+      name: "diff.switch_diff",
+      title: "Switch diff viewer source",
+      category: "VCS",
+      run() {
+        openSwitchDiffDialog()
+      },
+    },
+    {
+      name: "diff.toggle_view",
+      title: "Toggle diff viewer split or unified view",
+      category: "VCS",
+      run() {
+        if (!splitAvailable()) return
+        setViewOverride(view() === "split" ? "unified" : "split")
+      },
+    },
+  ]
 
   const switchDiffOptions = createMemo(() => [
     {
@@ -505,67 +519,74 @@ function DiffViewer(props: { api: TuiPluginApi }) {
             >
               <Switch>
                 <Match when={diff.error}>
-                  <text fg={theme().error}>Failed to load diff</text>
+                  <box paddingTop={1}>
+                    <text fg={theme().error}>Failed to load diff</text>
+                  </box>
                 </Match>
                 <Match when={files().length === 0}>
-                  <text fg={theme().textMuted}>No diff to show</text>
+                  <box paddingTop={1}>
+                    <text fg={theme().textMuted}>No diff to show</text>
+                  </box>
                 </Match>
                 <Match when={files().length > 0}>
-              <scrollbox
-                ref={(element: ScrollBoxRenderable) => (scroll = element)}
-                flexGrow={1}
-                minHeight={0}
-                verticalScrollbarOptions={{ visible: false }}
-                horizontalScrollbarOptions={{ visible: false }}
-              >
-                <For each={visiblePatchFiles()}>
-                  {(entry) => (
-                    <box
-                      ref={(element: BoxRenderable) => registerPatchNode(entry.fileIndex, element)}
-                      marginBottom={1}
-                      backgroundColor={theme().backgroundPanel}
-                    >
-                      <box
-                        flexDirection="row"
-                        gap={2}
-                        flexShrink={0}
-                        paddingTop={1}
-                        paddingBottom={1}
-                        paddingLeft={2}
-                        paddingRight={1}
-                        backgroundColor={theme().backgroundPanel}
-                      >
-                        <text fg={theme().text}>{entry.file.file}</text>
-                        <text fg={theme().diffAdded}>+{entry.file.additions}</text>
-                        <text fg={theme().diffRemoved}>-{entry.file.deletions}</text>
-                      </box>
-                      <Show when={entry.file.patch} fallback={<text fg={theme().textMuted}>No patch available for this file.</text>}>
-                        {(patch) => (
-                          <diff
-                            diff={patch()}
-                            view={view()}
-                            filetype={filetype(entry.file.file)}
-                            syntaxStyle={themeState.syntax()}
-                            showLineNumbers={true}
-                            width="100%"
-                            wrapMode="word"
-                            fg={theme().text}
-                            addedBg={theme().diffAddedBg}
-                            removedBg={theme().diffRemovedBg}
-                            contextBg={theme().diffContextBg}
-                            addedSignColor={theme().diffHighlightAdded}
-                            removedSignColor={theme().diffHighlightRemoved}
-                            lineNumberFg={theme().diffLineNumber}
-                            lineNumberBg={theme().diffContextBg}
-                            addedLineNumberBg={theme().diffAddedLineNumberBg}
-                            removedLineNumberBg={theme().diffRemovedLineNumberBg}
-                          />
-                        )}
-                      </Show>
-                    </box>
-                  )}
-                </For>
-              </scrollbox>
+                  <scrollbox
+                    ref={(element: ScrollBoxRenderable) => (scroll = element)}
+                    flexGrow={1}
+                    minHeight={0}
+                    verticalScrollbarOptions={{ visible: false }}
+                    horizontalScrollbarOptions={{ visible: false }}
+                  >
+                    <For each={visiblePatchFiles()}>
+                      {(entry) => (
+                        <box
+                          ref={(element: BoxRenderable) => registerPatchNode(entry.fileIndex, element)}
+                          marginBottom={1}
+                          backgroundColor={theme().backgroundPanel}
+                        >
+                          <box
+                            flexDirection="row"
+                            gap={2}
+                            flexShrink={0}
+                            paddingTop={1}
+                            paddingBottom={1}
+                            paddingLeft={2}
+                            paddingRight={1}
+                            backgroundColor={theme().backgroundPanel}
+                          >
+                            <text fg={theme().text}>{entry.file.file}</text>
+                            <text fg={theme().diffAdded}>+{entry.file.additions}</text>
+                            <text fg={theme().diffRemoved}>-{entry.file.deletions}</text>
+                          </box>
+                          <Show
+                            when={entry.file.patch}
+                            fallback={<text fg={theme().textMuted}>No patch available for this file.</text>}
+                          >
+                            {(patch) => (
+                              <diff
+                                diff={patch()}
+                                view={view()}
+                                filetype={filetype(entry.file.file)}
+                                syntaxStyle={themeState.syntax()}
+                                showLineNumbers={true}
+                                width="100%"
+                                wrapMode="word"
+                                fg={theme().text}
+                                addedBg={theme().diffAddedBg}
+                                removedBg={theme().diffRemovedBg}
+                                contextBg={theme().diffContextBg}
+                                addedSignColor={theme().diffHighlightAdded}
+                                removedSignColor={theme().diffHighlightRemoved}
+                                lineNumberFg={theme().diffLineNumber}
+                                lineNumberBg={theme().diffContextBg}
+                                addedLineNumberBg={theme().diffAddedLineNumberBg}
+                                removedLineNumberBg={theme().diffRemovedLineNumberBg}
+                              />
+                            )}
+                          </Show>
+                        </box>
+                      )}
+                    </For>
+                  </scrollbox>
                 </Match>
               </Switch>
             </box>
@@ -598,14 +619,16 @@ function DiffViewer(props: { api: TuiPluginApi }) {
         <Show when={toggleFileTreeShortcut()}>
           {(shortcut) => (
             <text fg={theme().text}>
-              {shortcut()} <span style={{ fg: theme().textMuted }}>{showFileTree() ? "hide file tree" : "show file tree"}</span>
+              {shortcut()}{" "}
+              <span style={{ fg: theme().textMuted }}>{showFileTree() ? "hide file tree" : "show file tree"}</span>
             </text>
           )}
         </Show>
         <Show when={singlePatchShortcut()}>
           {(shortcut) => (
             <text fg={theme().text}>
-              {shortcut()} <span style={{ fg: theme().textMuted }}>{singlePatch() ? "all patches" : "single patch"}</span>
+              {shortcut()}{" "}
+              <span style={{ fg: theme().textMuted }}>{singlePatch() ? "all patches" : "single patch"}</span>
             </text>
           )}
         </Show>
@@ -619,7 +642,8 @@ function DiffViewer(props: { api: TuiPluginApi }) {
         <Show when={toggleViewShortcut()}>
           {(shortcut) => (
             <text fg={theme().text}>
-              {shortcut()} <span style={{ fg: theme().textMuted }}>{view() === "split" ? "unified view" : "split view"}</span>
+              {shortcut()}{" "}
+              <span style={{ fg: theme().textMuted }}>{view() === "split" ? "unified view" : "split view"}</span>
             </text>
           )}
         </Show>
