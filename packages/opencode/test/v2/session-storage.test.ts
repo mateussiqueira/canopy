@@ -17,6 +17,7 @@ const projectID = ProjectID.make("project-session-storage")
 const sessionA = SessionID.make("ses_storage_a")
 const sessionB = SessionID.make("ses_storage_b")
 const sessionC = SessionID.make("ses_storage_c")
+const sessionD = SessionID.make("ses_storage_d")
 const encodeMessage = Schema.encodeSync(SessionMessage.Message)
 const memoryState = SessionStorageMemory.makeState()
 
@@ -67,9 +68,15 @@ function sessionStorageContract<R, E>(name: string, layer: Layer.Layer<SessionSt
       yield* seed.session({
         id: sessionC,
         title: "Gamma",
-        directory: "/tmp/other-project",
         path: "docs",
         updated: 3000,
+      })
+      yield* seed.session({
+        id: sessionD,
+        title: "Delta",
+        directory: "/tmp/other-project",
+        path: "other",
+        updated: 4000,
       })
 
       const storage = yield* SessionStorage.Service
@@ -77,19 +84,27 @@ function sessionStorageContract<R, E>(name: string, layer: Layer.Layer<SessionSt
       expect(found?.title).toBe("Beta")
       expect(found ? DateTime.toEpochMillis(found.time.updated) : undefined).toBe(2000)
 
-      expect((yield* storage.list({ path: "apps", order: "asc" })).map((row) => row.id)).toEqual([sessionA, sessionB])
       expect(
-        (yield* storage.list({ directory: "/tmp/project-session-storage", order: "asc" })).map((row) => row.id),
+        (yield* storage.list({ directory: "/tmp/project-session-storage", path: "apps", order: "asc" })).map(
+          (row) => row.id,
+        ),
       ).toEqual([sessionA, sessionB])
       expect(
-        (yield* storage.list({ order: "asc", cursor: { id: sessionA, time: 1000, direction: "next" } })).map(
-          (row) => row.id,
-        ),
+        (yield* storage.list({ directory: "/tmp/project-session-storage", order: "asc" })).map((row) => row.id),
+      ).toEqual([sessionA, sessionB, sessionC])
+      expect(
+        (yield* storage.list({
+          directory: "/tmp/project-session-storage",
+          order: "asc",
+          cursor: { id: sessionA, time: 1000, direction: "next" },
+        })).map((row) => row.id),
       ).toEqual([sessionB, sessionC])
       expect(
-        (yield* storage.list({ order: "asc", cursor: { id: sessionC, time: 3000, direction: "previous" } })).map(
-          (row) => row.id,
-        ),
+        (yield* storage.list({
+          directory: "/tmp/project-session-storage",
+          order: "asc",
+          cursor: { id: sessionC, time: 3000, direction: "previous" },
+        })).map((row) => row.id),
       ).toEqual([sessionA, sessionB])
     }),
   )
@@ -190,7 +205,14 @@ function resetSqlSeeds() {
   Database.use((db) => {
     db.delete(SessionMessageTable).where(eq(SessionMessageTable.session_id, sessionA)).run()
     db.delete(SessionTable)
-      .where(or(eq(SessionTable.id, sessionA), eq(SessionTable.id, sessionB), eq(SessionTable.id, sessionC)))
+      .where(
+        or(
+          eq(SessionTable.id, sessionA),
+          eq(SessionTable.id, sessionB),
+          eq(SessionTable.id, sessionC),
+          eq(SessionTable.id, sessionD),
+        ),
+      )
       .run()
     db.delete(ProjectTable).where(eq(ProjectTable.id, projectID)).run()
   })
