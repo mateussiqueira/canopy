@@ -50,21 +50,6 @@ const draftText = (prompt: Prompt) => prompt.map((part) => ("content" in part ? 
 
 const draftImages = (prompt: Prompt) => prompt.filter((part): part is ImageAttachmentPart => part.type === "image")
 
-const slashCommand = (text: string) => {
-  if (!text.startsWith("/")) return undefined
-  return text.split("\n")[0].split(" ")[0].slice(1)
-}
-
-const slashArguments = (text: string) => {
-  const firstLineEnd = text.indexOf("\n")
-  const firstLine = firstLineEnd === -1 ? text : text.slice(0, firstLineEnd)
-  const [, ...firstLineArgs] = firstLine.split(" ")
-  const restOfInput = firstLineEnd === -1 ? "" : text.slice(firstLineEnd + 1)
-  return firstLineArgs.join(" ") + (restOfInput ? "\n" + restOfInput : "")
-}
-
-const isCompactSlash = (command: string | undefined) => command === "compact" || command === "summarize"
-
 export async function sendFollowupDraft(input: FollowupSendInput) {
   const text = draftText(input.draft.prompt)
   const images = draftImages(input.draft.prompt)
@@ -86,27 +71,8 @@ export async function sendFollowupDraft(input: FollowupSendInput) {
     return true
   }
 
-  const cmd = slashCommand(text)
-  if (isCompactSlash(cmd)) {
-    setBusy()
-    try {
-      if (!(await wait())) {
-        setIdle()
-        return false
-      }
-
-      const instructions = slashArguments(text).trim()
-      const payload = instructions
-        ? { sessionID: input.draft.sessionID, ...input.draft.model, instructions }
-        : { sessionID: input.draft.sessionID, ...input.draft.model }
-      await input.client.session.summarize(payload)
-      return true
-    } catch (err) {
-      setIdle()
-      throw err
-    }
-  }
-
+  const [head, ...tail] = text.split(" ")
+  const cmd = head?.startsWith("/") ? head.slice(1) : undefined
   if (cmd && input.sync.data.command.find((item) => item.name === cmd)) {
     setBusy()
     try {
@@ -118,7 +84,7 @@ export async function sendFollowupDraft(input: FollowupSendInput) {
       await input.client.session.command({
         sessionID: input.draft.sessionID,
         command: cmd,
-        arguments: slashArguments(text),
+        arguments: tail.join(" "),
         agent: input.draft.agent,
         model: `${input.draft.model.providerID}/${input.draft.model.modelID}`,
         variant: input.draft.variant,
@@ -487,7 +453,8 @@ export function createPromptSubmit(input: PromptSubmitInput) {
     }
 
     if (text.startsWith("/")) {
-      const commandName = slashCommand(text) ?? ""
+      const [cmdName, ...args] = text.split(" ")
+      const commandName = cmdName.slice(1)
       const customCommand = sync.data.command.find((c) => c.name === commandName)
       if (customCommand) {
         clearInput()
@@ -495,7 +462,7 @@ export function createPromptSubmit(input: PromptSubmitInput) {
           .command({
             sessionID: session.id,
             command: commandName,
-            arguments: slashArguments(text),
+            arguments: args.join(" "),
             agent,
             model: `${model.providerID}/${model.modelID}`,
             variant,
@@ -513,22 +480,6 @@ export function createPromptSubmit(input: PromptSubmitInput) {
               description: formatServerError(err, language.t, language.t("common.requestFailed")),
             })
             restoreInput()
-          })
-        return
-      }
-
-      if (isCompactSlash(commandName)) {
-        clearInput()
-        const instructions = slashArguments(text).trim()
-        const payload = instructions
-          ? { sessionID: session.id, ...model, instructions }
-          : { sessionID: session.id, ...model }
-        client.session.summarize(payload).catch((err) => {
-          showToast({
-            title: language.t("prompt.toast.promptSendFailed.title"),
-            description: errorMessage(err),
-          })
-          restoreInput()
         })
         return
       }
