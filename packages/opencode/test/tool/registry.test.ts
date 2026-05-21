@@ -34,6 +34,7 @@ import { ProviderID, ModelID } from "@/provider/schema"
 import { ToolJsonSchema } from "@/tool/json-schema"
 import { MessageID, SessionID } from "@/session/schema"
 import { RuntimeFlags } from "@/effect/runtime-flags"
+import z3 from "zod/v3"
 
 const node = CrossSpawnSpawner.defaultLayer
 const configLayer = TestConfig.layer({
@@ -80,7 +81,7 @@ const brokenPluginLayer = Layer.succeed(
     init: () => Effect.void,
     trigger: ((_name: unknown, _input: unknown, output: unknown) =>
       Effect.succeed(output)) as Plugin.Interface["trigger"],
-    list: () =>
+    list: (() =>
       Effect.succeed([
         {
           tool: {
@@ -91,7 +92,41 @@ const brokenPluginLayer = Layer.succeed(
             },
           },
         },
-      ]),
+      ])) as unknown as Plugin.Interface["list"],
+  }),
+)
+
+const zod3PluginLayer = Layer.succeed(
+  Plugin.Service,
+  Plugin.Service.of({
+    init: () => Effect.void,
+    trigger: ((_name: unknown, _input: unknown, output: unknown) =>
+      Effect.succeed(output)) as Plugin.Interface["trigger"],
+    list: (() =>
+      Effect.succeed([
+        {
+          tool: {
+            ctx_batch_execute: {
+              description: "context-mode batch executor",
+              args: {
+                batch: z3
+                  .preprocess(
+                    (value) => (typeof value === "string" ? JSON.parse(value) : value),
+                    z3
+                      .array(
+                        z3.object({
+                          command: z3.string().describe("Command to execute"),
+                        }),
+                      )
+                      .min(1),
+                  )
+                  .describe("Commands to execute as a batch"),
+              },
+              execute: async () => "ok",
+            },
+          },
+        },
+      ])) as unknown as Plugin.Interface["list"],
   }),
 )
 
@@ -105,6 +140,7 @@ const background = testEffect(
 const withBrokenPlugin = testEffect(
   Layer.mergeAll(registryLayer({ plugin: brokenPluginLayer }), node, Agent.defaultLayer),
 )
+const withZod3Plugin = testEffect(Layer.mergeAll(registryLayer({ plugin: zod3PluginLayer }), node, Agent.defaultLayer))
 
 afterEach(async () => {
   await disposeAllInstances()
@@ -346,6 +382,52 @@ describe("tool.registry", () => {
         },
         required: ["query"],
       })
+    }),
+  )
+
+  withZod3Plugin.instance("loads plugin tools with Zod 3 args as JSON Schema", () =>
+    Effect.gen(function* () {
+      const registry = yield* ToolRegistry.Service
+      const loaded = (yield* registry.all()).find((tool) => tool.id === "ctx_batch_execute")
+      if (!loaded) throw new Error("ctx_batch_execute tool was not loaded")
+
+      expect(loaded.jsonSchema).toMatchObject({
+        type: "object",
+        properties: {
+          batch: {
+            type: "array",
+            description: "Commands to execute as a batch",
+            items: {
+              type: "object",
+              properties: {
+                command: { type: "string", description: "Command to execute" },
+              },
+            },
+            minItems: 1,
+          },
+        },
+        required: ["batch"],
+      })
+      expect(JSON.stringify(loaded.jsonSchema)).not.toContain("_def")
+      expect(JSON.stringify(loaded.jsonSchema)).not.toContain("_zod")
+      expect(Result.isSuccess(Schema.decodeUnknownResult(loaded.parameters)({ batch: [{ command: "pwd" }] }))).toBe(
+        true,
+      )
+      expect(Result.isSuccess(Schema.decodeUnknownResult(loaded.parameters)({}))).toBe(false)
+    }),
+  )
+
+  withZod3Plugin.instance("validates plugin tools with Zod 3 preprocessors", () =>
+    Effect.gen(function* () {
+      const registry = yield* ToolRegistry.Service
+      const loaded = (yield* registry.all()).find((tool) => tool.id === "ctx_batch_execute")
+      if (!loaded) throw new Error("ctx_batch_execute tool was not loaded")
+
+      expect(
+        Result.isSuccess(
+          Schema.decodeUnknownResult(loaded.parameters)({ batch: JSON.stringify([{ command: "pwd" }]) }),
+        ),
+      ).toBe(true)
     }),
   )
 

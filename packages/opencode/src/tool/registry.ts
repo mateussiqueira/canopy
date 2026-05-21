@@ -55,6 +55,13 @@ import { Reference } from "@/reference/reference"
 import { BackgroundJob } from "@/background/job"
 import { SessionStatus } from "@/session/status"
 import { RuntimeFlags } from "@/effect/runtime-flags"
+import {
+  objectFromShape,
+  safeParse,
+  type AnyObjectSchema,
+  type AnySchema,
+} from "@modelcontextprotocol/sdk/server/zod-compat.js"
+import { toJsonSchemaCompat } from "@modelcontextprotocol/sdk/server/zod-json-schema-compat.js"
 
 const log = Log.create({ service: "tool.registry" })
 
@@ -150,10 +157,10 @@ export const layer: Layer.Layer<
           const args = def.args ?? {}
           const entries = Object.entries(args)
           const allZod = entries.every((entry) => isZodType(entry[1]))
-          const zodParams = allZod ? z.object(args) : undefined
+          const zodParams = allZod ? objectFromShape(args as Record<string, AnySchema>) : undefined
           const jsonSchema = zodParams ? zodJsonSchema(zodParams) : legacyJsonSchema(entries)
           const parameters = zodParams
-            ? Schema.declare<unknown>((u): u is unknown => zodParams.safeParse(u).success)
+            ? Schema.declare<unknown>((u): u is unknown => safeParse(zodParams, u).success)
             : Schema.Unknown
           return {
             id,
@@ -402,7 +409,11 @@ export const defaultLayer = Layer.suspend(() =>
     .pipe(Layer.provide(RuntimeFlags.defaultLayer)),
 )
 
-function isZodType(value: unknown): value is z.ZodType {
+function isZodType(value: unknown): value is AnySchema {
+  return typeof value === "object" && value !== null && ("_zod" in value || "_def" in value)
+}
+
+function isZod4Type(value: unknown): value is z.ZodType {
   return typeof value === "object" && value !== null && "_zod" in value
 }
 
@@ -425,8 +436,12 @@ function legacyJsonSchema(entries: [string, unknown][]): JSONSchema7 {
   }
 }
 
-function zodJsonSchema(schema: z.ZodType): JSONSchema7 {
-  const result = normalizeZodJsonSchema(z.toJSONSchema(schema, { io: "input", metadata: zodMetadataRegistry(schema) }))
+function zodJsonSchema(schema: AnyObjectSchema): JSONSchema7 {
+  const result = normalizeZodJsonSchema(
+    isZod4Type(schema)
+      ? z.toJSONSchema(schema, { io: "input", metadata: zodMetadataRegistry(schema) })
+      : toJsonSchemaCompat(schema, { pipeStrategy: "input" }),
+  )
   if (!isJsonSchemaObject(result)) throw new Error("plugin tool Zod schema produced a non-object JSON Schema")
   const { $defs, ...rest } = result
   return (
@@ -434,7 +449,7 @@ function zodJsonSchema(schema: z.ZodType): JSONSchema7 {
   ) as JSONSchema7
 }
 
-function zodMetadataRegistry(schema: z.ZodType) {
+function zodMetadataRegistry(schema: AnyObjectSchema) {
   const registry = z.registry<Record<string, unknown>>()
   const seen = new WeakSet<object>()
   const collect = (value: unknown) => {
@@ -442,7 +457,7 @@ function zodMetadataRegistry(schema: z.ZodType) {
     if (seen.has(value)) return
     seen.add(value)
 
-    if (isZodType(value)) {
+    if (isZod4Type(value)) {
       const metadata = typeof value.meta === "function" ? value.meta() : undefined
       const description = typeof value.description === "string" ? value.description : undefined
       const merged = {
