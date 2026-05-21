@@ -133,6 +133,12 @@ function buildPrompt(input: { previousSummary?: string; context: string[] }) {
   return [anchor, SUMMARY_TEMPLATE, ...input.context].join("\n\n")
 }
 
+function withInstructions(prompt: string, instructions: string | undefined) {
+  const trimmed = instructions?.trim()
+  if (!trimmed) return prompt
+  return [prompt, "Additional user instructions for this compaction:", trimmed].join("\n\n")
+}
+
 function preserveRecentBudget(input: { cfg: Config.Info; model: Provider.Model }) {
   return (
     input.cfg.compaction?.preserve_recent_tokens ??
@@ -202,6 +208,7 @@ export interface Interface {
     model: { providerID: ProviderID; modelID: ModelID }
     auto: boolean
     overflow?: boolean
+    instructions?: string
   }) => Effect.Effect<void>
 }
 
@@ -400,7 +407,10 @@ export const layer = Layer.effect(
         { sessionID: input.sessionID },
         { context: [], prompt: undefined },
       )
-      const nextPrompt = compacting.prompt ?? buildPrompt({ previousSummary, context: compacting.context })
+      const nextPrompt = withInstructions(
+        compacting.prompt ?? buildPrompt({ previousSummary, context: compacting.context }),
+        compactionPart?.instructions,
+      )
       const msgs = structuredClone(selected.head)
       yield* plugin.trigger("experimental.chat.messages.transform", {}, { messages: msgs })
       const modelMessages = yield* MessageV2.toModelMessagesEffect(msgs, model, {
@@ -587,6 +597,7 @@ export const layer = Layer.effect(
       model: { providerID: ProviderID; modelID: ModelID }
       auto: boolean
       overflow?: boolean
+      instructions?: string
     }) {
       const msg = yield* session.updateMessage({
         id: MessageID.ascending(),
@@ -603,6 +614,7 @@ export const layer = Layer.effect(
         type: "compaction",
         auto: input.auto,
         overflow: input.overflow,
+        instructions: input.instructions,
       })
       if (flags.experimentalEventSystem) {
         yield* events.publish(SessionEvent.Compaction.Started, {

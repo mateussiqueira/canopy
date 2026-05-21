@@ -18,6 +18,7 @@ const optimistic: Array<{
 const optimisticSeeded: boolean[] = []
 const storedSessions: Record<string, Array<{ id: string; title?: string }>> = {}
 const promoted: Array<{ directory: string; sessionID: string }> = []
+const sentSummaries: Array<{ sessionID: string; instructions?: string }> = []
 const sentShell: string[] = []
 const syncedDirectories: string[] = []
 
@@ -25,7 +26,7 @@ let params: { id?: string } = {}
 let selected = "/repo/worktree-a"
 let variant: string | undefined
 
-const promptValue: Prompt = [{ type: "text", content: "ls", start: 0, end: 2 }]
+let promptValue: Prompt = [{ type: "text", content: "ls", start: 0, end: 2 }]
 
 const clientFor = (directory: string) => {
   createdClients.push(directory)
@@ -47,6 +48,10 @@ const clientFor = (directory: string) => {
       prompt: async () => ({ data: undefined }),
       promptAsync: async () => ({ data: undefined }),
       command: async () => ({ data: undefined }),
+      summarize: async (input: { sessionID: string; instructions?: string }) => {
+        sentSummaries.push({ sessionID: input.sessionID, instructions: input.instructions })
+        return { data: undefined }
+      },
       abort: async () => ({ data: undefined }),
     },
     worktree: {
@@ -208,6 +213,8 @@ beforeEach(() => {
   optimistic.length = 0
   optimisticSeeded.length = 0
   promoted.length = 0
+  promptValue = [{ type: "text", content: "ls", start: 0, end: 2 }]
+  sentSummaries.length = 0
   params = {}
   sentShell.length = 0
   syncedDirectories.length = 0
@@ -341,5 +348,32 @@ describe("prompt submit worktree selection", () => {
 
     expect(storedSessions["/repo/worktree-a"]).toEqual([{ id: "session-1", title: "New session 1" }])
     expect(optimisticSeeded).toEqual([true])
+  })
+
+  test("submits typed compact slash arguments as summarize instructions", async () => {
+    params = { id: "session-1" }
+    promptValue = [{ type: "text", content: "/compact keep unresolved TODOs", start: 0, end: 30 }]
+
+    const submit = createPromptSubmit({
+      info: () => ({ id: "session-1" }),
+      imageAttachments: () => [],
+      commentCount: () => 0,
+      autoAccept: () => false,
+      mode: () => "normal",
+      working: () => false,
+      editor: () => undefined,
+      queueScroll: () => undefined,
+      promptLength: (value) => value.reduce((sum, part) => sum + ("content" in part ? part.content.length : 0), 0),
+      addToHistory: () => undefined,
+      resetHistoryNavigation: () => undefined,
+      setMode: () => undefined,
+      setPopover: () => undefined,
+      onSubmit: () => undefined,
+    })
+
+    await submit.handleSubmit({ preventDefault: () => undefined } as unknown as Event)
+
+    expect(sentSummaries).toEqual([{ sessionID: "session-1", instructions: "keep unresolved TODOs" }])
+    expect(optimistic).toHaveLength(0)
   })
 })

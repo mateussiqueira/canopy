@@ -287,8 +287,8 @@ function compactionProcessLayer(options?: CompactionProcessOptions) {
   )
 }
 
-function createSummaryCompaction(sessionID: SessionID) {
-  return SessionCompaction.use.create({ sessionID, agent: "build", model: ref, auto: false })
+function createSummaryCompaction(sessionID: SessionID, instructions?: string) {
+  return SessionCompaction.use.create({ sessionID, agent: "build", model: ref, auto: false, instructions })
 }
 
 function readCompactionPart(sessionID: SessionID) {
@@ -957,6 +957,30 @@ describe("session.compaction.process", () => {
       expect(part?.type).toBe("compaction")
       expect(part?.tail_start_id).toBe(keep.id)
     }).pipe(withCompaction({ config: cfg({ tail_turns: 2, preserve_recent_tokens: 100 }) })),
+  )
+
+  itCompaction.instance(
+    "appends stored instructions to compaction prompt",
+    () => {
+      const stub = llm()
+      let captured = ""
+      stub.push(reply("summary", (input) => (captured = JSON.stringify(input.messages))))
+      return Effect.gen(function* () {
+        const ssn = yield* SessionNs.Service
+        const session = yield* ssn.create({})
+        yield* createUserMessage(session.id, "first")
+        yield* createSummaryCompaction(session.id, "focus on unresolved TODOs")
+
+        const msgs = yield* ssn.messages({ sessionID: session.id })
+        const parent = msgs.at(-1)?.info.id
+        expect(parent).toBeTruthy()
+        yield* SessionCompaction.use.process({ parentID: parent!, messages: msgs, sessionID: session.id, auto: false })
+
+        expect(captured).toContain("Additional user instructions for this compaction")
+        expect(captured).toContain("focus on unresolved TODOs")
+      }).pipe(withCompaction({ llm: stub.layer }))
+    },
+    { git: true },
   )
 
   itCompaction.instance(

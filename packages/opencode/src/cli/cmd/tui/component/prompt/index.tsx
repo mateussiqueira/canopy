@@ -1143,6 +1143,21 @@ export function Prompt(props: PromptProps) {
         command: inputText,
       })
       setStore("mode", "normal")
+    } else if (isCompactSlash(inputText)) {
+      const instructions = slashArguments(inputText).trim()
+      const payload = instructions
+        ? {
+            sessionID,
+            modelID: selectedModel.modelID,
+            providerID: selectedModel.providerID,
+            instructions,
+          }
+        : {
+            sessionID,
+            modelID: selectedModel.modelID,
+            providerID: selectedModel.providerID,
+          }
+      void sdk.client.session.summarize(payload)
     } else if (
       inputText.startsWith("/") &&
       iife(() => {
@@ -1219,6 +1234,19 @@ export function Prompt(props: PromptProps) {
     }
     input.clear()
     return true
+  }
+
+  function isCompactSlash(text: string) {
+    const command = text.split("\n")[0].split(" ")[0].slice(1)
+    return text.startsWith("/") && (command === "compact" || command === "summarize")
+  }
+
+  function slashArguments(text: string) {
+    const firstLineEnd = text.indexOf("\n")
+    const firstLine = firstLineEnd === -1 ? text : text.slice(0, firstLineEnd)
+    const [, ...firstLineArgs] = firstLine.split(" ")
+    const restOfInput = firstLineEnd === -1 ? "" : text.slice(firstLineEnd + 1)
+    return firstLineArgs.join(" ") + (restOfInput ? "\n" + restOfInput : "")
   }
   const exit = useExit()
 
