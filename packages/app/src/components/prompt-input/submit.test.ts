@@ -342,5 +342,4 @@ describe("prompt submit worktree selection", () => {
     expect(storedSessions["/repo/worktree-a"]).toEqual([{ id: "session-1", title: "New session 1" }])
     expect(optimisticSeeded).toEqual([true])
   })
-
 })

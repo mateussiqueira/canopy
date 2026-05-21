@@ -480,7 +480,7 @@ export function createPromptSubmit(input: PromptSubmitInput) {
               description: formatServerError(err, language.t, language.t("common.requestFailed")),
             })
             restoreInput()
-        })
+          })
         return
       }
     }
