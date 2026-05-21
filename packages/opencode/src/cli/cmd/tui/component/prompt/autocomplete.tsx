@@ -543,19 +543,21 @@ export function Autocomplete(props: {
     ),
   )
 
+  function insertSlashCommand(name: string) {
+    const newText = `/${name} `
+    const cursor = props.input().logicalCursor
+    props.input().deleteRange(0, 0, cursor.row, cursor.col)
+    props.input().insertText(newText)
+    props.input().cursorOffset = Bun.stringWidth(newText)
+  }
+
   const commands = createMemo((): AutocompleteOption[] => {
     const results: AutocompleteOption[] = slashes().map((command) => {
       const name = command.display.trim().slice(1)
       if (name !== "compact") return command
       return {
         ...command,
-        onSelect: () => {
-          const newText = `/${name} `
-          const cursor = props.input().logicalCursor
-          props.input().deleteRange(0, 0, cursor.row, cursor.col)
-          props.input().insertText(newText)
-          props.input().cursorOffset = Bun.stringWidth(newText)
-        },
+        onSelect: () => insertSlashCommand(name),
       }
     })
 
@@ -565,13 +567,7 @@ export function Autocomplete(props: {
       results.push({
         display: "/" + serverCommand.name + label,
         description: serverCommand.description,
-        onSelect: () => {
-          const newText = "/" + serverCommand.name + " "
-          const cursor = props.input().logicalCursor
-          props.input().deleteRange(0, 0, cursor.row, cursor.col)
-          props.input().insertText(newText)
-          props.input().cursorOffset = Bun.stringWidth(newText)
-        },
+        onSelect: () => insertSlashCommand(serverCommand.name),
       })
     }
 

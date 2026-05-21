@@ -133,7 +133,7 @@ function buildPrompt(input: { previousSummary?: string; context: string[] }) {
   return [anchor, SUMMARY_TEMPLATE, ...input.context].join("\n\n")
 }
 
-function withInstructions(prompt: string, instructions: string | undefined) {
+function appendInstructions(prompt: string, instructions: string | undefined) {
   const trimmed = instructions?.trim()
   if (!trimmed) return prompt
   return [prompt, "Additional user instructions for this compaction:", trimmed].join("\n\n")
@@ -407,7 +407,7 @@ export const layer = Layer.effect(
         { sessionID: input.sessionID },
         { context: [], prompt: undefined },
       )
-      const nextPrompt = withInstructions(
+      const nextPrompt = appendInstructions(
         compacting.prompt ?? buildPrompt({ previousSummary, context: compacting.context }),
         compactionPart?.instructions,
       )
