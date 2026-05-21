@@ -130,7 +130,7 @@ describe("StructuredOutput Integration", () => {
   )
 
   live(
-    "works with text outputFormat (default)",
+    "works with text format (default)",
     () =>
       Effect.gen(function* () {
         const prompt = yield* SessionPrompt.Service
@@ -168,7 +168,7 @@ describe("StructuredOutput Integration", () => {
   )
 
   live(
-    "stores outputFormat on user message",
+    "stores format on user message",
     () =>
       Effect.gen(function* () {
         const prompt = yield* SessionPrompt.Service
@@ -200,7 +200,7 @@ describe("StructuredOutput Integration", () => {
         const messages = yield* sessions.messages({ sessionID: session.id })
         const userMessage = messages.find((m) => m.info.role === "user")
 
-        // Verify outputFormat was stored on user message
+        // Verify format was stored on user message
         expect(userMessage).toBeDefined()
         if (userMessage?.info.role === "user") {
           expect(userMessage.info.format).toBeDefined()

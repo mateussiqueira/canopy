@@ -148,7 +148,7 @@ const result = await client.session.prompt({
 })
 
 // Acessar a saída estruturada
-console.log(result.data.info.structured_output)
+console.log(result.data.info.structured)
 // { company: "Anthropic", founded: 2021, products: ["Claude", "Claude API"] }
 ```
 
@@ -175,8 +175,8 @@ Se o modelo falhar em produzir uma saída estruturada válida após todas as ten
 
 ```typescript
 if (result.data.info.error?.name === "StructuredOutputError") {
-  console.error("Failed to produce structured output:", result.data.info.error.message)
-  console.error("Attempts:", result.data.info.error.retries)
+  console.error("Failed to produce structured output:", result.data.info.error.data.message)
+  console.error("Attempts:", result.data.info.error.data.retries)
 }
 ```
 
@@ -313,7 +313,7 @@ const { providers, default: defaults } = await client.config.providers()
 | `session.summarize({ path, body })`                        | Resumir sessão                     | Retorna `boolean`                                                                                                                                                                                                              |
 | `session.messages({ path })`                               | Listar mensagens em uma sessão     | Retorna `{ info: `<a href={typesUrl}><code>Message</code></a>`, parts: `<a href={typesUrl}><code>Part[]</code></a>`}[]`                                                                                                        |
 | `session.message({ path })`                                | Obter detalhes da mensagem         | Retorna `{ info: `<a href={typesUrl}><code>Message</code></a>`, parts: `<a href={typesUrl}><code>Part[]</code></a>`}`                                                                                                          |
-| `session.prompt({ path, body })`                           | Enviar mensagem de prompt          | `body.noReply: true` retorna UserMessage (apenas contexto). O padrão retorna <a href={typesUrl}><code>AssistantMessage</code></a> com resposta da AI. Suporta `body.outputFormat` para [saída estruturada](#saída-estruturada) |
+| `session.prompt({ path, body })`                           | Enviar mensagem de prompt          | `body.noReply: true` retorna UserMessage (apenas contexto). O padrão retorna <a href={typesUrl}><code>AssistantMessage</code></a> com resposta da AI. Suporta `body.format` para [saída estruturada](#saída-estruturada) |
 | `session.command({ path, body })`                          | Enviar comando para a sessão       | Retorna `{ info: `<a href={typesUrl}><code>AssistantMessage</code></a>`, parts: `<a href={typesUrl}><code>Part[]</code></a>`}`                                                                                                 |
 | `session.shell({ path, body })`                            | Executar um comando shell          | Retorna <a href={typesUrl}><code>AssistantMessage</code></a>                                                                                                                                                                   |
 | `session.revert({ path, body })`                           | Reverter uma mensagem              | Retorna <a href={typesUrl}><code>Session</code></a>                                                                                                                                                                            |

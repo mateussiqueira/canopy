@@ -148,7 +148,7 @@ const result = await client.session.prompt({
 })
 
 // Access the structured output
-console.log(result.data.info.structured_output)
+console.log(result.data.info.structured)
 // { company: "Anthropic", founded: 2021, products: ["Claude", "Claude API"] }
 ```
 
@@ -175,8 +175,8 @@ Si el modelo no logra producir una salida estructurada válida después de todos
 
 ```typescript
 if (result.data.info.error?.name === "StructuredOutputError") {
-  console.error("Failed to produce structured output:", result.data.info.error.message)
-  console.error("Attempts:", result.data.info.error.retries)
+  console.error("Failed to produce structured output:", result.data.info.error.data.message)
+  console.error("Attempts:", result.data.info.error.data.retries)
 }
 ```
 
@@ -313,7 +313,7 @@ const { providers, default: defaults } = await client.config.providers()
 | `session.summarize({ path, body })`                        | Resumir sesión                          | Devuelve `boolean`                                                                                                                                                                                                                                |
 | `session.messages({ path })`                               | Listar mensajes en una sesión           | Devuelve `{ info: `<a href={typesUrl}><code>Message</code></a>`, parts: `<a href={typesUrl}><code>Part[]</code></a>`}[]`                                                                                                                          |
 | `session.message({ path })`                                | Obtener detalles del mensaje            | Devuelve `{ info: `<a href={typesUrl}><code>Message</code></a>`, parts: `<a href={typesUrl}><code>Part[]</code></a>`}`                                                                                                                            |
-| `session.prompt({ path, body })`                           | Enviar mensaje rápido                   | `body.noReply: true` devuelve UserMessage (solo contexto). El valor predeterminado devuelve <a href={typesUrl}><code>AssistantMessage</code></a> con respuesta de IA. Admite `body.outputFormat` para [salida estructurada](#salida-estructurada) |
+| `session.prompt({ path, body })`                           | Enviar mensaje rápido                   | `body.noReply: true` devuelve UserMessage (solo contexto). El valor predeterminado devuelve <a href={typesUrl}><code>AssistantMessage</code></a> con respuesta de IA. Admite `body.format` para [salida estructurada](#salida-estructurada) |
 | `session.command({ path, body })`                          | Enviar comando a la sesión              | Devuelve `{ info: `<a href={typesUrl}><code>AssistantMessage</code></a>`, parts: `<a href={typesUrl}><code>Part[]</code></a>`}`                                                                                                                   |
 | `session.shell({ path, body })`                            | Ejecute un comando de shell             | Devuelve <a href={typesUrl}><code>AssistantMessage</code></a>                                                                                                                                                                                     |
 | `session.revert({ path, body })`                           | Revertir un mensaje                     | Devuelve <a href={typesUrl}><code>Session</code></a>                                                                                                                                                                                              |

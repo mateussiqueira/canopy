@@ -148,7 +148,7 @@ const result = await client.session.prompt({
 })
 
 // Access the structured output
-console.log(result.data.info.structured_output)
+console.log(result.data.info.structured)
 // { company: "Anthropic", founded: 2021, products: ["Claude", "Claude API"] }
 ```
 
@@ -175,8 +175,8 @@ console.log(result.data.info.structured_output)
 
 ```typescript
 if (result.data.info.error?.name === "StructuredOutputError") {
-  console.error("Failed to produce structured output:", result.data.info.error.message)
-  console.error("Attempts:", result.data.info.error.retries)
+  console.error("Failed to produce structured output:", result.data.info.error.data.message)
+  console.error("Attempts:", result.data.info.error.data.retries)
 }
 ```
 
@@ -313,7 +313,7 @@ const { providers, default: defaults } = await client.config.providers()
 | `session.summarize({ path, body })`                        | 摘要工作階段                   | 回傳 `boolean`                                                                                                                                                                                 |
 | `session.messages({ path })`                               | 列出工作階段中的訊息           | 回傳 `{ info: `<a href={typesUrl}><code>Message</code></a>`, parts: `<a href={typesUrl}><code>Part[]</code></a>`}[]`                                                                           |
 | `session.message({ path })`                                | 取得訊息詳情                   | 回傳 `{ info: `<a href={typesUrl}><code>Message</code></a>`, parts: `<a href={typesUrl}><code>Part[]</code></a>`}`                                                                             |
-| `session.prompt({ path, body })`                           | 傳送提示訊息                   | `body.noReply: true` 回傳 UserMessage（僅注入上下文）。預設回傳帶有 AI 回應的 <a href={typesUrl}><code>AssistantMessage</code></a>。支援透過 `body.outputFormat` 使用[結構化輸出](#結構化輸出) |
+| `session.prompt({ path, body })`                           | 傳送提示訊息                   | `body.noReply: true` 回傳 UserMessage（僅注入上下文）。預設回傳帶有 AI 回應的 <a href={typesUrl}><code>AssistantMessage</code></a>。支援透過 `body.format` 使用[結構化輸出](#結構化輸出) |
 | `session.command({ path, body })`                          | 向工作階段傳送指令             | 回傳 `{ info: `<a href={typesUrl}><code>AssistantMessage</code></a>`, parts: `<a href={typesUrl}><code>Part[]</code></a>`}`                                                                    |
 | `session.shell({ path, body })`                            | 執行 shell 指令                | 回傳 <a href={typesUrl}><code>AssistantMessage</code></a>                                                                                                                                      |
 | `session.revert({ path, body })`                           | 還原訊息                       | 回傳 <a href={typesUrl}><code>Session</code></a>                                                                                                                                               |

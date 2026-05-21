@@ -148,7 +148,7 @@ const result = await client.session.prompt({
 })
 
 // Access the structured output
-console.log(result.data.info.structured_output)
+console.log(result.data.info.structured)
 // { company: "Anthropic", founded: 2021, products: ["Claude", "Claude API"] }
 ```
 
@@ -175,8 +175,8 @@ Hvis modellen ikke klarer å produsere gyldig strukturert utdata etter alle fors
 
 ```typescript
 if (result.data.info.error?.name === "StructuredOutputError") {
-  console.error("Failed to produce structured output:", result.data.info.error.message)
-  console.error("Attempts:", result.data.info.error.retries)
+  console.error("Failed to produce structured output:", result.data.info.error.data.message)
+  console.error("Attempts:", result.data.info.error.data.retries)
 }
 ```
 
@@ -313,7 +313,7 @@ const { providers, default: defaults } = await client.config.providers()
 | `session.summarize({ path, body })`                        | Oppsummer økten                   | Returnerer `boolean`                                                                                                                                                                                                        |
 | `session.messages({ path })`                               | List meldinger i en økt           | Returnerer `{ info: `<a href={typesUrl}><code>Message</code></a>`, parts: `<a href={typesUrl}><code>Part[]</code></a>`}[]`                                                                                                  |
 | `session.message({ path })`                                | Hent meldingsdetaljer             | Returnerer `{ info: `<a href={typesUrl}><code>Message</code></a>`, parts: `<a href={typesUrl}><code>Part[]</code></a>`}`                                                                                                    |
-| `session.prompt({ path, body })`                           | Send melding                      | `body.noReply: true` returnerer UserMessage (kun kontekst). Standard returnerer <a href={typesUrl}><code>AssistantMessage</code></a> med AI svar. Støtter `body.outputFormat` for [strukturert utdata](#strukturert-utdata) |
+| `session.prompt({ path, body })`                           | Send melding                      | `body.noReply: true` returnerer UserMessage (kun kontekst). Standard returnerer <a href={typesUrl}><code>AssistantMessage</code></a> med AI svar. Støtter `body.format` for [strukturert utdata](#strukturert-utdata) |
 | `session.command({ path, body })`                          | Send kommando til økt             | Returnerer `{ info: `<a href={typesUrl}><code>AssistantMessage</code></a>`, parts: `<a href={typesUrl}><code>Part[]</code></a>`}`                                                                                           |
 | `session.shell({ path, body })`                            | Kjør en shell-kommando            | Returnerer <a href={typesUrl}><code>AssistantMessage</code></a>                                                                                                                                                             |
 | `session.revert({ path, body })`                           | Tilbakestill en melding           | Returnerer <a href={typesUrl}><code>Session</code></a>                                                                                                                                                                      |

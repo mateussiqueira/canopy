@@ -99,7 +99,7 @@ describe("structured-output.StructuredOutputError", () => {
 })
 
 describe("structured-output.UserMessage", () => {
-  test("user message accepts outputFormat", () => {
+  test("user message accepts format", () => {
     const result = decodeUser({
       id: MessageID.ascending(),
       sessionID: SessionID.descending(),
@@ -107,7 +107,7 @@ describe("structured-output.UserMessage", () => {
       time: { created: Date.now() },
       agent: "default",
       model: { providerID: "anthropic", modelID: "claude-3" },
-      outputFormat: {
+      format: {
         type: "json_schema",
         schema: { type: "object" },
       },
@@ -115,7 +115,7 @@ describe("structured-output.UserMessage", () => {
     expect(Exit.isSuccess(result)).toBe(true)
   })
 
-  test("user message works without outputFormat (optional)", () => {
+  test("user message works without format (optional)", () => {
     const result = decodeUser({
       id: MessageID.ascending(),
       sessionID: SessionID.descending(),

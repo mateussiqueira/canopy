@@ -148,7 +148,7 @@ const result = await client.session.prompt({
 })
 
 // Access the structured output
-console.log(result.data.info.structured_output)
+console.log(result.data.info.structured)
 // { company: "Anthropic", founded: 2021, products: ["Claude", "Claude API"] }
 ```
 
@@ -175,8 +175,8 @@ console.log(result.data.info.structured_output)
 
 ```typescript
 if (result.data.info.error?.name === "StructuredOutputError") {
-  console.error("Failed to produce structured output:", result.data.info.error.message)
-  console.error("Attempts:", result.data.info.error.retries)
+  console.error("Failed to produce structured output:", result.data.info.error.data.message)
+  console.error("Attempts:", result.data.info.error.data.retries)
 }
 ```
 
@@ -313,7 +313,7 @@ const { providers, default: defaults } = await client.config.providers()
 | `session.summarize({ path, body })`                        | 总结会话                   | 返回 `boolean`                                                                                                                                                                                 |
 | `session.messages({ path })`                               | 列出会话中的消息           | 返回 `{ info: `<a href={typesUrl}><code>Message</code></a>`, parts: `<a href={typesUrl}><code>Part[]</code></a>`}[]`                                                                           |
 | `session.message({ path })`                                | 获取消息详情               | 返回 `{ info: `<a href={typesUrl}><code>Message</code></a>`, parts: `<a href={typesUrl}><code>Part[]</code></a>`}`                                                                             |
-| `session.prompt({ path, body })`                           | 发送提示词消息             | `body.noReply: true` 返回 UserMessage（仅注入上下文）。默认返回带有 AI 响应的 <a href={typesUrl}><code>AssistantMessage</code></a>。支持通过 `body.outputFormat` 使用[结构化输出](#结构化输出) |
+| `session.prompt({ path, body })`                           | 发送提示词消息             | `body.noReply: true` 返回 UserMessage（仅注入上下文）。默认返回带有 AI 响应的 <a href={typesUrl}><code>AssistantMessage</code></a>。支持通过 `body.format` 使用[结构化输出](#结构化输出) |
 | `session.command({ path, body })`                          | 向会话发送命令             | 返回 `{ info: `<a href={typesUrl}><code>AssistantMessage</code></a>`, parts: `<a href={typesUrl}><code>Part[]</code></a>`}`                                                                    |
 | `session.shell({ path, body })`                            | 执行 shell 命令            | 返回 <a href={typesUrl}><code>AssistantMessage</code></a>                                                                                                                                      |
 | `session.revert({ path, body })`                           | 撤回消息                   | 返回 <a href={typesUrl}><code>Session</code></a>                                                                                                                                               |
