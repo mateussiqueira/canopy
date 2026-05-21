@@ -1,7 +1,8 @@
 import { afterAll, beforeAll, beforeEach, describe, expect, test } from "bun:test"
 import path from "path"
 import { tool, type ModelMessage } from "ai"
-import { Cause, Effect, Exit, Layer, Stream } from "effect"
+import { Cause, Effect, Exit, Layer, ManagedRuntime, Stream } from "effect"
+import { memoMap } from "@opencode-ai/core/effect/memo-map"
 import { HttpClientRequest, HttpClientResponse } from "effect/unstable/http"
 import z from "zod"
 import { makeRuntime } from "../../src/effect/run-service"
@@ -21,7 +22,6 @@ import { tmpdir, withTestInstance } from "../fixture/fixture"
 import type { Agent } from "../../src/agent/agent"
 import { MessageV2 } from "../../src/session/message-v2"
 import { SessionID, MessageID } from "../../src/session/schema"
-import { AppRuntime } from "../../src/effect/app-runtime"
 import { RuntimeFlags } from "@/effect/runtime-flags"
 import { Permission } from "@/permission"
 import { LLMAISDK } from "@/session/llm/ai-sdk"
@@ -50,12 +50,14 @@ const openAIConfig = (model: ModelsDev.Provider["models"][string], baseURL: stri
   }
 }
 
+const providerRuntime = ManagedRuntime.make(Provider.defaultLayer, { memoMap })
+
 async function getModel(providerID: ProviderID, modelID: ModelID, ctx: InstanceContext) {
   const effect = Effect.gen(function* () {
     const provider = yield* Provider.Service
     return yield* provider.getModel(providerID, modelID)
   })
-  return AppRuntime.runPromise(effect.pipe(Effect.provideService(InstanceRef, ctx)))
+  return providerRuntime.runPromise(effect.pipe(Effect.provideService(InstanceRef, ctx)))
 }
 
 const llm = makeRuntime(LLM.Service, LLM.defaultLayer)

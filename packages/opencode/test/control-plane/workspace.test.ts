@@ -5,7 +5,8 @@ import Http from "node:http"
 import path from "node:path"
 import { setTimeout as delay } from "node:timers/promises"
 import { NodeHttpServer } from "@effect/platform-node"
-import { Effect, Layer, Schema } from "effect"
+import { Effect, Layer, ManagedRuntime, Schema } from "effect"
+import { memoMap } from "@opencode-ai/core/effect/memo-map"
 import { FetchHttpClient, HttpServer, HttpServerRequest, HttpServerResponse } from "effect/unstable/http"
 import { eq } from "drizzle-orm"
 import { AppFileSystem } from "@opencode-ai/core/filesystem"
@@ -29,8 +30,8 @@ import { WorkspaceID } from "../../src/control-plane/schema"
 import { WorkspaceTable } from "../../src/control-plane/workspace.sql"
 import type { Target, WorkspaceAdapter, WorkspaceInfo } from "../../src/control-plane/types"
 import * as Workspace from "../../src/control-plane/workspace"
-import { AppRuntime } from "@/effect/app-runtime"
 import { InstanceStore } from "@/project/instance-store"
+import { InstanceLayer } from "@/project/instance-layer"
 import { InstanceBootstrap } from "@/project/bootstrap"
 import { Auth } from "@/auth"
 import { SessionPrompt } from "@/session/prompt"
@@ -121,9 +122,14 @@ afterEach(async () => {
   await resetDatabase()
 })
 
+const runtime = ManagedRuntime.make(
+  Layer.mergeAll(InstanceLayer.layer, Workspace.defaultLayer, SessionNs.defaultLayer),
+  { memoMap },
+)
+
 async function withInstance<T>(fn: (ctx: InstanceContext) => T | Promise<T>) {
   await using tmp = await tmpdir({ git: true })
-  const ctx = await AppRuntime.runPromise(InstanceStore.Service.use((store) => store.load({ directory: tmp.path })))
+  const ctx = await runtime.runPromise(InstanceStore.Service.use((store) => store.load({ directory: tmp.path })))
   return await context.provide(ctx, () => fn(ctx))
 }
 
@@ -149,7 +155,7 @@ function currentInstance() {
 
 const runWorkspace = <A, E>(effect: Effect.Effect<A, E, Workspace.Service>) => {
   const ctx = currentInstance()
-  return AppRuntime.runPromise(ctx ? effect.pipe(Effect.provideService(InstanceRef, ctx)) : effect)
+  return runtime.runPromise(ctx ? effect.pipe(Effect.provideService(InstanceRef, ctx)) : effect)
 }
 const createWorkspace = (input: Workspace.CreateInput) =>
   runWorkspace(Workspace.Service.use((workspace) => workspace.create(input)))
@@ -932,12 +938,12 @@ describe("workspace CRUD", () => {
       const previous = workspaceInfo(projectID, previousType)
       insertWorkspace(previous)
       registerAdapter(projectID, previousType, localAdapter(workspaceTmp.path, { createDir: false }).adapter)
-      const session = await AppRuntime.runPromise(
+      const session = await runtime.runPromise(
         SessionNs.Service.use((svc) => svc.create({})).pipe(Effect.provideService(InstanceRef, instance)),
       )
       attachSessionToWorkspace(session.id, previous.id)
 
-      const workspaceCtx = await AppRuntime.runPromise(
+      const workspaceCtx = await runtime.runPromise(
         InstanceStore.Service.use((store) => store.load({ directory: workspaceTmp.path })),
       )
       const workspaceProjectID = await context.provide(workspaceCtx, async () => {

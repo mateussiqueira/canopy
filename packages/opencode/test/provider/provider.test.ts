@@ -12,8 +12,8 @@ import { Provider } from "@/provider/provider"
 import { ProviderID, ModelID } from "../../src/provider/schema"
 import { Filesystem } from "@/util/filesystem"
 import { Env } from "../../src/env"
-import { Effect, Layer } from "effect"
-import { AppRuntime } from "../../src/effect/app-runtime"
+import { Effect, Layer, ManagedRuntime } from "effect"
+import { memoMap } from "@opencode-ai/core/effect/memo-map"
 import { InstanceRef } from "../../src/effect/instance-ref"
 import { makeRuntime } from "../../src/effect/run-service"
 import { testEffect } from "../lib/effect"
@@ -66,8 +66,10 @@ const providerLayer = (flags: Partial<RuntimeFlags.Info> = {}) =>
     Layer.provide(RuntimeFlags.layer(flags)),
   )
 
+const providerRuntime = ManagedRuntime.make(Layer.mergeAll(Provider.defaultLayer, Plugin.defaultLayer), { memoMap })
+
 async function run<A, E>(ctx: InstanceContext, fn: (provider: Provider.Interface) => Effect.Effect<A, E, never>) {
-  return AppRuntime.runPromise(
+  return providerRuntime.runPromise(
     Effect.gen(function* () {
       const provider = yield* Provider.Service
       return yield* fn(provider)
@@ -2509,7 +2511,7 @@ test("plugin config providers persist after instance dispose", async () => {
   const first = await withTestInstance({
     directory: tmp.path,
     fn: async (ctx) =>
-      AppRuntime.runPromise(
+      providerRuntime.runPromise(
         Effect.gen(function* () {
           const plugin = yield* Plugin.Service
           const provider = yield* Provider.Service
