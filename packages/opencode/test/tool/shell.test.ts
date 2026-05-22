@@ -1200,6 +1200,29 @@ describe("tool.shell truncation", () => {
     ),
   )
 
+  it.live("does not truncate output when tool_output is disabled", () =>
+    Effect.gen(function* () {
+      const tmp = yield* tmpdirScoped({ config: { tool_output: false } })
+      yield* runIn(
+        tmp,
+        Effect.gen(function* () {
+          const bash = yield* initShell()
+          expect(bash.description).not.toContain("If the output exceeds")
+          const result = yield* bash.execute(
+            {
+              command: fill("bytes", Truncate.MAX_BYTES + 10000),
+              description: "Generate bytes with truncation disabled",
+            },
+            ctx,
+          )
+          expect(result.metadata.truncated).toBe(false)
+          expect(result.output).not.toContain("...output truncated...")
+          expect(Buffer.byteLength(result.output, "utf-8")).toBeGreaterThan(Truncate.MAX_BYTES)
+        }),
+      )
+    }),
+  )
+
   it.live("full output is saved to file when truncated", () =>
     runIn(
       projectRoot,

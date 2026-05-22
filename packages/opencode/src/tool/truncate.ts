@@ -19,6 +19,7 @@ export const DIR = TRUNCATION_DIR
 export const GLOB = path.join(TRUNCATION_DIR, "*")
 
 export type Result = { content: string; truncated: false } | { content: string; truncated: true; outputPath: string }
+export type Limits = { enabled: boolean; maxLines: number; maxBytes: number }
 
 export interface Options {
   maxLines?: number
@@ -40,9 +41,9 @@ export interface Interface {
    */
   readonly output: (text: string, options?: Options, agent?: Agent.Info) => Effect.Effect<Result>
   /**
-   * Resolved truncation limits: values from `tool_output` in opencode config, or MAX_LINES / MAX_BYTES if unset.
+   * Resolved truncation state and limits from `tool_output` in opencode config.
    */
-  readonly limits: () => Effect.Effect<{ maxLines: number; maxBytes: number }>
+  readonly limits: () => Effect.Effect<Limits>
 }
 
 export class Service extends Context.Service<Service, Interface>()("@opencode/Truncate") {}
@@ -75,9 +76,11 @@ export const layer = Layer.effect(
 
     const limits = Effect.fn("Truncate.limits")(function* () {
       const configSvc = yield* Effect.serviceOption(Config.Service)
-      if (Option.isNone(configSvc)) return { maxLines: MAX_LINES, maxBytes: MAX_BYTES }
+      if (Option.isNone(configSvc)) return { enabled: true, maxLines: MAX_LINES, maxBytes: MAX_BYTES }
       const cfg = yield* configSvc.value.get().pipe(Effect.catch(() => Effect.succeed(undefined)))
+      if (cfg?.tool_output === false) return { enabled: false, maxLines: MAX_LINES, maxBytes: MAX_BYTES }
       return {
+        enabled: true,
         maxLines: cfg?.tool_output?.max_lines ?? MAX_LINES,
         maxBytes: cfg?.tool_output?.max_bytes ?? MAX_BYTES,
       }
@@ -85,6 +88,7 @@ export const layer = Layer.effect(
 
     const output = Effect.fn("Truncate.output")(function* (text: string, options: Options = {}, agent?: Agent.Info) {
       const resolved = yield* limits()
+      if (!resolved.enabled) return { content: text, truncated: false } as const
       const maxLines = options.maxLines ?? resolved.maxLines
       const maxBytes = options.maxBytes ?? resolved.maxBytes
       const direction = options.direction ?? "head"

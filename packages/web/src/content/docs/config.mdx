@@ -372,6 +372,15 @@ You can control when tool output is truncated using the `tool_output` option. Wh
 
 These thresholds apply to output handled by OpenCode's shared truncation layer, including MCP and plugin tool output. Individual tools that page or cap their own results can have separate limits.
 
+To disable shared tool output truncation, set `tool_output` to `false`:
+
+```json title="opencode.json"
+{
+  "$schema": "https://opencode.ai/config.json",
+  "tool_output": false
+}
+```
+
 ---
 
 ### Models

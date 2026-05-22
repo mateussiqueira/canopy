@@ -253,17 +253,20 @@ export const Info = Schema.Struct({
     }),
   ),
   tool_output: Schema.optional(
-    Schema.Struct({
-      max_lines: Schema.optional(PositiveInt).annotate({
-        description: "Maximum lines of tool output before it is truncated and saved to disk (default: 2000)",
+    Schema.Union([
+      Schema.Literal(false),
+      Schema.Struct({
+        max_lines: Schema.optional(PositiveInt).annotate({
+          description: "Maximum lines of tool output before it is truncated and saved to disk (default: 2000)",
+        }),
+        max_bytes: Schema.optional(PositiveInt).annotate({
+          description: "Maximum bytes of tool output before it is truncated and saved to disk (default: 51200)",
+        }),
       }),
-      max_bytes: Schema.optional(PositiveInt).annotate({
-        description: "Maximum bytes of tool output before it is truncated and saved to disk (default: 51200)",
-      }),
-    }),
+    ]),
   ).annotate({
     description:
-      "Thresholds for truncating tool output. When output exceeds either limit, the full text is written to the truncation directory and a preview is returned.",
+      "Configure tool output truncation, or set to false to disable it. When output exceeds either limit, the full text is written to the truncation directory and a preview is returned.",
   }),
   compaction: Schema.optional(
     Schema.Struct({

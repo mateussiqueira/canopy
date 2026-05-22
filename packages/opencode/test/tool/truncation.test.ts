@@ -110,6 +110,7 @@ describe("Truncate", () => {
       Effect.gen(function* () {
         const svc = yield* Truncate.Service
         const resolved = yield* svc.limits()
+        expect(resolved.enabled).toBe(true)
         expect(resolved.maxLines).toBe(Truncate.MAX_LINES)
         expect(resolved.maxBytes).toBe(Truncate.MAX_BYTES)
       }),
@@ -120,6 +121,7 @@ describe("Truncate", () => {
       limitsIt.live("limits() reflects config overrides", () =>
         Effect.gen(function* () {
           const resolved = yield* (yield* Truncate.Service).limits()
+          expect(resolved.enabled).toBe(true)
           expect(resolved.maxLines).toBe(123)
           expect(resolved.maxBytes).toBe(456)
         }),
@@ -157,6 +159,18 @@ describe("Truncate", () => {
             maxBytes: 1024 * 1024,
           })
           expect(result.truncated).toBe(false)
+        }),
+      )
+
+      const disabledIt = configuredIt({ tool_output: false })
+      disabledIt.live("does not truncate output when disabled", () =>
+        Effect.gen(function* () {
+          const content = "a".repeat(Truncate.MAX_BYTES + 1)
+          const svc = yield* Truncate.Service
+          const resolved = yield* svc.limits()
+          const result = yield* svc.output(content)
+          expect(resolved.enabled).toBe(false)
+          expect(result).toEqual({ content, truncated: false })
         }),
       )
     })

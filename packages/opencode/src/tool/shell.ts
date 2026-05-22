@@ -433,7 +433,7 @@ export const ShellTool = Tool.define(
       ctx: Tool.Context,
     ) {
       const limits = yield* trunc.limits()
-      const keep = limits.maxBytes * 2
+      const keep = limits.enabled ? limits.maxBytes * 2 : Number.POSITIVE_INFINITY
       let full = ""
       let last = ""
       const list: Chunk[] = []
@@ -499,7 +499,7 @@ export const ShellTool = Tool.define(
                 sink?.write(chunk)
               } else {
                 full += chunk
-                if (Buffer.byteLength(full, "utf-8") > limits.maxBytes) {
+                if (limits.enabled && Buffer.byteLength(full, "utf-8") > limits.maxBytes) {
                   return trunc.write(full).pipe(
                     Effect.andThen((next) =>
                       Effect.sync(() => {
@@ -566,7 +566,7 @@ export const ShellTool = Tool.define(
       }
       if (aborted) meta.push("User aborted the command")
       const raw = list.map((item) => item.text).join("")
-      const end = tail(raw, limits.maxLines, limits.maxBytes)
+      const end = limits.enabled ? tail(raw, limits.maxLines, limits.maxBytes) : { text: raw, cut: false }
       if (end.cut) cut = true
       if (!file && end.cut) {
         file = yield* trunc.write(raw)
