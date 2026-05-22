@@ -5,12 +5,13 @@ import { fileURLToPath } from "url"
 
 const theme = fileURLToPath(new URL("./public/oc-theme-preload.js", import.meta.url))
 
-const channel = (() => {
+const channel = (command) => {
   const raw = process.env.OPENCODE_CHANNEL
   if (raw === "dev" || raw === "beta" || raw === "prod") return raw
   if (process.env.OPENCODE_CHANNEL === "latest") return "prod"
-  return "dev"
-})()
+  if (command === "serve") return "dev"
+  return "prod"
+}
 
 /**
  * @type {import("vite").PluginOption}
@@ -18,7 +19,7 @@ const channel = (() => {
 export default [
   {
     name: "opencode-desktop:config",
-    config() {
+    config(_, env) {
       return {
         resolve: {
           alias: {
@@ -26,7 +27,7 @@ export default [
           },
         },
         define: {
-          "import.meta.env.VITE_OPENCODE_CHANNEL": JSON.stringify(channel),
+          "import.meta.env.VITE_OPENCODE_CHANNEL": JSON.stringify(channel(env.command)),
         },
         worker: {
           format: "es",

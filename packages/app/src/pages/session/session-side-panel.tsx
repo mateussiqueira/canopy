@@ -28,6 +28,9 @@ import { createOpenSessionFileTab, createSessionTabs, getTabReorderIndex, type S
 import { setSessionHandoff } from "@/pages/session/handoff"
 import { useSessionLayout } from "@/pages/session/session-layout"
 
+const USE_NEW_SESSION_DESIGN =
+  import.meta.env.VITE_OPENCODE_CHANNEL === "dev" || import.meta.env.VITE_OPENCODE_CHANNEL === "beta"
+
 type RenderDiff = (SnapshotFileDiff & { file: string }) | VcsFileDiff
 
 function renderDiff(value: SnapshotFileDiff | VcsFileDiff): value is RenderDiff {
@@ -207,7 +210,7 @@ export function SessionSidePanel(props: {
   })
 
   return (
-    <Show when={isDesktop() && !(import.meta.env.VITE_OPENCODE_CHANNEL !== "prod" && !params.id)}>
+    <Show when={isDesktop() && !(USE_NEW_SESSION_DESIGN && !params.id)}>
       <aside
         id="review-panel"
         aria-label={language.t("session.panel.reviewAndFiles")}

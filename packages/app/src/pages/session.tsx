@@ -74,7 +74,8 @@ const emptyFollowups: FollowupItem[] = []
 
 type ChangeMode = "git" | "branch" | "turn"
 type VcsMode = "git" | "branch"
-const USE_NEW_SESSION_DESIGN = import.meta.env.VITE_OPENCODE_CHANNEL !== "prod"
+const USE_NEW_SESSION_DESIGN =
+  import.meta.env.VITE_OPENCODE_CHANNEL === "dev" || import.meta.env.VITE_OPENCODE_CHANNEL === "beta"
 
 type SessionHistoryWindowInput = {
   sessionID: () => string | undefined
@@ -263,7 +264,7 @@ export default function Page() {
 
   const isDesktop = createMediaQuery("(min-width: 768px)")
   const size = createSizing()
-  const isV2NewSessionPage = () => import.meta.env.VITE_OPENCODE_CHANNEL === "prod" || !params.id
+  const isV2NewSessionPage = () => !USE_NEW_SESSION_DESIGN || !params.id
   const desktopReviewOpen = createMemo(() => isDesktop() && view().reviewPanel.opened() && !isV2NewSessionPage())
   const desktopFileTreeOpen = createMemo(() => isDesktop() && layout.fileTree.opened() && !isV2NewSessionPage())
   const desktopSidePanelOpen = createMemo(() => desktopReviewOpen() || desktopFileTreeOpen())

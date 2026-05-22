@@ -89,7 +89,8 @@ import {
 import { ProjectDragOverlay, SortableProject, type ProjectSidebarContext } from "./layout/sidebar-project"
 import { SidebarContent } from "./layout/sidebar-shell"
 
-const USE_NEW_DESIGN = import.meta.env.VITE_OPENCODE_CHANNEL !== "prod"
+const USE_NEW_DESIGN =
+  import.meta.env.VITE_OPENCODE_CHANNEL === "dev" || import.meta.env.VITE_OPENCODE_CHANNEL === "beta"
 
 export default function Layout(props: ParentProps) {
   const [store, setStore, , ready] = persisted(
