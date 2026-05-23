@@ -1250,14 +1250,18 @@ export const layer = Layer.effect(
 
           let msgs = yield* MessageV2.filterCompactedEffect(sessionID)
 
-          const { user: lastUser, assistant: lastAssistant, finished: lastFinished, tasks } = MessageV2.latest(msgs)
-          const before = (a: MessageV2.Info, b: MessageV2.Info) => MessageV2.compare(a, b) < 0
+          const latest = MessageV2.latest(msgs)
+          const { user: lastUser, assistant: lastAssistant, finished: lastFinished, tasks } = latest
 
           if (!lastUser) throw new Error("No user message found in stream. This should never happen.")
 
           const lastAssistantMsg = msgs.findLast(
             (msg) => msg.info.role === "assistant" && msg.info.id === lastAssistant?.id,
           )
+          const userBeforeAssistant =
+            latest.userMessage &&
+            latest.assistantMessage &&
+            MessageV2.compare(latest.userMessage, latest.assistantMessage) < 0
           // Some providers return "stop" even when the assistant message contains tool calls.
           // Keep the loop running so tool results can be sent back to the model.
           // Skip provider-executed tool parts — those were fully handled within the
@@ -1269,7 +1273,7 @@ export const layer = Layer.effect(
             lastAssistant?.finish &&
             !["tool-calls"].includes(lastAssistant.finish) &&
             !hasToolCalls &&
-            before(lastUser, lastAssistant)
+            userBeforeAssistant
           ) {
             yield* slog.info("exiting loop")
             break
@@ -1399,7 +1403,8 @@ export const layer = Layer.effect(
 
             if (step > 1 && lastFinished) {
               for (const m of msgs) {
-                if (m.info.role !== "user" || !before(lastFinished, m.info)) continue
+                const finishedBeforeMessage = latest.finishedMessage && MessageV2.compare(latest.finishedMessage, m) < 0
+                if (m.info.role !== "user" || !finishedBeforeMessage) continue
                 for (const p of m.parts) {
                   if (p.type !== "text" || p.ignored || p.synthetic) continue
                   if (!p.text.trim()) continue

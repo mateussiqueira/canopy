@@ -579,9 +579,10 @@ export const cursor = {
   },
 }
 
-const messageOrder = new WeakMap<Info, number>()
+const chronologicalOrder = Symbol("chronologicalOrder")
 const messageRowID = sql<number>`rowid`
 type MessageRow = typeof MessageTable.$inferSelect & { sequence?: number }
+type Chronological = WithParts & { [chronologicalOrder]?: number }
 
 const info = (row: MessageRow) =>
   ({
@@ -1045,7 +1046,7 @@ export function filterCompacted(msgs: Iterable<WithParts>) {
       completed.add(msg.info.parentID)
   }
   result.reverse()
-  result.forEach((msg, index) => messageOrder.set(msg.info, index))
+  result.forEach((msg, index) => ((msg as Chronological)[chronologicalOrder] = index))
   const compactionIndex = result.findLastIndex(
     (msg) =>
       msg.info.role === "user" &&
@@ -1079,10 +1080,10 @@ export const filterCompactedEffect = Effect.fnUntraced(function* (sessionID: Ses
   return filterCompacted(stream(sessionID))
 })
 
-export function compare(a: Info, b: Info, indexA = -1, indexB = -1) {
-  if (a.time.created !== b.time.created) return a.time.created - b.time.created
-  const sequenceA = messageOrder.get(a)
-  const sequenceB = messageOrder.get(b)
+export function compare(a: WithParts, b: WithParts, indexA = -1, indexB = -1) {
+  if (a.info.time.created !== b.info.time.created) return a.info.time.created - b.info.time.created
+  const sequenceA = (a as Chronological)[chronologicalOrder]
+  const sequenceB = (b as Chronological)[chronologicalOrder]
   if (sequenceA !== undefined && sequenceB !== undefined && sequenceA !== sequenceB) return sequenceA - sequenceB
   return indexA - indexB
 }
@@ -1095,33 +1096,41 @@ export function compare(a: Info, b: Info, indexA = -1, indexB = -1) {
 // tasks are compaction/subtask parts attached to user messages newer than the
 // latest finished assistant — i.e. unprocessed work.
 export function latest(msgs: WithParts[]) {
-  let user: User | undefined
-  let assistant: Assistant | undefined
-  let finished: Assistant | undefined
+  let user: WithParts | undefined
+  let assistant: WithParts | undefined
+  let finished: WithParts | undefined
   let userIndex = -1
   let assistantIndex = -1
   let finishedIndex = -1
   for (const [index, msg] of msgs.entries()) {
     const info = msg.info
-    if (info.role === "user" && (!user || compare(info, user, index, userIndex) > 0)) {
-      user = info
+    if (info.role === "user" && (!user || compare(msg, user, index, userIndex) > 0)) {
+      user = msg
       userIndex = index
     }
-    if (info.role === "assistant" && (!assistant || compare(info, assistant, index, assistantIndex) > 0)) {
-      assistant = info
+    if (info.role === "assistant" && (!assistant || compare(msg, assistant, index, assistantIndex) > 0)) {
+      assistant = msg
       assistantIndex = index
     }
-    if (info.role === "assistant" && info.finish && (!finished || compare(info, finished, index, finishedIndex) > 0)) {
-      finished = info
+    if (info.role === "assistant" && info.finish && (!finished || compare(msg, finished, index, finishedIndex) > 0)) {
+      finished = msg
       finishedIndex = index
     }
   }
   const tasks = msgs.flatMap((m, index) =>
-    finished && compare(m.info, finished, index, finishedIndex) <= 0
+    finished && compare(m, finished, index, finishedIndex) <= 0
       ? []
       : m.parts.filter((p): p is CompactionPart | SubtaskPart => p.type === "compaction" || p.type === "subtask"),
   )
-  return { user, assistant, finished, tasks }
+  return {
+    user: user?.info.role === "user" ? user.info : undefined,
+    assistant: assistant?.info.role === "assistant" ? assistant.info : undefined,
+    finished: finished?.info.role === "assistant" ? finished.info : undefined,
+    userMessage: user,
+    assistantMessage: assistant,
+    finishedMessage: finished,
+    tasks,
+  }
 }
 
 export function fromError(
