@@ -79,6 +79,30 @@ export type PluginModule = {
   tui?: never
 }
 
+export type ExperimentalFetchContext = {
+  sessionID: string
+  parentSessionID?: string
+  agent: {
+    name: string
+    mode: string
+    [key: string]: unknown
+  }
+  model: ModelV2
+  provider: ProviderV2
+  message: UserMessage
+  messages: unknown[]
+  system: string[]
+  headers: Record<string, string>
+  tools: string[]
+  small?: boolean
+}
+
+export type ExperimentalFetch = (
+  input: RequestInfo | URL,
+  init?: RequestInit,
+  context?: ExperimentalFetchContext,
+) => Promise<Response>
+
 type Rule = {
   key: string
   op: "eq" | "neq"

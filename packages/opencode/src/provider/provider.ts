@@ -2,7 +2,7 @@ import os from "os"
 import fuzzysort from "fuzzysort"
 import { Config } from "@/config/config"
 import { mapValues, mergeDeep, omit, pickBy, sortBy } from "remeda"
-import { NoSuchModelError, type Provider as SDK } from "ai"
+import { NoSuchModelError, type ModelMessage, type Provider as SDK } from "ai"
 import * as Log from "@opencode-ai/core/util/log"
 import { Npm } from "@opencode-ai/core/npm"
 import { Hash } from "@opencode-ai/core/util/hash"
@@ -28,6 +28,8 @@ import * as ProviderTransform from "./transform"
 import { ModelID, ProviderID } from "./schema"
 import { ModelStatus } from "./model-status"
 import { RuntimeFlags } from "@/effect/runtime-flags"
+import type { Agent } from "@/agent/agent"
+import type { MessageV2 } from "@/session/message-v2"
 
 const log = Log.create({ service: "provider" })
 
@@ -945,6 +947,18 @@ export const Info = Schema.Struct({
 }).annotate({ identifier: "Provider" })
 export type Info = Types.DeepMutable<Schema.Schema.Type<typeof Info>>
 
+export type LanguageModelRequest = {
+  sessionID: string
+  parentSessionID?: string
+  agent: Agent.Info
+  message: MessageV2.User
+  messages: ModelMessage[]
+  system: string[]
+  headers: Record<string, string>
+  tools: string[]
+  small?: boolean
+}
+
 const DefaultModelIDs = Schema.Record(Schema.String, Schema.String)
 
 export const ListResult = Schema.Struct({
@@ -1015,7 +1029,7 @@ export interface Interface {
   readonly list: () => Effect.Effect<Record<ProviderID, Info>>
   readonly getProvider: (providerID: ProviderID) => Effect.Effect<Info>
   readonly getModel: (providerID: ProviderID, modelID: ModelID) => Effect.Effect<Model, ModelNotFoundError>
-  readonly getLanguage: (model: Model) => Effect.Effect<LanguageModelV3, ModelNotFoundError>
+  readonly getLanguage: (model: Model, request?: LanguageModelRequest) => Effect.Effect<LanguageModelV3, ModelNotFoundError>
   readonly closest: (
     providerID: ProviderID,
     query: string[],
@@ -1532,7 +1546,12 @@ export const layer = Layer.effect(
 
     const list = Effect.fn("Provider.list")(() => InstanceState.use(state, (s) => s.providers))
 
-    async function resolveSDK(model: Model, s: State, envs: Record<string, string | undefined>) {
+    async function resolveSDK(
+      model: Model,
+      s: State,
+      envs: Record<string, string | undefined>,
+      request?: LanguageModelRequest,
+    ) {
       try {
         using _ = log.time("getSDK", {
           providerID: model.providerID,
@@ -1597,7 +1616,7 @@ export const layer = Layer.effect(
           }),
         )
         const existing = s.sdk.get(key)
-        if (existing) return existing
+        if (existing && !request) return existing
 
         const customFetch = options["fetch"]
         const chunkTimeout = options["chunkTimeout"]
@@ -1635,11 +1654,21 @@ export const layer = Layer.effect(
             }
           }
 
-          const res = await fetchFn(input, {
-            ...opts,
-            // @ts-ignore see here: https://github.com/oven-sh/bun/issues/16682
-            timeout: false,
-          })
+          const res = await fetchFn(
+            input,
+            {
+              ...opts,
+              // @ts-ignore see here: https://github.com/oven-sh/bun/issues/16682
+              timeout: false,
+            },
+            request
+              ? {
+                  ...request,
+                  model,
+                  provider,
+                }
+              : undefined,
+          )
 
           if (!chunkAbortCtl) return res
           return wrapSSE(res, chunkTimeout, chunkAbortCtl)
@@ -1656,7 +1685,7 @@ export const layer = Layer.effect(
             name: model.providerID,
             ...options,
           })
-          s.sdk.set(key, loaded)
+          if (!request) s.sdk.set(key, loaded)
           return loaded as SDK
         }
 
@@ -1680,7 +1709,7 @@ export const layer = Layer.effect(
           name: model.providerID,
           ...options,
         })
-        s.sdk.set(key, loaded)
+        if (!request) s.sdk.set(key, loaded)
         return loaded as SDK
       } catch (e) {
         throw new InitError({ providerID: model.providerID, cause: e })
@@ -1715,23 +1744,29 @@ export const layer = Layer.effect(
       return info
     })
 
-    const getLanguage = Effect.fn("Provider.getLanguage")(function* (model: Model) {
+    const getLanguage = Effect.fn("Provider.getLanguage")(function* (model: Model, request?: LanguageModelRequest) {
       const s = yield* InstanceState.get(state)
       const envs = yield* env.all()
       const key = `${model.providerID}/${model.id}`
-      if (s.models.has(key)) return s.models.get(key)!
-
       const provider = s.providers[model.providerID]
+      const requestFetch =
+        request &&
+        typeof provider.options.fetch === "function" &&
+        !(model.providerID === "google-vertex" && !model.api.npm.includes("@ai-sdk/openai-compatible"))
+          ? request
+          : undefined
+      if (!requestFetch && s.models.has(key)) return s.models.get(key)!
+
       return yield* EffectPromise.refineRejection(
         async () => {
-          const sdk = await resolveSDK(model, s, envs)
+          const sdk = await resolveSDK(model, s, envs, requestFetch)
           const language = s.modelLoaders[model.providerID]
             ? await s.modelLoaders[model.providerID](sdk, model.api.id, {
                 ...provider.options,
                 ...model.options,
               })
             : sdk.languageModel(model.api.id)
-          s.models.set(key, language)
+          if (!requestFetch) s.models.set(key, language)
           return language
         },
         (cause) =>
@@ -1845,7 +1880,15 @@ export const layer = Layer.effect(
       }
     })
 
-    return Service.of({ list, getProvider, getModel, getLanguage, closest, getSmallModel, defaultModel })
+    return Service.of({
+      list,
+      getProvider,
+      getModel,
+      getLanguage,
+      closest,
+      getSmallModel,
+      defaultModel,
+    })
   }),
 )
 

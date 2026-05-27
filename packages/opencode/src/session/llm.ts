@@ -111,12 +111,23 @@ const live: Layer.Layer<
         flags,
         isWorkflow,
       })
+      const requestLanguage = yield* provider.getLanguage(input.model, {
+        sessionID: input.sessionID,
+        parentSessionID: input.parentSessionID,
+        agent: input.agent,
+        message: input.user,
+        messages: prepared.messages,
+        system: prepared.system,
+        headers: prepared.headers,
+        tools: Object.keys(prepared.tools),
+        small: input.small,
+      })
 
       // Wire up toolExecutor for DWS workflow models so that tool calls
       // from the workflow service are executed via opencode's tool system
       // and results sent back over the WebSocket.
-      if (language instanceof GitLabWorkflowLanguageModel) {
-        const workflowModel = language as GitLabWorkflowLanguageModel & {
+      if (requestLanguage instanceof GitLabWorkflowLanguageModel) {
+        const workflowModel = requestLanguage as GitLabWorkflowLanguageModel & {
           sessionID?: string
           sessionPreapprovedTools?: string[]
           approvalHandler?: (approvalTools: { name: string; args: string }[]) => Promise<{ approved: boolean }>
@@ -309,7 +320,7 @@ const live: Layer.Layer<
           maxRetries: input.retries ?? 0,
           messages: prepared.messages,
           model: wrapLanguageModel({
-            model: language,
+            model: requestLanguage,
             middleware: [
               {
                 specificationVersion: "v3" as const,
