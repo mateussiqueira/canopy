@@ -11,9 +11,11 @@ import { Policy } from "./policy"
 import { AbsolutePath } from "./schema"
 import { ConfigAgent } from "./config/agent"
 import { ConfigAttachments } from "./config/attachments"
+import { ConfigCompaction } from "./config/compaction"
 import { ConfigExperimental } from "./config/experimental"
 import { ConfigFormatter } from "./config/formatter"
 import { ConfigLSP } from "./config/lsp"
+import { ConfigMCP } from "./config/mcp"
 import { ConfigPlugin } from "./config/plugin"
 import { ConfigProvider } from "./config/provider"
 import { ConfigReference } from "./config/reference"
@@ -67,6 +69,12 @@ export class Info extends Schema.Class<Info>("Config.Info")({
   }),
   tool_output: ConfigToolOutput.Info.pipe(Schema.optional).annotate({
     description: "Tool output truncation thresholds",
+  }),
+  mcp: ConfigMCP.Info.pipe(Schema.optional).annotate({
+    description: "MCP server configuration",
+  }),
+  compaction: ConfigCompaction.Info.pipe(Schema.optional).annotate({
+    description: "Conversation compaction behavior",
   }),
   skills: Schema.String.pipe(Schema.Array, Schema.optional).annotate({
     description: "Additional paths or URLs to discover skills from",

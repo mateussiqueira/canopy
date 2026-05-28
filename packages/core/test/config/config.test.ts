@@ -200,6 +200,31 @@ describe("Config", () => {
                 lsp: { typescript: { disabled: true }, custom: { command: ["custom-lsp"], extensions: [".foo"] } },
                 attachments: { image: { auto_resize: false, max_width: 1200, max_height: 900, max_base64_bytes: 1048576 } },
                 tool_output: { max_lines: 1000, max_bytes: 32768 },
+                mcp: {
+                  timeout: 5000,
+                  servers: {
+                    local: {
+                      type: "local",
+                      command: ["node", "./mcp/server.js"],
+                      environment: { API_KEY: "secret" },
+                      disabled: false,
+                      timeout: 10000,
+                    },
+                    remote: {
+                      type: "remote",
+                      url: "https://mcp.example.com/mcp",
+                      headers: { Authorization: "Bearer token" },
+                      oauth: { client_id: "client", scope: "read write", callback_port: 19876 },
+                      disabled: true,
+                    },
+                  },
+                },
+                compaction: {
+                  auto: true,
+                  prune: false,
+                  keep: { turns: 3, tokens: 2000 },
+                  buffer: 10000,
+                },
                 skills: ["./skills", "~/shared-skills", "https://example.com/.well-known/skills/"],
                 instructions: ["CONTRIBUTING.md", ".cursor/rules/*.md", "https://example.com/shared-rules.md"],
                 references: {
@@ -261,6 +286,31 @@ describe("Config", () => {
               image: { auto_resize: false, max_width: 1200, max_height: 900, max_base64_bytes: 1048576 },
             })
             expect(documents[0]?.info.tool_output).toEqual({ max_lines: 1000, max_bytes: 32768 })
+            expect(documents[0]?.info.mcp).toEqual({
+              timeout: 5000,
+              servers: {
+                local: {
+                  type: "local",
+                  command: ["node", "./mcp/server.js"],
+                  environment: { API_KEY: "secret" },
+                  disabled: false,
+                  timeout: 10000,
+                },
+                remote: {
+                  type: "remote",
+                  url: "https://mcp.example.com/mcp",
+                  headers: { Authorization: "Bearer token" },
+                  oauth: { client_id: "client", scope: "read write", callback_port: 19876 },
+                  disabled: true,
+                },
+              },
+            })
+            expect(documents[0]?.info.compaction).toEqual({
+              auto: true,
+              prune: false,
+              keep: { turns: 3, tokens: 2000 },
+              buffer: 10000,
+            })
             expect(documents[0]?.info.skills).toEqual([
               "./skills",
               "~/shared-skills",

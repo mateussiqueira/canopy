@@ -276,7 +276,39 @@ External protocol and server integration configuration.
 
 | Field | Current Purpose                       | Status  | Notes |
 | ----- | ------------------------------------- | ------- | ----- |
-| `mcp` | MCP server definitions and enablement | pending |       |
+| `mcp` | MCP server definitions and enablement | redesign | Keep opencode's explicit local/remote server entry format, nested under `mcp.servers`; use `disabled` for inactive entries and move timeout here. |
+
+Keep the opencode MCP server entry format instead of adopting the common `mcpServers` copy/paste shape. Local servers remain explicit `type: "local"` entries with command arrays and `environment`; remote servers remain explicit `type: "remote"` entries with `url`, `headers`, and optional `oauth`. Nest the server map under `mcp.servers` so protocol-wide settings such as default timeout can live under the same subsystem.
+
+```jsonc
+{
+  "mcp": {
+    "timeout": 5000,
+    "servers": {
+      "github": {
+        "type": "local",
+        "command": ["npx", "-y", "@github/github-mcp-server"],
+        "environment": { "GITHUB_TOKEN": "{env:GITHUB_TOKEN}" },
+        "disabled": false,
+        "timeout": 10000,
+      },
+      "docs": {
+        "type": "remote",
+        "url": "https://docs.example.com/mcp",
+        "headers": { "Authorization": "Bearer {env:DOCS_TOKEN}" },
+        "oauth": {
+          "client_id": "{env:MCP_CLIENT_ID}",
+          "client_secret": "{env:MCP_CLIENT_SECRET}",
+          "scope": "read write",
+          "callback_port": 19876,
+          "redirect_uri": "http://127.0.0.1:19876/mcp/oauth/callback",
+        },
+        "disabled": false,
+      },
+    },
+  },
+}
+```
 
 ## Group 10: Conversation Lifecycle
 
@@ -284,7 +316,23 @@ Behavior affecting long-running conversations and context management.
 
 | Field        | Current Purpose                                             | Status  | Notes |
 | ------------ | ----------------------------------------------------------- | ------- | ----- |
-| `compaction` | Automatic compaction, pruning, and context reserve settings | pending |       |
+| `compaction` | Automatic compaction, pruning, and context reserve settings | redesign | Group retained verbatim history under `keep` and rename context headroom to `buffer`. |
+
+Retain the compaction capability but redesign the less clear limits. `keep.turns` is the maximum number of recent user turns to preserve verbatim after compaction, and `keep.tokens` is the token budget for those retained turns. `buffer` is the token headroom reserved so automatic compaction triggers before the input window is exhausted.
+
+```jsonc
+{
+  "compaction": {
+    "auto": true,
+    "prune": true,
+    "keep": {
+      "turns": 2,
+      "tokens": 2000,
+    },
+    "buffer": 10000,
+  },
+}
+```
 
 ## Group 11: Deprecated And Experimental Settings
 
@@ -292,13 +340,13 @@ Fields that should not be ported by inertia; each needs an explicit justificatio
 
 | Field                                | Current Purpose                         | Status  | Notes                                                               |
 | ------------------------------------ | --------------------------------------- | ------- | ------------------------------------------------------------------- |
-| `layout`                             | Legacy layout selection                 | pending | Deprecated; current description says stretch layout is always used. |
-| `experimental.disable_paste_summary` | Disable pasted-content summary behavior | pending |                                                                     |
-| `experimental.batch_tool`            | Enable batch tool                       | pending |                                                                     |
-| `experimental.openTelemetry`         | Enable AI SDK telemetry spans           | pending |                                                                     |
-| `experimental.primary_tools`         | Restrict tools to primary agents        | pending |                                                                     |
-| `experimental.continue_loop_on_deny` | Continue loop after denied tool call    | pending |                                                                     |
-| `experimental.mcp_timeout`           | MCP request timeout                     | pending | May belong with MCP rather than experiments.                        |
+| `layout`                             | Legacy layout selection                 | remove | Do not port deprecated option; stretch layout is always used.       |
+| `experimental.disable_paste_summary` | Disable pasted-content summary behavior | remove | Do not port; pasted-input presentation behavior belongs to the client/UI surface. |
+| `experimental.batch_tool`            | Enable batch tool                       | remove | Do not port; batch tool is no longer a supported feature.          |
+| `experimental.openTelemetry`         | Enable AI SDK telemetry spans           | remove | Do not port; observability is process-level and should use standard OpenTelemetry environment or declarative configuration. |
+| `experimental.primary_tools`         | Restrict tools to primary agents        | remove | Do not port obsolete gating; agent tool access is configured through permissions. |
+| `experimental.continue_loop_on_deny` | Continue loop after denied tool call    | remove | Do not port legacy denied-tool loop behavior.                       |
+| `experimental.mcp_timeout`           | MCP request timeout                     | redesign | Move to `mcp.timeout` for the default and `mcp.servers.<name>.timeout` for per-server overrides. |
 
 ## Review Order
 
