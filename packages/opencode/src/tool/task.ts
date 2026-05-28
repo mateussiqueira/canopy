@@ -37,7 +37,7 @@ const BaseParameterFields = {
   subagent_type: Schema.String.annotate({ description: "The type of specialized agent to use for this task" }),
   task_id: Schema.optional(Schema.String).annotate({
     description:
-      "This should only be set if you mean to resume a previous task (you can pass a prior task_id and the task will continue the same subagent session as before instead of creating a fresh one)",
+      "Pass a prior task_id only to continue an idle subagent session with additional work. Do not use it to check progress on a running background task; while a task is running, the follow-up will not be sent and its result will be delivered automatically.",
   }),
   command: Schema.optional(Schema.String).annotate({ description: "The command that triggered this task" }),
 }
@@ -62,6 +62,18 @@ function backgroundOutput(sessionID: SessionID) {
     "<task_result>",
     "Background task started. You will be notified automatically when it finishes; do not poll for progress.",
     "Do not duplicate its work. Continue only with non-overlapping work, or stop if there is nothing else useful to do.",
+    "</task_result>",
+    "</task>",
+  ].join("\n")
+}
+
+function backgroundStillRunningOutput(sessionID: SessionID) {
+  return [
+    `<task id="${sessionID}" state="running">`,
+    "<summary>Background task is still running</summary>",
+    "<task_result>",
+    "This background task is still running. Your follow-up prompt was not sent.",
+    "Its result will be delivered automatically when it completes. Wait for that result before continuing this task.",
     "</task_result>",
     "</task>",
   ].join("\n")
@@ -227,7 +239,11 @@ export const TaskTool = Tool.define(
 
       const existing = yield* background.get(nextSession.id)
       if (existing?.status === "running") {
-        return yield* Effect.fail(new Error(`Task ${nextSession.id} is already running.`))
+        return {
+          title: params.description,
+          metadata,
+          output: backgroundStillRunningOutput(nextSession.id),
+        }
       }
 
       if (runInBackground) {

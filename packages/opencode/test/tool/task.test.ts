@@ -514,6 +514,71 @@ describe("tool.task", () => {
     }),
   )
 
+  background.instance("resuming a running background task reports that the follow-up was not sent", () =>
+    Effect.gen(function* () {
+      const jobs = yield* BackgroundJob.Service
+      const { chat, assistant } = yield* seed()
+      const tool = yield* TaskTool
+      const def = yield* tool.init()
+      const startedPrompt = defer<SessionID>()
+      let promptCount = 0
+      const promptOps: TaskPromptOps = {
+        ...stubOps(),
+        prompt: (input) =>
+          Effect.sync(() => {
+            promptCount++
+            startedPrompt.resolve(input.sessionID)
+          }).pipe(Effect.andThen(Effect.never)),
+      }
+
+      const started = yield* def.execute(
+        {
+          description: "review code quality",
+          prompt: "review the current diff",
+          subagent_type: "general",
+          background: true,
+        },
+        {
+          sessionID: chat.id,
+          messageID: assistant.id,
+          agent: "build",
+          abort: new AbortController().signal,
+          extra: { promptOps },
+          messages: [],
+          metadata: () => Effect.void,
+          ask: () => Effect.void,
+        },
+      )
+
+      expect(yield* Effect.promise(() => startedPrompt.promise)).toBe(started.metadata.sessionId)
+      expect((yield* jobs.get(started.metadata.sessionId))?.status).toBe("running")
+
+      const continued = yield* def.execute(
+        {
+          description: "review quality findings",
+          prompt: "return your findings now if available",
+          subagent_type: "general",
+          task_id: started.metadata.sessionId,
+        },
+        {
+          sessionID: chat.id,
+          messageID: assistant.id,
+          agent: "build",
+          abort: new AbortController().signal,
+          extra: { promptOps },
+          messages: [],
+          metadata: () => Effect.void,
+          ask: () => Effect.void,
+        },
+      )
+
+      expect(continued.output).toContain(`<task id="${started.metadata.sessionId}" state="running">`)
+      expect(continued.output).toContain("Your follow-up prompt was not sent.")
+      expect(continued.output).toContain("result will be delivered automatically")
+      expect(promptCount).toBe(1)
+    }),
+  )
+
   background.instance("background tasks complete through the background job service", () =>
     Effect.gen(function* () {
       const jobs = yield* BackgroundJob.Service
