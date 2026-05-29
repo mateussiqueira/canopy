@@ -587,6 +587,7 @@ function InlineTool(props: {
   const [showError, setShowError] = createSignal(false)
   const error = createMemo(() => (props.part.state.status === "error" ? props.part.state.error.message : undefined))
   const complete = createMemo(() => !!props.complete)
+  const active = createMemo(() => props.part.state.status === "pending" || props.part.state.status === "running")
   const denied = createMemo(() => {
     const message = error()
     if (!message) return false
@@ -632,7 +633,7 @@ function InlineTool(props: {
     >
       <box flexShrink={0}>
         <Switch>
-          <Match when={props.spinner}>
+          <Match when={props.spinner || (!complete() && active())}>
             <Spinner color={theme.text} />
           </Match>
           <Match when={complete()}>

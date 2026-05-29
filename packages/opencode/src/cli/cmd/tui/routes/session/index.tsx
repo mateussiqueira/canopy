@@ -1795,6 +1795,7 @@ function InlineTool(props: {
   const sync = useSync()
   const renderer = useRenderer()
   const [hover, setHover] = createSignal(false)
+  const active = createMemo(() => props.part.state.status === "pending" || props.part.state.status === "running")
 
   const permission = createMemo(() => {
     const callID = sync.data.permission[ctx.sessionID]?.at(0)?.tool?.callID
@@ -1854,8 +1855,12 @@ function InlineTool(props: {
       }}
     >
       <Switch>
-        <Match when={props.spinner}>
-          <Spinner color={fg()} children={props.children} />
+        <Match when={props.spinner || (!props.complete && active())}>
+          <Spinner color={fg()}>
+            <Show when={props.complete} fallback={props.pending}>
+              {props.children}
+            </Show>
+          </Spinner>
         </Match>
         <Match when={true}>
           <text paddingLeft={3} fg={fg()} attributes={denied() ? TextAttributes.STRIKETHROUGH : undefined}>
