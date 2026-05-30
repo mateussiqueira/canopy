@@ -105,7 +105,6 @@ describe("Config", () => {
             expect(documents.map((document) => document.source.type)).toEqual(["file", "file", "file"])
             expect(documents.map((document) => document.info.$schema)).toEqual(["base", "middle", "last"])
             expect(documents[0]).toBeInstanceOf(Config.Loaded)
-            expect(documents[0]?.source).toBeInstanceOf(Config.FileSource)
             expect(documents[0]?.source.type === "file" ? documents[0].source.path : undefined).toBe(
               path.join(tmp.path, "config.json"),
             )

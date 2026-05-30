@@ -92,14 +92,16 @@ export class Info extends Schema.Class<Info>("Config.Info")({
   providers: Schema.Record(Schema.String, ConfigProvider.Info).pipe(Schema.optional),
 }) {}
 
-export class FileSource extends Schema.Class<FileSource>("Config.FileSource")({
+export const FileSource = Schema.Struct({
   type: Schema.Literal("file"),
   path: Schema.String,
-}) {}
+}).annotate({ identifier: "Config.FileSource" })
+export type FileSource = typeof FileSource.Type
 
-export class MemorySource extends Schema.Class<MemorySource>("Config.MemorySource")({
+export const MemorySource = Schema.Struct({
   type: Schema.Literal("memory"),
-}) {}
+}).annotate({ identifier: "Config.MemorySource" })
+export type MemorySource = typeof MemorySource.Type
 
 export const Source = Schema.Union([FileSource, MemorySource]).pipe(Schema.toTaggedUnion("type"))
 export type Source = typeof Source.Type
@@ -141,7 +143,7 @@ export const layer = Layer.effect(
         Schema.decodeUnknownOption(Info)(input, { errors: "all", onExcessProperty: "ignore" }),
       )
       if (!info) return
-      return new Loaded({ source: new FileSource({ type: "file", path: filepath }), info })
+      return new Loaded({ source: { type: "file", path: filepath }, info })
     })
 
     const loadDirectory = Effect.fnUntraced(function* (directory: AbsolutePath) {

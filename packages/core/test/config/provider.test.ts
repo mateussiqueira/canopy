@@ -29,7 +29,7 @@ describe("ConfigProviderPlugin.Plugin", () => {
         get: () =>
           Effect.succeed([
             new Config.Loaded({
-              source: new Config.MemorySource({ type: "memory" }),
+              source: { type: "memory" },
               info: decode({
                 providers: {
                   custom: {
@@ -58,7 +58,7 @@ describe("ConfigProviderPlugin.Plugin", () => {
               }),
             }),
             new Config.Loaded({
-              source: new Config.MemorySource({ type: "memory" }),
+              source: { type: "memory" },
               info: decode({
                 providers: {
                   custom: {
@@ -87,7 +87,7 @@ describe("ConfigProviderPlugin.Plugin", () => {
               }),
             }),
             new Config.Loaded({
-              source: new Config.MemorySource({ type: "memory" }),
+              source: { type: "memory" },
               info: decode({
                 providers: {
                   custom: { name: "Renamed" },
