@@ -140,7 +140,8 @@ export const layer = Layer.effect(
 
     const cancel = Effect.fn("SessionPrompt.cancel")(function* (sessionID: SessionID) {
       yield* elog.info("cancel", { sessionID })
-      yield* state.cancel(sessionID)
+      const session = yield* sessions.get(sessionID).pipe(Effect.catchCause(() => Effect.succeed(undefined)))
+      yield* state.cancel(sessionID, session?.parentID ? { parentID: session.parentID } : undefined)
     })
 
     const resolvePromptParts = Effect.fn("SessionPrompt.resolvePromptParts")(function* (template: string) {
@@ -1251,9 +1252,10 @@ export const layer = Layer.effect(
         let structured: unknown
         let step = 0
         const session = yield* sessions.get(sessionID).pipe(Effect.orDie)
+        const statusContext = session.parentID ? { parentID: session.parentID } : {}
 
         while (true) {
-          yield* status.set(sessionID, { type: "busy" })
+          yield* status.set(sessionID, { type: "busy" }, statusContext)
           yield* slog.info("loop", { step })
 
           let msgs = yield* MessageV2.filterCompactedEffect(sessionID).pipe(
@@ -1381,6 +1383,7 @@ export const layer = Layer.effect(
               assistantMessage: msg,
               sessionID,
               model,
+              statusContext,
             })
             .pipe(Effect.onInterrupt(() => finalizeInterruptedAssistant))
 
@@ -1504,7 +1507,13 @@ export const layer = Layer.effect(
 
     const loop: (input: LoopInput) => Effect.Effect<SessionLegacy.WithParts> = Effect.fn("SessionPrompt.loop")(
       function* (input: LoopInput) {
-        return yield* state.ensureRunning(input.sessionID, lastAssistant(input.sessionID), runLoop(input.sessionID))
+        const session = yield* sessions.get(input.sessionID).pipe(Effect.orDie)
+        return yield* state.ensureRunning(
+          input.sessionID,
+          session.parentID ? { parentID: session.parentID } : {},
+          lastAssistant(input.sessionID),
+          runLoop(input.sessionID),
+        )
       },
     )
 
@@ -1512,7 +1521,14 @@ export const layer = Layer.effect(
       "SessionPrompt.shell",
     )(function* (input: ShellInput) {
       const ready = yield* Latch.make()
-      return yield* state.startShell(input.sessionID, lastAssistant(input.sessionID), shellImpl(input, ready), ready)
+      const session = yield* sessions.get(input.sessionID).pipe(Effect.orDie)
+      return yield* state.startShell(
+        input.sessionID,
+        session.parentID ? { parentID: session.parentID } : {},
+        lastAssistant(input.sessionID),
+        shellImpl(input, ready),
+        ready,
+      )
     })
 
     const command = Effect.fn("SessionPrompt.command")(function* (input: CommandInput) {

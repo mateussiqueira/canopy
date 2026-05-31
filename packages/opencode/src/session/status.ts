@@ -31,12 +31,18 @@ export const Info = Schema.Union([
 ]).annotate({ identifier: "SessionStatus" })
 export type Info = Schema.Schema.Type<typeof Info>
 
+export const SetContext = Schema.Struct({
+  parentID: Schema.optional(SessionID),
+})
+export type SetContext = Schema.Schema.Type<typeof SetContext>
+
 export const Event = {
   Status: EventV2.define({
     type: "session.status",
     schema: {
       sessionID: SessionID,
       status: Info,
+      parentID: Schema.optional(SessionID),
     },
   }),
   // deprecated
@@ -51,7 +57,7 @@ export const Event = {
 export interface Interface {
   readonly get: (sessionID: SessionID) => Effect.Effect<Info>
   readonly list: () => Effect.Effect<Map<SessionID, Info>>
-  readonly set: (sessionID: SessionID, status: Info) => Effect.Effect<void>
+  readonly set: (sessionID: SessionID, status: Info, context?: SetContext) => Effect.Effect<void>
 }
 
 export class Service extends Context.Service<Service, Interface>()("@opencode/SessionStatus") {}
@@ -74,9 +80,13 @@ export const layer = Layer.effect(
       return new Map(yield* InstanceState.get(state))
     })
 
-    const set = Effect.fn("SessionStatus.set")(function* (sessionID: SessionID, status: Info) {
+    const set = Effect.fn("SessionStatus.set")(function* (sessionID: SessionID, status: Info, context?: SetContext) {
       const data = yield* InstanceState.get(state)
-      yield* events.publish(Event.Status, { sessionID, status })
+      yield* events.publish(Event.Status, {
+        sessionID,
+        status,
+        ...(context?.parentID ? { parentID: context.parentID } : {}),
+      })
       if (status.type === "idle") {
         yield* events.publish(Event.Idle, { sessionID })
         data.delete(sessionID)

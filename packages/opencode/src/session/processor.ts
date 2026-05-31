@@ -57,6 +57,7 @@ type Input = {
   assistantMessage: SessionLegacy.Assistant
   sessionID: SessionID
   model: Provider.Model
+  statusContext?: SessionStatus.SetContext
 }
 
 export interface Interface {
@@ -777,7 +778,7 @@ export const layer = Layer.effect(
           sessionID: ctx.assistantMessage.sessionID,
           error: ctx.assistantMessage.error,
         })
-        yield* status.set(ctx.sessionID, { type: "idle" })
+        yield* status.set(ctx.sessionID, { type: "idle" }, ctx.statusContext)
       })
 
       const process = Effect.fn("SessionProcessor.process")(function* (streamInput: LLM.StreamInput) {
@@ -789,7 +790,7 @@ export const layer = Layer.effect(
           yield* Effect.gen(function* () {
             ctx.currentText = undefined
             ctx.reasoningMap = {}
-            yield* status.set(ctx.sessionID, { type: "busy" })
+            yield* status.set(ctx.sessionID, { type: "busy" }, ctx.statusContext)
             const stream = llm.stream(streamInput)
 
             yield* stream.pipe(
@@ -829,13 +830,17 @@ export const layer = Layer.effect(
                     : Effect.void
                   return event.pipe(
                     Effect.andThen(
-                      status.set(ctx.sessionID, {
-                        type: "retry",
-                        attempt: info.attempt,
-                        message: info.message,
-                        action: info.action,
-                        next: info.next,
-                      }),
+                      status.set(
+                        ctx.sessionID,
+                        {
+                          type: "retry",
+                          attempt: info.attempt,
+                          message: info.message,
+                          action: info.action,
+                          next: info.next,
+                        },
+                        ctx.statusContext,
+                      ),
                     ),
                   )
                 },

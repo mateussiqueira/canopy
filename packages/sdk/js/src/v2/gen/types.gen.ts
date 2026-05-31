@@ -1188,6 +1188,7 @@ export type GlobalEvent = {
         properties: {
           sessionID: string
           status: SessionStatus
+          parentID?: string
         }
       }
     | {
@@ -4275,6 +4276,7 @@ export type EventSessionStatus = {
   properties: {
     sessionID: string
     status: SessionStatus
+    parentID?: string
   }
 }
 
