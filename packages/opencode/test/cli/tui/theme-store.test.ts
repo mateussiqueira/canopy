@@ -1,6 +1,6 @@
 import { expect, test } from "bun:test"
 
-const { DEFAULT_THEMES, allThemes, addTheme, hasTheme, resolveTheme } = await import(
+const { DEFAULT_THEMES, allThemes, addTheme, generateSyntax, hasTheme, resolveTheme } = await import(
   "../../../src/cli/cmd/tui/context/theme"
 )
 
@@ -48,4 +48,18 @@ test("resolveTheme rejects circular color refs", () => {
   item.theme.primary = "one"
 
   expect(() => resolveTheme(item, "dark")).toThrow("Circular color reference")
+})
+
+test("generateSyntax maps calls and builtins away from error red", () => {
+  const theme = resolveTheme(DEFAULT_THEMES.opencode, "dark")
+  const syntax = generateSyntax(theme)
+
+  try {
+    expect(syntax.getStyle("function.call")?.fg?.equals(theme.syntaxFunction)).toBe(true)
+    expect(syntax.getStyle("function.builtin")?.fg?.equals(theme.syntaxFunction)).toBe(true)
+    expect(syntax.getStyle("variable.parameter")?.fg?.equals(theme.text)).toBe(true)
+    expect(syntax.getStyle("function.builtin")?.fg?.equals(theme.error)).toBe(false)
+  } finally {
+    syntax.destroy()
+  }
 })

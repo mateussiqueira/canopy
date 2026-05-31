@@ -835,6 +835,12 @@ function getSyntaxRules(theme: Theme) {
       },
     },
     {
+      scope: ["function.call", "function.method.call", "function.builtin"],
+      style: {
+        foreground: theme.syntaxFunction,
+      },
+    },
+    {
       scope: ["keyword"],
       style: {
         foreground: theme.syntaxKeyword,
@@ -860,9 +866,15 @@ function getSyntaxRules(theme: Theme) {
       },
     },
     {
-      scope: ["variable", "variable.parameter", "function.method.call", "function.call"],
+      scope: ["variable"],
       style: {
         foreground: theme.syntaxVariable,
+      },
+    },
+    {
+      scope: ["variable.parameter", "variable.builtin", "module.builtin"],
+      style: {
+        foreground: theme.text,
       },
     },
     {
@@ -908,15 +920,21 @@ function getSyntaxRules(theme: Theme) {
       },
     },
     {
-      scope: ["variable.builtin", "type.builtin", "function.builtin", "module.builtin", "constant.builtin"],
+      scope: ["type.builtin"],
       style: {
-        foreground: theme.error,
+        foreground: theme.syntaxType,
+      },
+    },
+    {
+      scope: ["constant.builtin"],
+      style: {
+        foreground: theme.syntaxNumber,
       },
     },
     {
       scope: ["variable.super"],
       style: {
-        foreground: theme.error,
+        foreground: theme.syntaxKeyword,
       },
     },
     {
