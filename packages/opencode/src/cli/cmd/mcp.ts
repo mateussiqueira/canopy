@@ -63,16 +63,7 @@ type McpAddArgs = {
   type?: "local" | "remote"
   env?: string[]
   header?: string[]
-  scope?: "project" | "global"
   global?: boolean
-  enabled?: boolean
-  timeout?: number
-  oauth?: boolean
-  oauthClientId?: string
-  oauthClientSecret?: string
-  oauthScope?: string
-  oauthCallbackPort?: number
-  oauthRedirectUri?: string
 }
 
 function configuredServers(config: Config.Info) {
@@ -486,53 +477,16 @@ export const McpAddCommand = effectCmd({
         type: "string",
         array: true,
       })
-      .option("scope", {
-        describe: "where to save the server",
-        type: "string",
-        choices: ["project", "global"] as const,
-      })
       .option("global", {
         alias: ["g"],
         describe: "save to global config",
         type: "boolean",
-      })
-      .option("enabled", {
-        describe: "enable or disable the server on startup",
-        type: "boolean",
-      })
-      .option("timeout", {
-        describe: "timeout in milliseconds for MCP server requests",
-        type: "number",
-      })
-      .option("oauth", {
-        describe: "enable OAuth for remote servers, or use --no-oauth to disable auto-detection",
-        type: "boolean",
-      })
-      .option("oauth-client-id", {
-        describe: "OAuth client ID for remote servers",
-        type: "string",
-      })
-      .option("oauth-client-secret", {
-        describe: "OAuth client secret for remote servers",
-        type: "string",
-      })
-      .option("oauth-scope", {
-        describe: "OAuth scopes to request for remote servers",
-        type: "string",
-      })
-      .option("oauth-callback-port", {
-        describe: "OAuth local callback port for remote servers",
-        type: "number",
-      })
-      .option("oauth-redirect-uri", {
-        describe: "OAuth redirect URI for remote servers",
-        type: "string",
       }).epilogue(`Usage:
   opencode mcp add <name> -- <command> [args...]                 (local MCP server)
   opencode mcp add <name> --env KEY=VALUE -- <command> [args...] (local MCP server with env vars)
   opencode mcp add <name> <url>                                  (remote MCP server)
   opencode mcp add <name> --header KEY=VALUE <url>               (remote MCP server with headers)
-  opencode mcp add <name> --scope project -- <command> [args...] (save to project config)
+  opencode mcp add <name> --global <url>                         (save to global config)
 
 Examples:
   opencode mcp add context7 -- npx -y @upstash/context7-mcp
@@ -546,8 +500,6 @@ Examples:
     const inlineArgs = mcpAddArgs(input)
     const inlineConfig = parseInlineMcpAdd(input, inlineArgs)
     if (inlineConfig && "error" in inlineConfig) return yield* fail(inlineConfig.error)
-    if (input.global && input.scope === "project")
-      return yield* fail("--global cannot be combined with --scope project")
     yield* Effect.promise(async () => {
       UI.empty()
       prompts.intro("Add MCP server")
@@ -560,8 +512,7 @@ Examples:
       ])
 
       const configPath = await (async () => {
-        if (input.global || input.scope === "global") return globalConfigPath
-        if (input.scope === "project") return projectConfigPath
+        if (input.global) return globalConfigPath
         if (inlineConfig) return project.vcs === "git" ? projectConfigPath : globalConfigPath
         if (project.vcs !== "git") return globalConfigPath
         const scopeResult = await prompts.select({
@@ -730,9 +681,6 @@ function parseInlineMcpAdd(
   const name = input.name?.trim()
   if (!name) return { error: "MCP server name is required" }
   if (inlineArgs.length === 0) return { error: "URL or command is required" }
-  if (input.timeout !== undefined && (!Number.isInteger(input.timeout) || input.timeout <= 0)) {
-    return { error: "--timeout must be a positive integer" }
-  }
 
   const type = input.type ?? (inlineArgs.length === 1 && URL.canParse(inlineArgs[0]) ? "remote" : "local")
   if (type === "local") return parseInlineLocalMcp(input, inlineArgs)
@@ -740,26 +688,11 @@ function parseInlineMcpAdd(
 }
 
 function hasInlineMcpAdd(input: McpAddArgs, inlineArgs: string[]) {
-  return !!(
-    input.name ||
-    inlineArgs.length > 0 ||
-    input.type ||
-    input.env?.length ||
-    input.header?.length ||
-    input.enabled !== undefined ||
-    input.timeout !== undefined ||
-    input.oauth !== undefined ||
-    input.oauthClientId ||
-    input.oauthClientSecret ||
-    input.oauthScope ||
-    input.oauthCallbackPort !== undefined ||
-    input.oauthRedirectUri
-  )
+  return !!(input.name || inlineArgs.length > 0 || input.type || input.env?.length || input.header?.length)
 }
 
 function parseInlineLocalMcp(args: McpAddArgs, command: string[]): { config: ConfigMCP.Info } | { error: string } {
   if (args.header?.length) return { error: "--header can only be used with --type remote" }
-  if (hasOAuthOptions(args)) return { error: "OAuth options can only be used with --type remote" }
   const environment = parseEnv(args.env)
   if ("error" in environment) return environment
   return {
@@ -767,8 +700,6 @@ function parseInlineLocalMcp(args: McpAddArgs, command: string[]): { config: Con
       type: "local",
       command,
       ...(environment.value && { environment: environment.value }),
-      ...(args.enabled !== undefined && { enabled: args.enabled }),
-      ...(args.timeout !== undefined && { timeout: args.timeout }),
     },
   }
 }
@@ -777,26 +708,13 @@ function parseInlineRemoteMcp(args: McpAddArgs, url: string[]): { config: Config
   if (url.length !== 1) return { error: "Remote MCP servers require exactly one URL" }
   if (!URL.canParse(url[0])) return { error: "Remote MCP server URL is invalid" }
   if (args.env?.length) return { error: "--env can only be used with --type local" }
-  if (
-    args.oauthCallbackPort !== undefined &&
-    (!Number.isInteger(args.oauthCallbackPort) || args.oauthCallbackPort < 1 || args.oauthCallbackPort > 65535)
-  ) {
-    return { error: "--oauth-callback-port must be an integer between 1 and 65535" }
-  }
-  if (args.oauth === false && hasOAuthConfigOptions(args)) {
-    return { error: "--no-oauth cannot be combined with OAuth options" }
-  }
   const headers = parseHeader(args.header)
   if ("error" in headers) return headers
-  const oauth = parseOAuth(args)
   return {
     config: {
       type: "remote",
       url: url[0],
       ...(headers.value && { headers: headers.value }),
-      ...(args.enabled !== undefined && { enabled: args.enabled }),
-      ...(args.timeout !== undefined && { timeout: args.timeout }),
-      ...(oauth !== undefined && { oauth }),
     },
   }
 }
@@ -827,32 +745,6 @@ function parseHeader(entries?: string[]): { value?: Record<string, string> } | {
   const invalid = parsed.find((entry): entry is { error: string } => "error" in entry)
   if (invalid) return invalid
   return { value: Object.fromEntries(parsed.map((entry) => [entry.key, entry.value])) }
-}
-
-function hasOAuthOptions(args: McpAddArgs) {
-  return !!(args.oauth !== undefined || hasOAuthConfigOptions(args))
-}
-
-function hasOAuthConfigOptions(args: McpAddArgs) {
-  return !!(
-    args.oauthClientId ||
-    args.oauthClientSecret ||
-    args.oauthScope ||
-    args.oauthCallbackPort !== undefined ||
-    args.oauthRedirectUri
-  )
-}
-
-function parseOAuth(args: McpAddArgs): ConfigMCP.Remote["oauth"] | undefined {
-  if (args.oauth === false) return false
-  if (!hasOAuthOptions(args)) return undefined
-  return {
-    ...(args.oauthClientId && { clientId: args.oauthClientId }),
-    ...(args.oauthClientSecret && { clientSecret: args.oauthClientSecret }),
-    ...(args.oauthScope && { scope: args.oauthScope }),
-    ...(args.oauthCallbackPort !== undefined && { callbackPort: args.oauthCallbackPort }),
-    ...(args.oauthRedirectUri && { redirectUri: args.oauthRedirectUri }),
-  }
 }
 
 export const McpDebugCommand = effectCmd({

@@ -62,28 +62,6 @@ describe("opencode mcp", () => {
             },
           },
         })
-
-        const noOAuth = yield* opencode.spawn([
-          "mcp",
-          "add",
-          "public",
-          "https://example.com/mcp",
-          "--no-oauth",
-          "--global",
-        ])
-        opencode.expectExit(noOAuth, 0, "opencode mcp add no oauth")
-
-        expect(
-          yield* Effect.promise(() => Bun.file(path.join(home, ".config/opencode/opencode.json")).json()),
-        ).toMatchObject({
-          mcp: {
-            public: {
-              type: "remote",
-              url: "https://example.com/mcp",
-              oauth: false,
-            },
-          },
-        })
       }),
     120_000,
   )
