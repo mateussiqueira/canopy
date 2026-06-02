@@ -972,13 +972,10 @@ export function Session() {
 
           if (options.openWithoutSaving) {
             // Just open in editor without saving
-            await Editor.open({
+            await Editor.openTemporary({
               value: transcript,
               renderer,
-              cwd:
-                (project.instance.path().worktree === "/" ? undefined : project.instance.path().worktree) ||
-                project.instance.directory() ||
-                process.cwd(),
+              cwd: project.instance.cwd(),
             })
           } else {
             const exportDir = process.cwd()
@@ -986,21 +983,21 @@ export function Session() {
             const filepath = path.join(exportDir, filename)
 
             await Filesystem.write(filepath, transcript)
-
-            // Open with EDITOR if available
-            const result = await Editor.open({
-              value: transcript,
+            const error = await Editor.openFile({
+              filepath,
               renderer,
-              cwd:
-                (project.instance.path().worktree === "/" ? undefined : project.instance.path().worktree) ||
-                project.instance.directory() ||
-                process.cwd(),
+              cwd: project.instance.cwd(),
+              directory: project.instance.directory() || process.cwd(),
             })
-            if (result !== undefined) {
-              await Filesystem.write(filepath, result)
-            }
+              .then(() => undefined)
+              .catch(errorMessage)
 
-            toast.show({ message: `Session exported to ${filename}`, variant: "success" })
+            toast.show({
+              message: error
+                ? `Session exported to ${filename}, but failed to open file: ${error}`
+                : `Session exported to ${filename}`,
+              variant: error ? "warning" : "success",
+            })
           }
         } catch {
           toast.show({ message: "Failed to export session", variant: "error" })
@@ -1744,6 +1741,20 @@ type ToolProps<T> = {
   output?: string
   part: ToolPart
 }
+
+function useOpenFile() {
+  const project = useProject()
+  const toast = useToast()
+  const renderer = useRenderer()
+  return (filePath: string | undefined) => {
+    if (!filePath) return
+    const cwd = project.instance.cwd()
+    void Editor.openFile({ filepath: filePath, renderer, cwd, directory: project.instance.directory() || cwd }).catch(
+      (error) => toast.show({ message: `Failed to open file: ${errorMessage(error)}`, variant: "error" }),
+    )
+  }
+}
+
 function GenericTool(props: ToolProps<any>) {
   const { theme } = useTheme()
   const ctx = use()
@@ -1962,6 +1973,7 @@ function BlockTool(props: {
   title: string
   children: JSX.Element
   onClick?: () => void
+  onTitleClick?: () => void
   part?: ToolPart
   spinner?: boolean
 }) {
@@ -1991,7 +2003,16 @@ function BlockTool(props: {
       <Show
         when={props.spinner}
         fallback={
-          <text paddingLeft={3} fg={theme.textMuted}>
+          <text
+            paddingLeft={3}
+            fg={hover() && props.onTitleClick ? theme.text : theme.textMuted}
+            onMouseOver={() => props.onTitleClick && setHover(true)}
+            onMouseOut={() => props.onTitleClick && setHover(false)}
+            onMouseUp={() => {
+              if (renderer.getSelection()?.getSelectedText()) return
+              props.onTitleClick?.()
+            }}
+          >
             {props.title}
           </text>
         }
@@ -2067,6 +2088,8 @@ function Shell(props: ToolProps<typeof ShellTool>) {
 function Write(props: ToolProps<typeof WriteTool>) {
   const { theme, syntax } = useTheme()
   const pathFormatter = usePathFormatter()
+  const openFile = useOpenFile()
+  const filePath = createMemo(() => props.metadata.filepath ?? props.input.filePath)
   const code = createMemo(() => {
     if (!props.input.content) return ""
     return props.input.content
@@ -2075,7 +2098,11 @@ function Write(props: ToolProps<typeof WriteTool>) {
   return (
     <Switch>
       <Match when={props.metadata.diagnostics !== undefined}>
-        <BlockTool title={"# Wrote " + pathFormatter.format(props.input.filePath)} part={props.part}>
+        <BlockTool
+          title={"# Wrote " + pathFormatter.format(props.input.filePath)}
+          part={props.part}
+          onTitleClick={props.part.state.status === "completed" ? () => openFile(filePath()) : undefined}
+        >
           <line_number fg={theme.textMuted} minWidth={3} paddingRight={1}>
             <code
               conceal={false}
@@ -2089,7 +2116,13 @@ function Write(props: ToolProps<typeof WriteTool>) {
         </BlockTool>
       </Match>
       <Match when={true}>
-        <InlineTool icon="←" pending="Preparing write..." complete={props.input.filePath} part={props.part}>
+        <InlineTool
+          icon="←"
+          pending="Preparing write..."
+          complete={props.input.filePath}
+          part={props.part}
+          onClick={props.part.state.status === "completed" ? () => openFile(filePath()) : undefined}
+        >
           Write {pathFormatter.format(props.input.filePath)}
         </InlineTool>
       </Match>
@@ -2287,6 +2320,8 @@ function Edit(props: ToolProps<typeof EditTool>) {
   const ctx = use()
   const { theme, syntax } = useTheme()
   const pathFormatter = usePathFormatter()
+  const openFile = useOpenFile()
+  const filePath = createMemo(() => props.metadata.filediff?.file ?? props.input.filePath)
 
   const view = createMemo(() => {
     const diffStyle = ctx.tui.diff_style
@@ -2302,7 +2337,11 @@ function Edit(props: ToolProps<typeof EditTool>) {
   return (
     <Switch>
       <Match when={props.metadata.diff !== undefined}>
-        <BlockTool title={"← Edit " + pathFormatter.format(props.input.filePath)} part={props.part}>
+        <BlockTool
+          title={"← Edit " + pathFormatter.format(props.input.filePath)}
+          part={props.part}
+          onTitleClick={props.part.state.status === "completed" ? () => openFile(filePath()) : undefined}
+        >
           <box paddingLeft={1}>
             <diff
               diff={diffContent()}
@@ -2328,7 +2367,13 @@ function Edit(props: ToolProps<typeof EditTool>) {
         </BlockTool>
       </Match>
       <Match when={true}>
-        <InlineTool icon="←" pending="Preparing edit..." complete={props.input.filePath} part={props.part}>
+        <InlineTool
+          icon="←"
+          pending="Preparing edit..."
+          complete={props.input.filePath}
+          part={props.part}
+          onClick={props.part.state.status === "completed" ? () => openFile(filePath()) : undefined}
+        >
           Edit {pathFormatter.format(props.input.filePath)} {input({ replaceAll: props.input.replaceAll })}
         </InlineTool>
       </Match>
@@ -2340,6 +2385,7 @@ function ApplyPatch(props: ToolProps<typeof ApplyPatchTool>) {
   const ctx = use()
   const { theme, syntax } = useTheme()
   const pathFormatter = usePathFormatter()
+  const openFile = useOpenFile()
 
   const files = createMemo(() => props.metadata.files ?? [])
 
@@ -2387,7 +2433,15 @@ function ApplyPatch(props: ToolProps<typeof ApplyPatchTool>) {
       <Match when={files().length > 0}>
         <For each={files()}>
           {(file) => (
-            <BlockTool title={title(file)} part={props.part}>
+            <BlockTool
+              title={title(file)}
+              part={props.part}
+              onTitleClick={
+                props.part.state.status !== "completed" || file.type === "delete"
+                  ? undefined
+                  : () => openFile(file.movePath ?? file.filePath)
+              }
+            >
               <Show
                 when={file.type !== "delete"}
                 fallback={

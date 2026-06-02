@@ -79,6 +79,13 @@ export const { use: useProject, provider: ProjectProvider } = createSimpleContex
         directory() {
           return store.instance.path.directory
         },
+        cwd() {
+          return (
+            (store.instance.path.worktree === "/" ? undefined : store.instance.path.worktree) ||
+            store.instance.path.directory ||
+            process.cwd()
+          )
+        },
       },
       workspace: {
         current() {

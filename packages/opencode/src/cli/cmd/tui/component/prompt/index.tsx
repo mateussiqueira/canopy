@@ -526,12 +526,9 @@ export function Prompt(props: PromptProps) {
           const content = await Editor.open({
             value,
             renderer,
-            cwd:
-              (project.instance.path().worktree === "/" ? undefined : project.instance.path().worktree) ||
-              project.instance.directory() ||
-              process.cwd(),
+            cwd: project.instance.cwd(),
           })
-          if (!content) return
+          if (content === undefined) return
 
           input.setText(content)
 
