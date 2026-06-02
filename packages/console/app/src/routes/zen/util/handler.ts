@@ -48,7 +48,7 @@ import { localeFromRequest } from "~/lib/language"
 import { createModelTpmLimiter } from "./modelTpmLimiter"
 import { createModelTpsLimiter } from "./modelTpsLimiter"
 import { accumulateUsage, HOT_WORKSPACES } from "./usageBatcher"
-import { readProviderError } from "./providerError"
+import { parseProviderErrorBody } from "./providerError"
 
 type ZenData = Awaited<ReturnType<typeof ZenData.list>>
 type RetryOptions = {
@@ -249,7 +249,15 @@ export async function handler(
 
     // Handle non-streaming response
     if (!isStream || [400, 404, 429].includes(res.status)) {
-      const json = res.status === 200 ? await res.json() : await readProviderError(res)
+      const json = await (async () => {
+        if (res.status === 200) return res.json()
+        const body = await res.text()
+        try {
+          const parsed = JSON.parse(body)
+          if (parsed && typeof parsed === "object") return parsed as Record<string, any>
+        } catch {}
+        return parseProviderErrorBody(body, res.statusText)
+      })()
       await rateLimiter?.track()
       const usage = providerInfo.extractUsage(json)
       if (usage) {
