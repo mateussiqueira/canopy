@@ -1,8 +1,7 @@
 import { cmd } from "./cmd"
 import { Duration, Effect, Match, Option } from "effect"
 import { UI } from "../ui"
-import { Account } from "@/account/account"
-import { AccountID, OrgID, PollExpired, type PollResult, type AccountError } from "@/account/schema"
+import { AccountV2 } from "@opencode-ai/core/account"
 import { effectCmd } from "../effect-cmd"
 import * as Prompt from "../effect/prompt"
 import open from "open"
@@ -34,12 +33,12 @@ export const formatOrgLine = (
 }
 
 const isActiveOrgChoice = (
-  active: Option.Option<{ id: AccountID; active_org_id: OrgID | null }>,
-  choice: { accountID: AccountID; orgID: OrgID },
+  active: Option.Option<{ id: AccountV2.ID; active_org_id: AccountV2.OrgID | null }>,
+  choice: { accountID: AccountV2.ID; orgID: AccountV2.OrgID },
 ) => Option.isSome(active) && active.value.id === choice.accountID && active.value.active_org_id === choice.orgID
 
 const loginEffect = Effect.fn("login")(function* (url: string) {
-  const service = yield* Account.Service
+  const service = yield* AccountV2.Service
 
   yield* Prompt.intro("Log in")
   const login = yield* service.login(url)
@@ -51,7 +50,7 @@ const loginEffect = Effect.fn("login")(function* (url: string) {
   const s = Prompt.spinner()
   yield* s.start("Waiting for authorization...")
 
-  const poll = (wait: Duration.Duration): Effect.Effect<PollResult, AccountError> =>
+  const poll = (wait: Duration.Duration): Effect.Effect<AccountV2.PollResult, AccountV2.AccountError> =>
     Effect.gen(function* () {
       yield* Effect.sleep(wait)
       const result = yield* service.poll(login)
@@ -62,7 +61,7 @@ const loginEffect = Effect.fn("login")(function* (url: string) {
 
   const result = yield* poll(login.interval).pipe(
     Effect.timeout(login.expiry),
-    Effect.catchTag("TimeoutError", () => Effect.succeed(new PollExpired())),
+    Effect.catchTag("TimeoutError", () => Effect.succeed(new AccountV2.PollExpired())),
   )
 
   yield* Match.valueTags(result, {
@@ -80,7 +79,7 @@ const loginEffect = Effect.fn("login")(function* (url: string) {
 })
 
 const logoutEffect = Effect.fn("logout")(function* (email?: string) {
-  const service = yield* Account.Service
+  const service = yield* AccountV2.Service
   const accounts = yield* service.list()
   if (accounts.length === 0) return yield* println("Not logged in")
 
@@ -113,13 +112,13 @@ const logoutEffect = Effect.fn("logout")(function* (email?: string) {
 })
 
 interface OrgChoice {
-  orgID: OrgID
-  accountID: AccountID
+  orgID: AccountV2.OrgID
+  accountID: AccountV2.ID
   label: string
 }
 
 const switchEffect = Effect.fn("switch")(function* () {
-  const service = yield* Account.Service
+  const service = yield* AccountV2.Service
 
   const groups = yield* service.orgsByAccount()
   if (groups.length === 0) return yield* println("Not logged in")
@@ -148,7 +147,7 @@ const switchEffect = Effect.fn("switch")(function* () {
 })
 
 const orgsEffect = Effect.fn("orgs")(function* () {
-  const service = yield* Account.Service
+  const service = yield* AccountV2.Service
 
   const groups = yield* service.orgsByAccount()
   if (groups.length === 0) return yield* println("No accounts found")
@@ -165,7 +164,7 @@ const orgsEffect = Effect.fn("orgs")(function* () {
 })
 
 const openEffect = Effect.fn("open")(function* () {
-  const service = yield* Account.Service
+  const service = yield* AccountV2.Service
   const active = yield* service.active()
   if (Option.isNone(active)) return yield* println("No active account")
 

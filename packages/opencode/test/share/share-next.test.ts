@@ -1,11 +1,10 @@
 import { NodeFileSystem } from "@effect/platform-node"
 import { beforeEach, describe, expect } from "bun:test"
-import { Effect, Exit, Layer, Option } from "effect"
+import { Effect, Exit, Layer } from "effect"
 import { HttpClient, HttpClientRequest, HttpClientResponse } from "effect/unstable/http"
 
-import { AccessToken, AccountID, OrgID, RefreshToken } from "../../src/account/schema"
-import { Account } from "../../src/account/account"
-import { AccountRepo } from "../../src/account/repo"
+import { AccountV2 } from "@opencode-ai/core/account"
+import { AccountStateTable, AccountTable } from "@opencode-ai/core/account/sql"
 import { CrossSpawnSpawner } from "@opencode-ai/core/cross-spawn-spawner"
 import { EventV2Bridge } from "../../src/event-v2-bridge"
 import { Config } from "@/config/config"
@@ -22,7 +21,6 @@ import { testEffect } from "../lib/effect"
 
 const env = Layer.mergeAll(
   Session.defaultLayer,
-  AccountRepo.defaultLayer,
   Database.defaultLayer,
   NodeFileSystem.layer,
   CrossSpawnSpawner.defaultLayer,
@@ -44,7 +42,7 @@ function live(client: HttpClient.HttpClient) {
   const http = Layer.succeed(HttpClient.HttpClient, client)
   return ShareNext.layer.pipe(
     Layer.provide(EventV2Bridge.defaultLayer),
-    Layer.provide(Account.layer.pipe(Layer.provide(AccountRepo.defaultLayer), Layer.provide(http))),
+    Layer.provide(AccountV2.defaultLayer),
     Layer.provide(Config.defaultLayer),
     Layer.provide(Database.defaultLayer),
     Layer.provide(http),
@@ -59,13 +57,12 @@ function wired(client: HttpClient.HttpClient) {
     EventV2Bridge.defaultLayer,
     ShareNext.layer,
     Session.defaultLayer,
-    AccountRepo.defaultLayer,
     Database.defaultLayer,
     NodeFileSystem.layer,
     CrossSpawnSpawner.defaultLayer,
   ).pipe(
     Layer.provide(EventV2Bridge.defaultLayer),
-    Layer.provide(Account.layer.pipe(Layer.provide(AccountRepo.defaultLayer), Layer.provide(http))),
+    Layer.provide(AccountV2.defaultLayer),
     Layer.provide(Config.defaultLayer),
     Layer.provide(http),
     Layer.provide(Provider.defaultLayer),
@@ -83,18 +80,28 @@ const share = (id: SessionID) =>
       .pipe(Effect.orDie)
   })
 
-const seed = (url: string, org?: string) =>
-  AccountRepo.Service.use((repo) =>
-    repo.persistAccount({
-      id: AccountID.make("account-1"),
-      email: "user@example.com",
-      url,
-      accessToken: AccessToken.make("st_test_token"),
-      refreshToken: RefreshToken.make("rt_test_token"),
-      expiry: Date.now() + 10 * 60_000,
-      orgID: org ? Option.some(OrgID.make(org)) : Option.none(),
-    }),
-  )
+const seed = (url: string, org?: AccountV2.OrgID) =>
+  Effect.gen(function* () {
+    const { db } = yield* Database.Service
+    yield* db
+      .insert(AccountTable)
+      .values({
+        id: AccountV2.ID.make("account-1"),
+        email: "user@example.com",
+        url,
+        access_token: AccountV2.AccessToken.make("st_test_token"),
+        refresh_token: AccountV2.RefreshToken.make("rt_test_token"),
+        token_expiry: Date.now() + 10 * 60_000,
+      })
+      .run()
+      .pipe(Effect.orDie)
+    yield* db
+      .insert(AccountStateTable)
+      .values({ id: 1, active_account_id: AccountV2.ID.make("account-1"), active_org_id: org ?? null })
+      .onConflictDoUpdate({ target: AccountStateTable.id, set: { active_org_id: org ?? null } })
+      .run()
+      .pipe(Effect.orDie)
+  })
 
 beforeEach(async () => {
   await resetDatabase()
@@ -137,7 +144,7 @@ describe("ShareNext", () => {
   it.live("request uses org share API with auth headers when account is active", () =>
     provideTmpdirInstance(() =>
       Effect.gen(function* () {
-        yield* seed("https://control.example.com", "org-1")
+        yield* seed("https://control.example.com", AccountV2.OrgID.make("org-1"))
 
         const req = yield* ShareNext.use.request().pipe(Effect.provide(live(none)))
 

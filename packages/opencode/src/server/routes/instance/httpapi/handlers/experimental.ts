@@ -1,4 +1,4 @@
-import { Account } from "@/account/account"
+import { AccountV2 } from "@opencode-ai/core/account"
 import { Agent } from "@/agent/agent"
 import { Config } from "@/config/config"
 import { InstanceState } from "@/effect/instance-state"
@@ -22,7 +22,7 @@ function mapWorktreeError<A, R>(self: Effect.Effect<A, Worktree.Error, R>) {
 
 export const experimentalHandlers = HttpApiBuilder.group(InstanceHttpApi, "experimental", (handlers) =>
   Effect.gen(function* () {
-    const account = yield* Account.Service
+    const account = yield* AccountV2.Service
     const agents = yield* Agent.Service
     const config = yield* Config.Service
     const mcp = yield* MCP.Service

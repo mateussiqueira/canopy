@@ -13,7 +13,7 @@ import { Env } from "../env"
 import { applyEdits, modify } from "jsonc-parser"
 import { InstallationLocal, InstallationVersion } from "@opencode-ai/core/installation/version"
 import { existsSync } from "fs"
-import { Account } from "@/account/account"
+import { AccountV2 } from "@opencode-ai/core/account"
 import { isRecord } from "@/util/record"
 import type { ConsoleState } from "./console-state"
 import { AppFileSystem } from "@opencode-ai/core/filesystem"
@@ -387,7 +387,7 @@ export const layer = Layer.effect(
   Effect.gen(function* () {
     const fs = yield* AppFileSystem.Service
     const authSvc = yield* Auth.Service
-    const accountSvc = yield* Account.Service
+    const accountSvc = yield* AccountV2.Service
     const env = yield* Env.Service
     const npmSvc = yield* Npm.Service
     const http = yield* HttpClient.HttpClient
@@ -880,7 +880,7 @@ export const defaultLayer = layer.pipe(
   Layer.provide(AppFileSystem.defaultLayer),
   Layer.provide(Env.defaultLayer),
   Layer.provide(Auth.defaultLayer),
-  Layer.provide(Account.defaultLayer),
+  Layer.provide(AccountV2.defaultLayer),
   Layer.provide(Npm.defaultLayer),
   Layer.provide(FetchHttpClient.layer),
 )

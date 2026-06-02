@@ -1,4 +1,4 @@
-import { AccountID, OrgID } from "@/account/schema"
+import { AccountV2 } from "@opencode-ai/core/account"
 import { MCP } from "@/mcp"
 
 import { Session } from "@/session/session"
@@ -37,8 +37,8 @@ const ConsoleOrgList = Schema.Struct({
 })
 
 export const ConsoleSwitchPayload = Schema.Struct({
-  accountID: AccountID,
-  orgID: OrgID,
+  accountID: AccountV2.ID,
+  orgID: AccountV2.OrgID,
 })
 
 const ToolIDs = Schema.Array(Schema.String).annotate({ identifier: "ToolIDs" })

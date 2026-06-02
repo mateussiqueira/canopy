@@ -2,7 +2,7 @@ import type * as SDK from "@opencode-ai/sdk/v2"
 import { serviceUse } from "@opencode-ai/core/effect/service-use"
 import { Effect, Exit, Layer, Option, Schema, Scope, Context, Stream } from "effect"
 import { FetchHttpClient, HttpClient, HttpClientRequest, HttpClientResponse } from "effect/unstable/http"
-import { Account } from "@/account/account"
+import { AccountV2 } from "@opencode-ai/core/account"
 import { EventV2Bridge } from "@/event-v2-bridge"
 import { InstanceState } from "@/effect/instance-state"
 import { Provider } from "@/provider/provider"
@@ -111,7 +111,7 @@ function key(item: Data) {
 export const layer = Layer.effect(
   Service,
   Effect.gen(function* () {
-    const account = yield* Account.Service
+    const account = yield* AccountV2.Service
     const events = yield* EventV2Bridge.Service
     const cfg = yield* Config.Service
     const { db } = yield* Database.Service
@@ -367,7 +367,7 @@ export const layer = Layer.effect(
 
 export const defaultLayer = layer.pipe(
   Layer.provide(EventV2Bridge.defaultLayer),
-  Layer.provide(Account.defaultLayer),
+  Layer.provide(AccountV2.defaultLayer),
   Layer.provide(Config.defaultLayer),
   Layer.provide(Database.defaultLayer),
   Layer.provide(FetchHttpClient.layer),

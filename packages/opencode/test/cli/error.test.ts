@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test"
-import { AccountTransportError } from "../../src/account/schema"
+import { AccountV2 } from "@opencode-ai/core/account"
 import { FormatError } from "../../src/cli/error"
 import { UI } from "../../src/cli/ui"
 
@@ -52,7 +52,7 @@ describe("cli.error", () => {
   })
 
   test("formats account transport errors clearly", () => {
-    const error = new AccountTransportError({
+    const error = new AccountV2.AccountTransportError({
       method: "POST",
       url: "https://console.opencode.ai/auth/device/code",
     })

@@ -1,7 +1,7 @@
 import { Effect, Layer, Option } from "effect"
-import { Account } from "../../src/account/account"
+import { AccountV2 } from "@opencode-ai/core/account"
 
-export const empty = Layer.mock(Account.Service)({
+export const empty = Layer.mock(AccountV2.Service)({
   active: () => Effect.succeed(Option.none()),
   activeOrg: () => Effect.succeed(Option.none()),
 })

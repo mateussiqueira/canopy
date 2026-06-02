@@ -1,12 +1,17 @@
+import fs from "fs/promises"
+import path from "path"
 import { describe, expect } from "bun:test"
-import { Effect, Schema } from "effect"
+import { Effect, Layer, Schema } from "effect"
 import { AgentV2 } from "@opencode-ai/core/agent"
 import { Config } from "@opencode-ai/core/config"
 import { ConfigAgentPlugin } from "@opencode-ai/core/config/plugin/agent"
+import { AppFileSystem } from "@opencode-ai/core/filesystem"
 import { PermissionV2 } from "@opencode-ai/core/permission"
+import { AbsolutePath } from "@opencode-ai/core/schema"
+import { tmpdir } from "../fixture/tmpdir"
 import { testEffect } from "../lib/effect"
 
-const it = testEffect(AgentV2.locationLayer)
+const it = testEffect(Layer.mergeAll(AgentV2.locationLayer, AppFileSystem.defaultLayer))
 const decode = Schema.decodeUnknownSync(Config.Info)
 
 describe("ConfigAgentPlugin.Plugin", () => {
@@ -182,5 +187,74 @@ describe("ConfigAgentPlugin.Plugin", () => {
 
       expect(yield* agents.get(build)).toBeUndefined()
     }),
+  )
+
+  it.live("loads markdown agents from config directories in priority order", () =>
+    Effect.acquireRelease(
+      Effect.promise(() => tmpdir()),
+      (tmp) => Effect.promise(() => tmp[Symbol.asyncDispose]()),
+    ).pipe(
+      Effect.flatMap((tmp) => {
+        const global = path.join(tmp.path, "global")
+        const local = path.join(tmp.path, ".opencode")
+        return Effect.gen(function* () {
+          yield* Effect.promise(async () => {
+            await fs.mkdir(path.join(global, "agent"), { recursive: true })
+            await fs.mkdir(path.join(local, "agents", "team"), { recursive: true })
+            await fs.writeFile(
+              path.join(global, "agent", "reviewer.md"),
+              `---
+description: Global reviewer
+mode: subagent
+permissions:
+  - action: edit
+    resource: "*"
+    effect: deny
+---
+Review globally.`,
+            )
+            await fs.writeFile(
+              path.join(local, "agents", "reviewer.md"),
+              `---
+description: Local reviewer
+model: anthropic/claude-sonnet
+---
+Review locally.`,
+            )
+            await fs.writeFile(
+              path.join(local, "agents", "team", "research.md"),
+              `---
+mode: subagent
+---
+Research the issue.`,
+            )
+            await fs.writeFile(path.join(local, "agents", "build.md"), "---\ndisabled: true\n---\n")
+          })
+
+          const agents = yield* AgentV2.Service
+          yield* agents.update((editor) => editor.update(AgentV2.ID.make("build"), () => {}))
+          const config = Config.Service.of({
+            directories: () => Effect.succeed([AbsolutePath.make(global), AbsolutePath.make(local)]),
+            get: () => Effect.succeed([]),
+          })
+
+          yield* ConfigAgentPlugin.Plugin.effect.pipe(Effect.provideService(Config.Service, config))
+
+          const reviewer = yield* agents.get(AgentV2.ID.make("reviewer"))
+          expect(reviewer).toMatchObject({
+            system: "Review locally.",
+            description: "Local reviewer",
+            mode: "subagent",
+            model: { providerID: "anthropic", id: "claude-sonnet" },
+          })
+          expect(PermissionV2.evaluate("edit", "src/index.ts", reviewer?.permissions ?? []).effect).toBe("deny")
+          expect(yield* agents.get(AgentV2.ID.make("team/research"))).toMatchObject({
+            system: "Research the issue.",
+            mode: "subagent",
+          })
+          expect(yield* agents.get(AgentV2.ID.make("build"))).toBeUndefined()
+        })
+      }),
+    ),
   )
 })
