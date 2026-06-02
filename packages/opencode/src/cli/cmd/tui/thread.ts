@@ -198,7 +198,7 @@ export const TuiThreadCommand = cmd({
           } catch (error) {
             UI.error(errorMessage(error))
             process.exitCode = 1
-            return
+            return false
           }
 
           const config = await TuiConfig.get()
@@ -221,6 +221,7 @@ export const TuiThreadCommand = cmd({
               fork: args.fork,
             },
           }).done
+          return true
         } finally {
           await input.stop?.()
         }
@@ -233,12 +234,15 @@ export const TuiThreadCommand = cmd({
           frame: args.debugFrame,
           directory: cwd,
         })
-        await launch({
-          url: "http://opencode.debug",
-          sessionID: transport.sessionID,
-          fetch: transport.fetch,
-          events: transport.events,
-        })
+        if (
+          !(await launch({
+            url: "http://opencode.debug",
+            sessionID: transport.sessionID,
+            fetch: transport.fetch,
+            events: transport.events,
+          }))
+        )
+          return
         process.exit(0)
         return
       }
@@ -310,17 +314,20 @@ export const TuiThreadCommand = cmd({
         client.call("checkUpgrade", { directory: cwd }).catch(() => {})
       }, 1000).unref?.()
 
-      await launch({
-        ...transport,
-        sessionID: args.session,
-        prompt,
-        stop,
-        onSnapshot: async () => {
-          const tui = writeHeapSnapshot("tui.heapsnapshot")
-          const server = await client.call("snapshot", undefined)
-          return [tui, server]
-        },
-      })
+      if (
+        !(await launch({
+          ...transport,
+          sessionID: args.session,
+          prompt,
+          stop,
+          onSnapshot: async () => {
+            const tui = writeHeapSnapshot("tui.heapsnapshot")
+            const server = await client.call("snapshot", undefined)
+            return [tui, server]
+          },
+        }))
+      )
+        return
     } finally {
       unguard?.()
     }
