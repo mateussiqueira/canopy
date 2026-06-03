@@ -4,6 +4,7 @@ import { HttpApiBuilder, HttpApiSchema } from "effect/unstable/httpapi"
 import { InstanceHttpApi } from "../../api"
 import { SessionsCursor } from "../../groups/v2/session"
 import { InvalidCursorError, ServiceUnavailableError, SessionNotFoundError, UnknownError } from "../../errors"
+import { make } from "../../groups/v2/response"
 
 const DefaultSessionsLimit = 50
 
@@ -28,7 +29,7 @@ export const sessionHandlers = HttpApiBuilder.group(InstanceHttpApi, "v2.session
           })
           const first = sessions[0]
           const last = sessions.at(-1)
-          return {
+          return make({
             items: sessions,
             cursor: {
               previous: first
@@ -52,13 +53,13 @@ export const sessionHandlers = HttpApiBuilder.group(InstanceHttpApi, "v2.session
                   })
                 : undefined,
             },
-          }
+          })
         }),
       )
       .handle(
         "prompt",
         Effect.fn(function* (ctx) {
-          return yield* session
+          return make(yield* session
             .prompt({
               sessionID: ctx.params.sessionID,
               prompt: ctx.payload.prompt,
@@ -81,7 +82,7 @@ export const sessionHandlers = HttpApiBuilder.group(InstanceHttpApi, "v2.session
                   }),
                 ),
               ),
-            )
+            ))
         }),
       )
       .handle(
@@ -135,7 +136,7 @@ export const sessionHandlers = HttpApiBuilder.group(InstanceHttpApi, "v2.session
       .handle(
         "context",
         Effect.fn(function* (ctx) {
-          return yield* session.context(ctx.params.sessionID).pipe(
+          return make(yield* session.context(ctx.params.sessionID).pipe(
             Effect.catchTag("Session.NotFoundError", (error) =>
               Effect.fail(
                 new SessionNotFoundError({
@@ -158,7 +159,7 @@ export const sessionHandlers = HttpApiBuilder.group(InstanceHttpApi, "v2.session
                 ),
               )
             }),
-          )
+          ))
         }),
       )
   }),

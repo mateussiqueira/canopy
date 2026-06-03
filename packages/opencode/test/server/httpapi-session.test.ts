@@ -388,8 +388,9 @@ describe("session HttpApi", () => {
         yield* insertLegacyAssistantMessage(parent.id)
 
         expect(
-          (yield* requestJson<{ items: SessionMessage.Message[] }>(`/api/session/${parent.id}/message`, { headers }))
-            .items,
+          (yield* requestJson<{ data: { items: SessionMessage.Message[] } }>(`/api/session/${parent.id}/message`, {
+            headers,
+          })).data.items,
         ).toMatchObject([{ type: "assistant" }])
       }),
     { git: true, config: { formatter: false, lsp: false } },
@@ -453,7 +454,7 @@ describe("session HttpApi", () => {
           })}`,
           { headers },
         )
-        const sessionCursor = (yield* json<{ cursor: { next?: string } }>(sessionPage)).cursor.next
+        const sessionCursor = (yield* json<{ data: { cursor: { next?: string } } }>(sessionPage)).data.cursor.next
         expect(sessionCursor).toBeTruthy()
         expect(JSON.parse(Buffer.from(sessionCursor!, "base64url").toString("utf8"))).toMatchObject({
           order: "asc",
@@ -480,7 +481,7 @@ describe("session HttpApi", () => {
         })
 
         const messagePage = yield* request(`/api/session/${session.id}/message?limit=1`, { headers })
-        const messageCursor = (yield* json<{ cursor: { next?: string } }>(messagePage)).cursor.next
+        const messageCursor = (yield* json<{ data: { cursor: { next?: string } } }>(messagePage)).data.cursor.next
         expect(messageCursor).toBeTruthy()
 
         const messageCursorWithOrder = yield* request(

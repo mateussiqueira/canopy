@@ -5,6 +5,7 @@ import * as DateTime from "effect/DateTime"
 import { HttpApiBuilder } from "effect/unstable/httpapi"
 import { InstanceHttpApi } from "../../api"
 import { InvalidCursorError, SessionNotFoundError, UnknownError } from "../../errors"
+import { make } from "../../groups/v2/response"
 
 const DefaultMessagesLimit = 50
 
@@ -75,13 +76,13 @@ export const messageHandlers = HttpApiBuilder.group(InstanceHttpApi, "v2.message
           )
         const first = messages[0]
         const last = messages.at(-1)
-        return {
+        return make({
           items: messages,
           cursor: {
             previous: first ? cursor.encode(first, order, "previous") : undefined,
             next: last ? cursor.encode(last, order, "next") : undefined,
           },
-        }
+        })
       }),
     )
   }),

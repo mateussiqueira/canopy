@@ -42,6 +42,22 @@ function cursor(input: Record<string, unknown>) {
   return Buffer.from(JSON.stringify(input)).toString("base64url")
 }
 
+function data(validate: (value: any) => void) {
+  return (body: any) => {
+    object(body)
+    validate(body.data)
+  }
+}
+
+function locationData(validate: (value: any) => void) {
+  return (body: any) => {
+    object(body)
+    object(body.location)
+    object(body.location.project)
+    validate(body.data)
+  }
+}
+
 const scenarios: Scenario[] = [
   http.protected
     .get("/global/health", "global.health")
@@ -608,19 +624,19 @@ const scenarios: Scenario[] = [
         check(auth.test === undefined, "auth remove should delete provider from isolated auth file")
       }),
     ),
-  http.protected.get("/api/model", "v2.model.list").json(200, array),
-  http.protected.get("/api/provider", "v2.provider.list").json(200, array),
+  http.protected.get("/api/model", "v2.model.list").json(200, locationData(array)),
+  http.protected.get("/api/provider", "v2.provider.list").json(200, locationData(array)),
   http.protected
     .get("/api/fs/read", "v2.fs.read")
     .seeded((ctx) => ctx.file("hello.txt", "hello\n"))
     .at((ctx) => ({ path: "/api/fs/read?path=hello.txt", headers: ctx.headers() }))
-    .json(200, object),
-  http.protected.get("/api/fs/list", "v2.fs.list").json(200, array),
+    .json(200, locationData(object)),
+  http.protected.get("/api/fs/list", "v2.fs.list").json(200, locationData(array)),
   http.protected
     .get("/api/provider/{providerID}", "v2.provider.get")
     .at((ctx) => ({ path: route("/api/provider/{providerID}", { providerID: "missing" }), headers: ctx.headers() }))
     .json(404, object, "status"),
-  http.protected.get("/api/permission/request", "v2.permission.request.list").json(200, array),
+  http.protected.get("/api/permission/request", "v2.permission.request.list").json(200, locationData(array)),
   http.protected
     .get("/api/session/{sessionID}/permission/request", "v2.session.permission.list")
     .seeded((ctx) => ctx.session({ title: "Permission list owner" }))
@@ -628,7 +644,7 @@ const scenarios: Scenario[] = [
       path: route("/api/session/{sessionID}/permission/request", { sessionID: ctx.state.id }),
       headers: ctx.headers(),
     }))
-    .json(200, array),
+    .json(200, data(array)),
   http.protected
     .post("/api/session/{sessionID}/permission/request/{requestID}/reply", "v2.session.permission.reply")
     .seeded((ctx) => ctx.session({ title: "Permission owner" }))
@@ -641,7 +657,7 @@ const scenarios: Scenario[] = [
       body: { reply: "once" },
     }))
     .json(404, object, "status"),
-  http.protected.get("/api/permission/saved", "v2.permission.saved.list").json(200, array),
+  http.protected.get("/api/permission/saved", "v2.permission.saved.list").json(200, data(array)),
   http.protected
     .delete("/api/permission/saved/{id}", "v2.permission.saved.remove")
     .at((ctx) => ({ path: route("/api/permission/saved/{id}", { id: "psv_httpapi_missing" }), headers: ctx.headers() }))
@@ -653,8 +669,9 @@ const scenarios: Scenario[] = [
       200,
       (body) => {
         object(body)
-        array(body.items)
-        object(body.cursor)
+        object(body.data)
+        array(body.data.items)
+        object(body.data.cursor)
       },
       "none",
     ),
@@ -676,8 +693,9 @@ const scenarios: Scenario[] = [
       200,
       (body) => {
         object(body)
-        array(body.items)
-        object(body.cursor)
+        object(body.data)
+        array(body.data.items)
+        object(body.data.cursor)
       },
       "none",
     ),
@@ -698,8 +716,9 @@ const scenarios: Scenario[] = [
       200,
       (body) => {
         object(body)
-        array(body.items)
-        object(body.cursor)
+        object(body.data)
+        array(body.data.items)
+        object(body.data.cursor)
       },
       "none",
     ),

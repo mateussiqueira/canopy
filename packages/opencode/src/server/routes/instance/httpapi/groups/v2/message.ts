@@ -5,6 +5,7 @@ import { HttpApiEndpoint, HttpApiGroup, OpenApi } from "effect/unstable/httpapi"
 import { InvalidCursorError, SessionNotFoundError, UnknownError } from "../../errors"
 import { V2Authorization } from "../../middleware/authorization"
 import { WorkspaceRoutingQueryFields } from "../../middleware/workspace-routing"
+import { data } from "./response"
 
 export const MessagesQuery = Schema.Struct({
   ...WorkspaceRoutingQueryFields,
@@ -29,13 +30,13 @@ export const MessageGroup = HttpApiGroup.make("v2.message")
     HttpApiEndpoint.get("messages", "/api/session/:sessionID/message", {
       params: { sessionID: SessionID },
       query: MessagesQuery,
-      success: Schema.Struct({
+      success: data(Schema.Struct({
         items: Schema.Array(SessionMessage.Message),
         cursor: Schema.Struct({
           previous: Schema.String.pipe(Schema.optional),
           next: Schema.String.pipe(Schema.optional),
         }),
-      }).annotate({ identifier: "V2SessionMessagesResponse" }),
+      }).annotate({ identifier: "V2SessionMessagesResponse" })),
       error: [InvalidCursorError, SessionNotFoundError, UnknownError],
     }).annotateMerge(
       OpenApi.annotations({
