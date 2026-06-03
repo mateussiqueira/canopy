@@ -1425,7 +1425,7 @@ export const layer = Layer.effect(
             log.error("Provider does not exist in model list " + providerID)
             continue
           }
-          const result = yield* fn(data)
+          const result = yield* fn(providers[providerID] ?? data)
           if (result && (result.autoload || providers[providerID])) {
             if (result.getModel) modelLoaders[providerID] = result.getModel
             if (result.vars) varsLoaders[providerID] = result.vars
