@@ -93,9 +93,7 @@ export const layer = Layer.effect(
 
     return Service.of({
       init: Effect.fn("Reference.init")(function* () {
-        yield* InstanceState.get(state)
-        // Own the cached warmup from the long-lived legacy scope before the core layer's scheduled fork can claim it.
-        yield* ensure().pipe(Effect.forkIn(scope, { startImmediately: true }), Effect.asVoid)
+        yield* ensure().pipe(Effect.forkIn(scope), Effect.asVoid)
       }),
       list: Effect.fn("Reference.list")(function* () {
         return yield* InstanceState.useEffect(state, (service) => service.list())

@@ -12,6 +12,7 @@ import { Truncate } from "@/tool/truncate"
 import { Agent } from "../../src/agent/agent"
 import { TestInstance, tmpdirScoped } from "../fixture/fixture"
 import { testEffect } from "../lib/effect"
+import { githubBase } from "../fixture/repository"
 import { Reference } from "@/reference"
 import { RepositoryCache } from "@opencode-ai/core/repository-cache"
 import { Config } from "@/config/config"
@@ -60,21 +61,6 @@ const asks = () => {
     } satisfies Tool.Context,
   }
 }
-
-const githubBase = <A, E, R>(url: string, self: Effect.Effect<A, E, R>) =>
-  Effect.acquireUseRelease(
-    Effect.sync(() => {
-      const previous = process.env.OPENCODE_REPO_CLONE_GITHUB_BASE_URL
-      process.env.OPENCODE_REPO_CLONE_GITHUB_BASE_URL = url
-      return previous
-    }),
-    () => self,
-    (previous) =>
-      Effect.sync(() => {
-        if (previous) process.env.OPENCODE_REPO_CLONE_GITHUB_BASE_URL = previous
-        else delete process.env.OPENCODE_REPO_CLONE_GITHUB_BASE_URL
-      }),
-  )
 
 const git = Effect.fn("GlobToolTest.git")(function* (cwd: string, args: string[]) {
   return yield* Effect.promise(async () => {
