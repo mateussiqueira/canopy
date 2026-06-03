@@ -9,7 +9,7 @@ import { InstanceState } from "@/effect/instance-state"
 import { assertExternalDirectoryEffect } from "./external-directory"
 import { Instruction } from "../session/instruction"
 import { isPdfAttachment, sniffAttachmentMime } from "@/util/media"
-import { Reference } from "@/reference/reference"
+import { Reference } from "@/reference"
 
 const DEFAULT_READ_LIMIT = 2000
 const MAX_LINE_LENGTH = 2000

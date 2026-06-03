@@ -24,8 +24,8 @@ import {
   tmpdirScoped,
 } from "../fixture/fixture"
 import { testEffect } from "../lib/effect"
-import { Reference } from "@/reference/reference"
-import { RepositoryCache } from "@/reference/repository-cache"
+import { Reference } from "@/reference"
+import { RepositoryCache } from "@opencode-ai/core/repository-cache"
 
 const FIXTURES_DIR = path.join(import.meta.dir, "fixtures")
 
@@ -44,12 +44,7 @@ const ctx = {
   ask: () => Effect.void,
 }
 
-const referenceLayer = (flags: Partial<RuntimeFlags.Info> = {}) =>
-  Reference.layer.pipe(
-    Layer.provide(Config.defaultLayer),
-    Layer.provide(RepositoryCache.defaultLayer),
-    Layer.provide(RuntimeFlags.layer(flags)),
-  )
+const referenceLayer = (_flags: Partial<RuntimeFlags.Info> = {}) => Reference.defaultLayer
 
 const readLayer = (flags: Partial<RuntimeFlags.Info> = {}) =>
   Layer.mergeAll(
@@ -265,43 +260,57 @@ describe("tool.read external_directory permission", () => {
   )
 
   references.live("does not ask for external_directory permission when reading configured references", () =>
-    Effect.gen(function* () {
-      const fs = yield* FSUtil.Service
-      const cache = path.join(Global.Path.repos, "github.com", "opencode-read-reference", "repo")
-      yield* fs.remove(cache, { recursive: true }).pipe(Effect.ignore)
-      yield* Effect.addFinalizer(() => fs.remove(cache, { recursive: true }).pipe(Effect.ignore))
+    withReferences(
+      Effect.gen(function* () {
+        const fs = yield* FSUtil.Service
+        const cache = path.join(Global.Path.repos, "github.com", "opencode-read-reference", "repo")
+        yield* fs.remove(cache, { recursive: true }).pipe(Effect.ignore)
+        yield* Effect.addFinalizer(() => fs.remove(cache, { recursive: true }).pipe(Effect.ignore))
 
-      const source = yield* tmpdirScoped({ git: true })
-      const remoteRoot = yield* tmpdirScoped()
-      const remoteDir = path.join(remoteRoot, "opencode-read-reference")
-      const remoteRepo = path.join(remoteDir, "repo.git")
-      yield* put(path.join(source, "notes.md"), "reference notes")
-      yield* git(source, ["add", "."])
-      yield* git(source, ["commit", "-m", "add notes"])
-      yield* fs.makeDirectory(remoteDir, { recursive: true }).pipe(Effect.orDie)
-      yield* git(remoteRoot, ["clone", "--bare", source, remoteRepo])
+        const source = yield* tmpdirScoped({ git: true })
+        const remoteRoot = yield* tmpdirScoped()
+        const remoteDir = path.join(remoteRoot, "opencode-read-reference")
+        const remoteRepo = path.join(remoteDir, "repo.git")
+        yield* put(path.join(source, "notes.md"), "reference notes")
+        yield* git(source, ["add", "."])
+        yield* git(source, ["commit", "-m", "add notes"])
+        yield* fs.makeDirectory(remoteDir, { recursive: true }).pipe(Effect.orDie)
+        yield* git(remoteRoot, ["clone", "--bare", source, remoteRepo])
 
-      const dir = yield* tmpdirScoped({
-        git: true,
-        config: {
-          reference: {
-            docs: "opencode-read-reference/repo",
+        const dir = yield* tmpdirScoped({
+          git: true,
+          config: {
+            reference: {
+              docs: "opencode-read-reference/repo",
+            },
           },
-        },
-      })
+        })
 
-      const { items, next } = asks()
-      const result = yield* githubBase(
-        `file://${remoteRoot}/`,
-        exec(dir, { filePath: path.join(cache, "notes.md") }, next),
-      )
-      const ext = items.find((item) => item.permission === "external_directory")
+        const { items, next } = asks()
+        const result = yield* githubBase(
+          `file://${remoteRoot}/`,
+          exec(dir, { filePath: path.join(cache, "notes.md") }, next),
+        )
+        const ext = items.find((item) => item.permission === "external_directory")
 
-      expect(result.output).toContain("reference notes")
-      expect(ext).toBeUndefined()
-    }),
+        expect(result.output).toContain("reference notes")
+        expect(ext).toBeUndefined()
+      }),
+    ),
   )
 })
+
+function withReferences<A, E, R>(body: Effect.Effect<A, E, R>) {
+  return Effect.acquireUseRelease(
+    Effect.sync(() => process.env.OPENCODE_EXPERIMENTAL_REFERENCES),
+    () => Effect.sync(() => void (process.env.OPENCODE_EXPERIMENTAL_REFERENCES = "true")).pipe(Effect.andThen(body)),
+    (previous) =>
+      Effect.sync(() => {
+        if (previous === undefined) delete process.env.OPENCODE_EXPERIMENTAL_REFERENCES
+        else process.env.OPENCODE_EXPERIMENTAL_REFERENCES = previous
+      }),
+  )
+}
 
 describe("tool.read env file permissions", () => {
   const cases: [string, boolean][] = [

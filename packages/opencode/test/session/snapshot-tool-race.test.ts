@@ -60,8 +60,8 @@ import { FSUtil } from "@opencode-ai/core/fs-util"
 import { CrossSpawnSpawner } from "@opencode-ai/core/cross-spawn-spawner"
 import { Ripgrep } from "@opencode-ai/core/filesystem/ripgrep"
 import { Format } from "../../src/format"
-import { Reference } from "../../src/reference/reference"
-import { RepositoryCache } from "../../src/reference/repository-cache"
+import { Reference } from "../../src/reference"
+import { RepositoryCache } from "@opencode-ai/core/repository-cache"
 import { RuntimeFlags } from "@/effect/runtime-flags"
 
 void Log.init({ print: false })

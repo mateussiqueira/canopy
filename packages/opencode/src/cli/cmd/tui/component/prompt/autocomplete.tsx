@@ -18,8 +18,9 @@ import { Locale } from "@/util/locale"
 import type { PromptInfo } from "./history"
 import { useFrecency } from "./frecency"
 import { useBindings, useCommandSlashes, useOpencodeModeStack } from "../../keymap"
-import { Reference } from "@/reference/reference"
-import { ConfigReference } from "@/config/reference"
+import { Reference } from "@/reference"
+import { ConfigReference } from "@opencode-ai/core/config/reference"
+import { Flag } from "@opencode-ai/core/flag/flag"
 import { displayCharAt, mentionTriggerIndex } from "@/cli/cmd/prompt-display"
 
 function removeLineRange(input: string) {
@@ -329,11 +330,13 @@ export function Autocomplete(props: {
   }
 
   const references = createMemo(() =>
-    Reference.resolveAll({
-      references: ConfigReference.normalize(sync.data.config.reference ?? {}),
-      directory: sync.path.directory || process.cwd(),
-      worktree: sync.path.worktree || sync.path.directory || process.cwd(),
-    }),
+    Flag.OPENCODE_EXPERIMENTAL_REFERENCES
+      ? Reference.resolveAll({
+          references: ConfigReference.normalize(sync.data.config.reference ?? {}),
+          directory: sync.path.directory || process.cwd(),
+          worktree: sync.path.worktree || sync.path.directory || process.cwd(),
+        })
+      : [],
   )
 
   const referenceSearch = createMemo(() => {

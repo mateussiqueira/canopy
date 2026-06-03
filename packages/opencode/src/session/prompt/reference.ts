@@ -1,7 +1,7 @@
 import { Option, Schema } from "effect"
 import { SessionV1 } from "@opencode-ai/core/v1/session"
 import { MessageV2 } from "../message-v2"
-import { Reference } from "@/reference/reference"
+import { Reference } from "@/reference"
 
 const Source = Schema.Struct({
   value: Schema.String,

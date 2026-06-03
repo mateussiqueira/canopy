@@ -9,7 +9,7 @@ import { ShareNext } from "@/share/share-next"
 import { Effect, Layer } from "effect"
 import { Config } from "@/config/config"
 import { Service } from "./bootstrap-service"
-import { Reference } from "@/reference/reference"
+import { Reference } from "@/reference"
 
 export { Service } from "./bootstrap-service"
 export type { Interface } from "./bootstrap-service"
