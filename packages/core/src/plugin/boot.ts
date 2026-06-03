@@ -4,8 +4,10 @@ import { Context, Deferred, Effect, Layer } from "effect"
 import { Auth } from "../auth"
 import { AgentV2 } from "../agent"
 import { Catalog } from "../catalog"
+import { CommandV2 } from "../command"
 import { Config } from "../config"
 import { ConfigAgentPlugin } from "../config/plugin/agent"
+import { ConfigCommandPlugin } from "../config/plugin/command"
 import { ConfigSkillPlugin } from "../config/plugin/skill"
 import { EventV2 } from "../event"
 import { FSUtil } from "../fs-util"
@@ -26,6 +28,7 @@ type Plugin = {
   id: PluginV2.ID
   effect: PluginV2.Effect<
     | Catalog.Service
+    | CommandV2.Service
     | Auth.Service
     | AgentV2.Service
     | Npm.Service
@@ -50,6 +53,7 @@ export const layer = Layer.effect(
   Service,
   Effect.gen(function* () {
     const catalog = yield* Catalog.Service
+    const commands = yield* CommandV2.Service
     const plugin = yield* PluginV2.Service
     const accounts = yield* Auth.Service
     const agents = yield* AgentV2.Service
@@ -68,6 +72,7 @@ export const layer = Layer.effect(
         id: input.id,
         effect: input.effect.pipe(
           Effect.provideService(Catalog.Service, catalog),
+          Effect.provideService(CommandV2.Service, commands),
           Effect.provideService(Auth.Service, accounts),
           Effect.provideService(AgentV2.Service, agents),
           Effect.provideService(Config.Service, config),
@@ -93,6 +98,7 @@ export const layer = Layer.effect(
       yield* add(ModelsDevPlugin)
       yield* add(ConfigProviderPlugin.Plugin)
       yield* add(ConfigAgentPlugin.Plugin)
+      yield* add(ConfigCommandPlugin.Plugin)
       yield* add(ConfigSkillPlugin.Plugin)
     }).pipe(Effect.withSpan("PluginBoot.boot"))
 
@@ -110,6 +116,7 @@ export const layer = Layer.effect(
 
 export const locationLayer = layer.pipe(
   Layer.provideMerge(Catalog.locationLayer),
+  Layer.provideMerge(CommandV2.locationLayer),
   Layer.provideMerge(Config.locationLayer),
   Layer.provideMerge(AgentV2.locationLayer),
   Layer.provideMerge(SkillV2.locationLayer),
