@@ -8,6 +8,7 @@ import { FSUtil } from "@opencode-ai/core/fs-util"
 import { Flag } from "@opencode-ai/core/flag/flag"
 import { Global } from "@opencode-ai/core/global"
 import { Location } from "@opencode-ai/core/location"
+import { Project } from "@opencode-ai/core/project"
 import { ProjectReference } from "@opencode-ai/core/project-reference"
 import { Repository } from "@opencode-ai/core/repository"
 import { RepositoryCache } from "@opencode-ai/core/repository-cache"
@@ -86,6 +87,64 @@ describe("ProjectReference", () => {
     }),
   )
 
+  it.live("resolves local references from the opened directory for global locations", () =>
+    withoutReferences(
+      withTmp((tmp) =>
+        withReferences(
+          Effect.gen(function* () {
+            const references = yield* ProjectReference.Service
+            expect(yield* references.get("docs")).toMatchObject({
+              name: "docs",
+              kind: "local",
+              path: path.join(tmp.path, "opened", "docs"),
+            })
+          }).pipe(
+            Effect.provide(
+              testLayer({
+                directory: path.join(tmp.path, "opened"),
+                project: "/",
+                projectID: Project.ID.global,
+                repos: path.join(tmp.path, "repos"),
+                documents: [document({ docs: "./docs" })],
+                ensure: () => Effect.die("unexpected ensure"),
+              }),
+            ),
+          ),
+        ),
+      ),
+    ),
+  )
+
+  it.live("resolves local references from the project root for global-id Git locations", () =>
+    withoutReferences(
+      withTmp((tmp) => {
+        const project = path.join(tmp.path, "project")
+        return withReferences(
+          Effect.gen(function* () {
+            const references = yield* ProjectReference.Service
+            expect(yield* references.get("docs")).toMatchObject({
+              name: "docs",
+              kind: "local",
+              path: path.join(project, "docs"),
+            })
+          }).pipe(
+            Effect.provide(
+              testLayer({
+                directory: path.join(project, "nested"),
+                project,
+                projectID: Project.ID.global,
+                vcs: { type: "git", store: AbsolutePath.make(path.join(project, ".git")) },
+                repos: path.join(tmp.path, "repos"),
+                documents: [document({ docs: "./docs" })],
+                ensure: () => Effect.die("unexpected ensure"),
+              }),
+            ),
+          ),
+        )
+      }),
+    ),
+  )
+
   it.live("merges config aliases and exposes mention and managed-path operations", () =>
     withoutReferences(
       withTmp((tmp) => {
@@ -139,6 +198,7 @@ describe("ProjectReference", () => {
                 testLayer({
                   directory: nested,
                   project,
+                  vcs: { type: "git", store: AbsolutePath.make(path.join(project, ".git")) },
                   repos,
                   documents: [
                     document({ docs: { path: "./old-docs" }, sdk: "owner/old" }),
@@ -236,6 +296,8 @@ function result(
 function testLayer(input: {
   directory: string
   project: string
+  projectID?: Project.ID
+  vcs?: Project.Vcs
   repos: string
   documents: Config.Loaded[]
   ensure: RepositoryCache.Interface["ensure"]
@@ -250,7 +312,11 @@ function testLayer(input: {
           Location.Service.of(
             location(
               { directory: AbsolutePath.make(input.directory) },
-              { projectDirectory: AbsolutePath.make(input.project) },
+              {
+                projectID: input.projectID ?? Project.ID.make("project"),
+                projectDirectory: AbsolutePath.make(input.project),
+                vcs: input.vcs,
+              },
             ),
           ),
         ),

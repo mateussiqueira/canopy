@@ -73,7 +73,7 @@ export const layer = Layer.effect(
       references: ConfigReference.normalize(
         Object.assign({}, ...(yield* config.get()).map((document) => document.info.references ?? {})),
       ),
-      directory: location.project.directory,
+      directory: location.vcs ? location.project.directory : location.directory,
       home: global.home,
       repos: global.repos,
     })
