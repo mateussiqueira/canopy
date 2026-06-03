@@ -1,5 +1,6 @@
 import { afterEach, describe, expect } from "bun:test"
 import path from "path"
+import { pathToFileURL } from "url"
 import { Effect, Layer } from "effect"
 import { FSUtil } from "@opencode-ai/core/fs-util"
 import { CrossSpawnSpawner } from "@opencode-ai/core/cross-spawn-spawner"
@@ -202,7 +203,9 @@ describe("reference", () => {
             const resolved = yield* reference.get("docs")
             expect(resolved?.kind).toBe("git")
             if (resolved?.kind === "git") {
-              expect(resolved.reference.remote).toBe(`file://${remoteRoot}/opencode-reference-init/repo.git`)
+              expect(resolved.reference.remote).toBe(
+                new URL("opencode-reference-init/repo.git", pathToFileURL(remoteRoot + path.sep)).href,
+              )
             }
           }),
         {
