@@ -1,4 +1,4 @@
-import { afterEach, expect } from "bun:test"
+import { afterEach, expect, test } from "bun:test"
 import { createServer, type Server } from "node:http"
 import { streamText } from "ai"
 import { Effect, Layer } from "effect"
@@ -19,6 +19,16 @@ afterEach(async () => {
 const it = testEffect(
   Layer.mergeAll(Provider.defaultLayer, Env.defaultLayer, Plugin.defaultLayer, CrossSpawnSpawner.defaultLayer),
 )
+
+test("marked custom fetch adapters opt out of outer header timeout", () => {
+  const fetch = Object.assign(() => Promise.resolve(new Response()), {
+    [Symbol.for("opencode.provider.header-timeout")]: false,
+  })
+
+  expect(Provider.headerTimeoutForFetch(fetch, 10_000)).toBeUndefined()
+  expect(Provider.headerTimeoutForFetch(() => Promise.resolve(new Response()), 10_000)).toBe(10_000)
+  expect(Provider.headerTimeoutForFetch(fetch, false)).toBeUndefined()
+})
 
 it.live("headerTimeout does not abort delayed SSE body after headers arrive", () =>
   Effect.gen(function* () {

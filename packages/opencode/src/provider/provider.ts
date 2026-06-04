@@ -36,6 +36,12 @@ const OPENAI_HEADER_TIMEOUT_DEFAULT = 10_000
 // Custom fetch adapters can opt out when they apply route-specific header timing internally.
 const HEADER_TIMEOUT = Symbol.for("opencode.provider.header-timeout")
 
+export function headerTimeoutForFetch(fetch: unknown, timeout: number | false | undefined) {
+  if (timeout === false) return undefined
+  if (typeof fetch === "function" && fetch[HEADER_TIMEOUT] === false) return undefined
+  return timeout
+}
+
 function wrapSSE(res: Response, ms: number, ctl: AbortController) {
   if (typeof ms !== "number" || ms <= 0) return res
   if (!res.body) return res
@@ -1605,8 +1611,7 @@ export const layer = Layer.effect(
           const fetchFn = customFetch ?? fetch
           const opts = init ?? {}
           const chunkAbortCtl = typeof chunkTimeout === "number" && chunkTimeout > 0 ? new AbortController() : undefined
-          const headerTimeoutMs =
-            headerTimeout === false || customFetch?.[HEADER_TIMEOUT] === false ? undefined : headerTimeout
+          const headerTimeoutMs = headerTimeoutForFetch(customFetch, headerTimeout)
           const headerTimeoutCtl = typeof headerTimeoutMs === "number" ? timeoutController(headerTimeoutMs) : undefined
           const signals: AbortSignal[] = []
 

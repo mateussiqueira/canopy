@@ -176,14 +176,24 @@ describe("plugin.codex", () => {
   })
 
   test("can disable websocket HTTP fallback header timeout", async () => {
-    const response = await fetchWithHeaderTimeout(
-      async () => new Response("http"),
-      "https://example.com/v1/responses",
-      undefined,
-      false,
-    )
+    using server = Bun.serve({
+      port: 0,
+      async fetch() {
+        await Bun.sleep(30)
+        return new Response("http")
+      },
+    })
+    const hooks = await CodexAuthPlugin({} as never, { experimentalWebSockets: true })
+    await hooks.config!({ provider: { openai: { options: { headerTimeout: false } } } } as never)
+    const loaded = await hooks.auth!.loader!(async () => ({ type: "api", key: "sk-test" }) as never, {} as never)
+
+    const response = await loaded.fetch!(new URL("/v1/responses", server.url), {
+      method: "POST",
+      body: JSON.stringify({ stream: true }),
+    })
 
     expect(await response.text()).toBe("http")
+    await hooks.dispose?.()
   })
 
   test("deduplicates concurrent Codex token refreshes", async () => {
