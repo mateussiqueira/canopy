@@ -14,7 +14,7 @@ async function published(name: string, version: string) {
 async function publish(dir: string, name: string, version: string) {
   if (process.platform !== "win32") await $`chmod -R 755 .`.cwd(dir)
   if (await published(name, version)) return console.log(`already published ${name}@${version}`)
-  await $`npm pack`.cwd(dir)
+  await $`bun pm pack`.cwd(dir)
   await $`npm publish *.tgz --access public --tag ${Script.channel}`.cwd(dir)
 }
 
