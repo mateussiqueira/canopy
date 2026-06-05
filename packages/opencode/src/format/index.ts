@@ -8,10 +8,10 @@ import { mergeDeep } from "remeda"
 import { Config } from "@/config/config"
 import { RuntimeFlags } from "@/effect/runtime-flags"
 import { errorMessage } from "@/util/error"
-import * as Log from "@opencode-ai/core/util/log"
+import * as EffectLogger from "@opencode-ai/core/effect/logger"
 import * as Formatter from "./formatter"
 
-const log = Log.create({ service: "format" })
+const log = EffectLogger.create({ service: "format" })
 
 export const Status = Schema.Struct({
   name: Schema.String,

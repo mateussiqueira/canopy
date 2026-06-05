@@ -28,7 +28,6 @@ import type { Snapshot } from "@/snapshot"
 import { useExit } from "./exit"
 import { useArgs } from "./args"
 import { batch, onMount } from "solid-js"
-import * as Log from "@opencode-ai/core/util/log"
 import { emptyConsoleState, type ConsoleState } from "@/config/console-state"
 import path from "path"
 import { useKV } from "./kv"
@@ -465,11 +464,6 @@ export const { use: useSync, provider: SyncProvider } = createSimpleContext({
           })
         })
         .catch(async (e) => {
-          Log.Default.error("tui bootstrap failed", {
-            error: e instanceof Error ? e.message : String(e),
-            name: e instanceof Error ? e.name : undefined,
-            stack: e instanceof Error ? e.stack : undefined,
-          })
           if (fatal) {
             await exit(e)
           } else {

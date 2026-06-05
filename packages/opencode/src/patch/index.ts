@@ -1,10 +1,10 @@
 import { Effect, Schema } from "effect"
 import * as path from "path"
 import { AppFileSystem } from "@opencode-ai/core/filesystem"
-import * as Log from "@opencode-ai/core/util/log"
+import * as EffectLogger from "@opencode-ai/core/effect/logger"
 import * as Bom from "../util/bom"
 
-const log = Log.create({ service: "patch" })
+const log = EffectLogger.create({ service: "patch" })
 
 export const PatchSchema = Schema.Struct({
   patchText: Schema.String.annotate({ description: "The full patch text that describes all changes to be made" }),

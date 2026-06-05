@@ -2,9 +2,9 @@ import path from "path"
 import { writeHeapSnapshot } from "node:v8"
 import { Flag } from "@opencode-ai/core/flag/flag"
 import { Global } from "@opencode-ai/core/global"
-import * as Log from "@opencode-ai/core/util/log"
+import * as EffectLogger from "@opencode-ai/core/effect/logger"
 
-const log = Log.create({ service: "heap" })
+const log = EffectLogger.create({ service: "heap" })
 const MINUTE = 60_000
 const LIMIT = 2 * 1024 * 1024 * 1024
 

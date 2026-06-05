@@ -1,10 +1,10 @@
 import { GlobalBus } from "@/bus/global"
 import { InstanceStore } from "@/project/instance-store"
-import * as Log from "@opencode-ai/core/util/log"
+import * as EffectLogger from "@opencode-ai/core/effect/logger"
 import { Effect } from "effect"
 import { Event } from "./event"
 
-const log = Log.create({ service: "server" })
+const log = EffectLogger.create({ service: "server" })
 
 export const emitGlobalDisposed = Effect.sync(() =>
   GlobalBus.emit("event", {

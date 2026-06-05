@@ -7,13 +7,10 @@ import { ModelID, ProviderID } from "../../src/provider/schema"
 import { SessionRevert } from "../../src/session/revert"
 import { MessageV2 } from "../../src/session/message-v2"
 import { Snapshot } from "../../src/snapshot"
-import * as Log from "@opencode-ai/core/util/log"
 import { MessageID, PartID, SessionID } from "../../src/session/schema"
 import { CrossSpawnSpawner } from "@opencode-ai/core/cross-spawn-spawner"
 import { provideTmpdirInstance } from "../fixture/fixture"
 import { testEffect } from "../lib/effect"
-
-void Log.init({ print: false })
 
 const env = Layer.mergeAll(
   Session.defaultLayer,

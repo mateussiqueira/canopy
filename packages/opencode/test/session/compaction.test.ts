@@ -9,7 +9,6 @@ import { Agent } from "../../src/agent/agent"
 import { LLM } from "../../src/session/llm"
 import { SessionCompaction } from "../../src/session/compaction"
 import { Token } from "@/util/token"
-import * as Log from "@opencode-ai/core/util/log"
 import { Permission } from "../../src/permission"
 import { Plugin } from "../../src/plugin"
 import { provideTmpdirInstance, TestInstance } from "../fixture/fixture"
@@ -31,8 +30,6 @@ import { SyncEvent } from "@/sync"
 import { RuntimeFlags } from "@/effect/runtime-flags"
 import { EventV2Bridge } from "@/event-v2-bridge"
 import { LLMEvent, Usage } from "@opencode-ai/llm"
-
-void Log.init({ print: false })
 
 const summary = Layer.succeed(
   SessionSummary.Service,

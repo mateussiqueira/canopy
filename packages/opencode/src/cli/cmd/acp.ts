@@ -1,4 +1,4 @@
-import * as Log from "@opencode-ai/core/util/log"
+import * as EffectLogger from "@opencode-ai/core/effect/logger"
 import { Effect } from "effect"
 import { effectCmd } from "../effect-cmd"
 import { AgentSideConnection, ndJsonStream } from "@agentclientprotocol/sdk"
@@ -10,7 +10,7 @@ import { createOpencodeClient } from "@opencode-ai/sdk/v2"
 import { withNetworkOptions, resolveNetworkOptions } from "../network"
 import { RuntimeFlags } from "@/effect/runtime-flags"
 
-const log = Log.create({ service: "acp-command" })
+const log = EffectLogger.create({ service: "acp-command" })
 
 export const AcpCommand = effectCmd({
   command: "acp",

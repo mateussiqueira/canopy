@@ -18,14 +18,14 @@ import { TuiKeybind } from "./keybind"
 import { InstallationLocal, InstallationVersion } from "@opencode-ai/core/installation/version"
 import { makeRuntime } from "@opencode-ai/core/effect/runtime"
 import { Filesystem } from "@/util/filesystem"
-import * as Log from "@opencode-ai/core/util/log"
+import * as EffectLogger from "@opencode-ai/core/effect/logger"
 import { ConfigVariable } from "@/config/variable"
 import { Npm } from "@opencode-ai/core/npm"
 import type { DeepMutable } from "@opencode-ai/core/schema"
 import type { TuiAttentionSoundName } from "@opencode-ai/plugin/tui"
 import { FormatError, FormatUnknownError } from "@/cli/error"
 
-const log = Log.create({ service: "tui.config" })
+const log = EffectLogger.create({ service: "tui.config" })
 
 export const Info = TuiInfo
 export type Info = DeepMutable<Schema.Schema.Type<typeof Info>>

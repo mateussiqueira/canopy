@@ -12,7 +12,7 @@ import ignore from "ignore"
 import path from "path"
 import { Global } from "@opencode-ai/core/global"
 import { containsPath } from "../project/instance-context"
-import * as Log from "@opencode-ai/core/util/log"
+import * as EffectLogger from "@opencode-ai/core/effect/logger"
 import { Protected } from "./protected"
 import { Ripgrep } from "./ripgrep"
 import { NonNegativeInt, type DeepMutable } from "@opencode-ai/core/schema"
@@ -70,7 +70,7 @@ export const Event = {
   ),
 }
 
-const log = Log.create({ service: "file" })
+const log = EffectLogger.create({ service: "file" })
 
 const binary = new Set([
   "exe",

@@ -2,7 +2,7 @@ import path from "path"
 import os from "os"
 import { SessionID, MessageID, PartID } from "./schema"
 import { MessageV2 } from "./message-v2"
-import * as Log from "@opencode-ai/core/util/log"
+import * as EffectLogger from "@opencode-ai/core/effect/logger"
 import { SessionRevert } from "./revert"
 import * as Session from "./session"
 import { Agent } from "../agent/agent"
@@ -42,7 +42,6 @@ import { Image } from "@/image/image"
 import { decodeDataUrl } from "@/util/data-url"
 import { Process } from "@/util/process"
 import { Cause, Effect, Exit, Latch, Layer, Option, Scope, Context, Schema, Types } from "effect"
-import * as EffectLogger from "@opencode-ai/core/effect/logger"
 import { InstanceState } from "@/effect/instance-state"
 import { TaskTool, type TaskPromptOps } from "@/tool/task"
 import { SessionRunState } from "./run-state"
@@ -78,7 +77,7 @@ IMPORTANT:
 
 const STRUCTURED_OUTPUT_SYSTEM_PROMPT = `IMPORTANT: The user has requested structured output. You MUST use the StructuredOutput tool to provide your final response. Do NOT respond with plain text - you MUST call the StructuredOutput tool with your answer formatted according to the schema.`
 
-const log = Log.create({ service: "session.prompt" })
+const log = EffectLogger.create({ service: "session.prompt" })
 const elog = EffectLogger.create({ service: "session.prompt" })
 
 function isOrphanedInterruptedTool(part: MessageV2.ToolPart) {

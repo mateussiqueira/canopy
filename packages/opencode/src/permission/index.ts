@@ -7,14 +7,14 @@ import { MessageID, SessionID } from "@/session/schema"
 import { PermissionTable } from "@/session/session.sql"
 import { Database } from "@/storage/db"
 import { eq } from "drizzle-orm"
-import * as Log from "@opencode-ai/core/util/log"
+import * as EffectLogger from "@opencode-ai/core/effect/logger"
 import { Wildcard } from "@opencode-ai/core/util/wildcard"
 import { Deferred, Effect, Layer, Schema, Context } from "effect"
 import os from "os"
 import { PermissionV2 } from "@opencode-ai/core/permission"
 import { PermissionID } from "./schema"
 
-const log = Log.create({ service: "permission" })
+const log = EffectLogger.create({ service: "permission" })
 
 export const Action = PermissionV2.Action.annotate({ identifier: "PermissionAction" })
 export type Action = Schema.Schema.Type<typeof Action>

@@ -2,7 +2,6 @@ import { describe, expect } from "bun:test"
 import { Deferred, Effect, Exit, Layer } from "effect"
 import { Session as SessionNs } from "@/session/session"
 import { GlobalBus, type GlobalEvent } from "../../src/bus/global"
-import * as Log from "@opencode-ai/core/util/log"
 import { MessageV2 } from "../../src/session/message-v2"
 import { MessageID, PartID, type SessionID } from "../../src/session/schema"
 import { CrossSpawnSpawner } from "@opencode-ai/core/cross-spawn-spawner"
@@ -13,8 +12,6 @@ import { Storage } from "@/storage/storage"
 import { SyncEvent } from "@/sync"
 import { RuntimeFlags } from "@/effect/runtime-flags"
 import { BackgroundJob } from "@/background/job"
-
-void Log.init({ print: false })
 
 const it = testEffect(
   Layer.mergeAll(

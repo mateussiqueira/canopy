@@ -13,10 +13,10 @@ import type { SessionID } from "@/session/schema"
 import { Database } from "@/storage/db"
 import { eq } from "drizzle-orm"
 import { Config } from "@/config/config"
-import * as Log from "@opencode-ai/core/util/log"
+import * as EffectLogger from "@opencode-ai/core/effect/logger"
 import { SessionShareTable } from "./share.sql"
 
-const log = Log.create({ service: "share-next" })
+const log = EffectLogger.create({ service: "share-next" })
 const disabled = process.env["OPENCODE_DISABLE_SHARE"] === "true" || process.env["OPENCODE_DISABLE_SHARE"] === "1"
 
 export type Api = {

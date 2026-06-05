@@ -7,9 +7,6 @@ import { HttpApiApp } from "../../src/server/routes/instance/httpapi/server"
 import { PtyID } from "../../src/pty/schema"
 import { resetDatabase } from "../fixture/db"
 import { disposeAllInstances, tmpdir } from "../fixture/fixture"
-import * as Log from "@opencode-ai/core/util/log"
-
-void Log.init({ print: false })
 
 function app(input: { password?: string; username?: string }) {
   const handler = HttpRouter.toWebHandler(

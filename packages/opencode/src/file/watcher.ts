@@ -14,11 +14,11 @@ import { lazy } from "@/util/lazy"
 import { Config } from "@/config/config"
 import { FileIgnore } from "./ignore"
 import { Protected } from "./protected"
-import * as Log from "@opencode-ai/core/util/log"
+import * as EffectLogger from "@opencode-ai/core/effect/logger"
 
 declare const OPENCODE_LIBC: string | undefined
 
-const log = Log.create({ service: "file.watcher" })
+const log = EffectLogger.create({ service: "file.watcher" })
 const SUBSCRIBE_TIMEOUT_MS = 10_000
 
 export const Event = {

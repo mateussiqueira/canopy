@@ -24,7 +24,7 @@ import type { SQL } from "drizzle-orm"
 import { PartTable, SessionTable } from "./session.sql"
 import { ProjectTable } from "../project/project.sql"
 import { Storage } from "@/storage/storage"
-import * as Log from "@opencode-ai/core/util/log"
+import * as EffectLogger from "@opencode-ai/core/effect/logger"
 import { MessageV2 } from "./message-v2"
 import type { InstanceContext } from "../project/instance-context"
 import { InstanceState } from "@/effect/instance-state"
@@ -41,7 +41,7 @@ import { Effect, Layer, Option, Context, Schema, Types } from "effect"
 import { NonNegativeInt, optionalOmitUndefined } from "@opencode-ai/core/schema"
 import { RuntimeFlags } from "@/effect/runtime-flags"
 
-const log = Log.create({ service: "session" })
+const log = EffectLogger.create({ service: "session" })
 
 const parentTitlePrefix = "New session - "
 const childTitlePrefix = "Child session - "

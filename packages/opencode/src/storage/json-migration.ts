@@ -1,7 +1,7 @@
 import type { SQLiteBunDatabase } from "drizzle-orm/bun-sqlite"
 import type { NodeSQLiteDatabase } from "drizzle-orm/node-sqlite"
 import { Global } from "@opencode-ai/core/global"
-import * as Log from "@opencode-ai/core/util/log"
+import * as EffectLogger from "@opencode-ai/core/effect/logger"
 import { ProjectTable } from "../project/project.sql"
 import { SessionTable, MessageTable, PartTable, TodoTable, PermissionTable } from "../session/session.sql"
 import { SessionShareTable } from "../share/share.sql"
@@ -10,7 +10,7 @@ import { existsSync } from "fs"
 import { Filesystem } from "@/util/filesystem"
 import { Glob } from "@opencode-ai/core/util/glob"
 
-const log = Log.create({ service: "json-migration" })
+const log = EffectLogger.create({ service: "json-migration" })
 
 export type Progress = {
   current: number

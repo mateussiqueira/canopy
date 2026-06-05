@@ -1,6 +1,6 @@
 import { Effect, Exit, Layer, PubSub, Scope, Context, Stream, Schema } from "effect"
 import { EffectBridge } from "@/effect/bridge"
-import * as Log from "@opencode-ai/core/util/log"
+import * as EffectLogger from "@opencode-ai/core/effect/logger"
 import { BusEvent } from "./bus-event"
 import { GlobalBus } from "./global"
 import { InstanceState } from "@/effect/instance-state"
@@ -10,7 +10,7 @@ import { Identifier } from "@/id/id"
 import type { InstanceContext } from "@/project/instance-context"
 import { InstanceRef } from "@/effect/instance-ref"
 
-const log = Log.create({ service: "bus" })
+const log = EffectLogger.create({ service: "bus" })
 
 type BusProperties<D extends BusEvent.Definition<string, Schema.Top>> = Schema.Schema.Type<D["properties"]>
 

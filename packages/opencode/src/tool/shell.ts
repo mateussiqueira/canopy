@@ -3,7 +3,7 @@ import os from "os"
 import { createWriteStream } from "node:fs"
 import * as Tool from "./tool"
 import path from "path"
-import * as Log from "@opencode-ai/core/util/log"
+import * as EffectLogger from "@opencode-ai/core/effect/logger"
 import { containsPath, type InstanceContext } from "../project/instance-context"
 import { InstanceState } from "@/effect/instance-state"
 import { lazy } from "@/util/lazy"
@@ -82,7 +82,7 @@ type Chunk = {
   size: number
 }
 
-export const log = Log.create({ service: "shell-tool" })
+export const log = EffectLogger.create({ service: "shell-tool" })
 
 const resolveWasm = (asset: string) => {
   if (asset.startsWith("file://")) return fileURLToPath(asset)

@@ -5,7 +5,7 @@ import { Bus } from "@/bus"
 import { Installation } from "@/installation"
 import { disposeAllInstancesAndEmitGlobalDisposed } from "@/server/global-lifecycle"
 import { InstallationVersion } from "@opencode-ai/core/installation/version"
-import * as Log from "@opencode-ai/core/util/log"
+import * as EffectLogger from "@opencode-ai/core/effect/logger"
 import { Effect, Queue, Schema } from "effect"
 import * as Stream from "effect/Stream"
 import { HttpServerRequest, HttpServerResponse } from "effect/unstable/http"
@@ -14,7 +14,7 @@ import * as Sse from "effect/unstable/encoding/Sse"
 import { RootHttpApi } from "../api"
 import { GlobalUpgradeInput } from "../groups/global"
 
-const log = Log.create({ service: "server" })
+const log = EffectLogger.create({ service: "server" })
 
 function eventData(data: unknown): Sse.Event {
   return {

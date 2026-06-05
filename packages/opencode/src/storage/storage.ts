@@ -1,4 +1,4 @@
-import * as Log from "@opencode-ai/core/util/log"
+import * as EffectLogger from "@opencode-ai/core/effect/logger"
 import path from "path"
 import { Global } from "@opencode-ai/core/global"
 import { AppFileSystem } from "@opencode-ai/core/filesystem"
@@ -6,7 +6,7 @@ import { Effect, Exit, Layer, Option, RcMap, Schema, Context, TxReentrantLock } 
 import { NonNegativeInt } from "@opencode-ai/core/schema"
 import { Git } from "@/git"
 
-const log = Log.create({ service: "storage" })
+const log = EffectLogger.create({ service: "storage" })
 
 type Migration = (
   dir: string,

@@ -2,12 +2,12 @@ import type { Hooks, PluginInput } from "@opencode-ai/plugin"
 import type { Model } from "@opencode-ai/sdk/v2"
 import { InstallationVersion } from "@opencode-ai/core/installation/version"
 import { iife } from "@/util/iife"
-import * as Log from "@opencode-ai/core/util/log"
+import * as EffectLogger from "@opencode-ai/core/effect/logger"
 import { setTimeout as sleep } from "node:timers/promises"
 import { CopilotModels } from "./models"
 import { MessageV2 } from "@/session/message-v2"
 
-const log = Log.create({ service: "plugin.copilot" })
+const log = EffectLogger.create({ service: "plugin.copilot" })
 
 const CLIENT_ID = "Ov23li8tweQw6odWQebz"
 // Add a small safety buffer when polling to avoid hitting the server

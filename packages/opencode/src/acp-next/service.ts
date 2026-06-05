@@ -30,7 +30,7 @@ import {
   type SetSessionModeResponse,
 } from "@agentclientprotocol/sdk"
 import { InstallationVersion } from "@opencode-ai/core/installation/version"
-import * as Log from "@opencode-ai/core/util/log"
+import * as EffectLogger from "@opencode-ai/core/effect/logger"
 import type { Message, OpencodeClient, SessionMessageResponse } from "@opencode-ai/sdk/v2"
 import { Context, Effect, Layer, ManagedRuntime } from "effect"
 import * as ACPNextError from "./error"
@@ -43,7 +43,7 @@ import { Provider } from "@/provider/provider"
 import type { Command } from "@/command"
 
 export const AuthMethodID = "opencode-login"
-const log = Log.create({ service: "acp-next-service" })
+const log = EffectLogger.create({ service: "acp-next-service" })
 
 export type Error = ACPNextError.Error
 

@@ -1,6 +1,6 @@
 import { Auth } from "@/auth"
 import { ProviderID } from "@/provider/schema"
-import * as Log from "@opencode-ai/core/util/log"
+import * as EffectLogger from "@opencode-ai/core/effect/logger"
 import { Effect } from "effect"
 import { HttpApiBuilder } from "effect/unstable/httpapi"
 import { RootHttpApi } from "../api"
@@ -24,7 +24,7 @@ export const controlHandlers = HttpApiBuilder.group(RootHttpApi, "control", (han
     })
 
     const log = Effect.fn("ControlHttpApi.log")(function* (ctx: { payload: typeof LogInput.Type }) {
-      const logger = Log.create({ service: ctx.payload.service })
+      const logger = EffectLogger.create({ service: ctx.payload.service })
       logger[ctx.payload.level](ctx.payload.message, ctx.payload.extra)
       return true
     })

@@ -1,10 +1,10 @@
 import type { Hooks, PluginInput } from "@opencode-ai/plugin"
-import * as Log from "@opencode-ai/core/util/log"
+import * as EffectLogger from "@opencode-ai/core/effect/logger"
 import { OAUTH_DUMMY_KEY } from "../auth"
 import { createServer } from "http"
 import { InstallationVersion } from "@opencode-ai/core/installation/version"
 
-const log = Log.create({ service: "plugin.xai" })
+const log = EffectLogger.create({ service: "plugin.xai" })
 
 // Public Grok-CLI OAuth client. xAI's auth server rejects loopback OAuth from
 // non-allowlisted clients, so we reuse the Grok-CLI client_id that xAI ships

@@ -6,10 +6,10 @@ import { DiffStyle, ScrollAcceleration, ScrollSpeed } from "./tui-schema"
 import { Flag } from "@opencode-ai/core/flag/flag"
 import { Global } from "@opencode-ai/core/global"
 import { Filesystem } from "@/util/filesystem"
-import * as Log from "@opencode-ai/core/util/log"
+import * as EffectLogger from "@opencode-ai/core/effect/logger"
 import * as ConfigPaths from "@/config/paths"
 
-const log = Log.create({ service: "tui.migrate" })
+const log = EffectLogger.create({ service: "tui.migrate" })
 
 const TUI_SCHEMA_URL = "https://opencode.ai/tui.json"
 

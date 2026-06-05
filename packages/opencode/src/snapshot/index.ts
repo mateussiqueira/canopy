@@ -8,7 +8,7 @@ import { AppFileSystem } from "@opencode-ai/core/filesystem"
 import { Hash } from "@opencode-ai/core/util/hash"
 import { Config } from "@/config/config"
 import { Global } from "@opencode-ai/core/global"
-import * as Log from "@opencode-ai/core/util/log"
+import * as EffectLogger from "@opencode-ai/core/effect/logger"
 
 export const Patch = Schema.Struct({
   hash: Schema.String,
@@ -28,7 +28,7 @@ export const FileDiff = Schema.Struct({
 }).annotate({ identifier: "SnapshotFileDiff" })
 export type FileDiff = typeof FileDiff.Type
 
-const log = Log.create({ service: "snapshot" })
+const log = EffectLogger.create({ service: "snapshot" })
 const prune = "7.days"
 const limit = 2 * 1024 * 1024
 const core = ["-c", "core.longpaths=true", "-c", "core.symlinks=true"]

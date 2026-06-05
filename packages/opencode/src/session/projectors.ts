@@ -8,10 +8,10 @@ import * as Session from "./session"
 import { MessageV2 } from "./message-v2"
 import { SessionTable, MessageTable, PartTable } from "./session.sql"
 import { WorkspaceTable } from "@/control-plane/workspace.sql"
-import { Log } from "@opencode-ai/core/util/log"
+import * as EffectLogger from "@opencode-ai/core/effect/logger"
 import nextProjectors from "./projectors-next"
 
-const log = Log.create({ service: "session.projector" })
+const log = EffectLogger.create({ service: "session.projector" })
 
 function foreign(err: unknown) {
   if (typeof err !== "object" || err === null) return false

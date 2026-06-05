@@ -1,11 +1,11 @@
 import type { Hooks, PluginInput } from "@opencode-ai/plugin"
 import type { Model } from "@opencode-ai/sdk/v2"
-import * as Log from "@opencode-ai/core/util/log"
+import * as EffectLogger from "@opencode-ai/core/effect/logger"
 import { InstallationVersion } from "@opencode-ai/core/installation/version"
 import { createServer } from "http"
 import open from "open"
 
-const log = Log.create({ service: "plugin.digitalocean" })
+const log = EffectLogger.create({ service: "plugin.digitalocean" })
 
 const DO_OAUTH_CLIENT_ID = "b1a6c5158156caac821fd1b30253ca8acb52454a48fa744420e41889cb589f82"
 const DO_AUTHORIZE_URL = "https://cloud.digitalocean.com/v1/oauth/authorize"

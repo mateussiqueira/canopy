@@ -1,9 +1,9 @@
 import { NamedError } from "@opencode-ai/core/util/error"
-import * as Log from "@opencode-ai/core/util/log"
+import * as EffectLogger from "@opencode-ai/core/effect/logger"
 import { Cause, Effect } from "effect"
 import { HttpRouter, HttpServerError, HttpServerRespondable, HttpServerResponse } from "effect/unstable/http"
 
-const log = Log.create({ service: "server" })
+const log = EffectLogger.create({ service: "server" })
 
 // Keep typed HttpApi failures on their declared error path; this boundary only replaces defect-only empty 500s.
 export const errorLayer = HttpRouter.middleware<{ handles: unknown }>()((effect) =>

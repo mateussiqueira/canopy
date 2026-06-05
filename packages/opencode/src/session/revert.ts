@@ -3,14 +3,14 @@ import { Bus } from "../bus"
 import { Snapshot } from "../snapshot"
 import { Storage } from "@/storage/storage"
 import { SyncEvent } from "../sync"
-import * as Log from "@opencode-ai/core/util/log"
+import * as EffectLogger from "@opencode-ai/core/effect/logger"
 import * as Session from "./session"
 import { MessageV2 } from "./message-v2"
 import { SessionID, MessageID, PartID } from "./schema"
 import { SessionRunState } from "./run-state"
 import { SessionSummary } from "./summary"
 
-const log = Log.create({ service: "session.revert" })
+const log = EffectLogger.create({ service: "session.revert" })
 
 export const RevertInput = Schema.Struct({
   sessionID: SessionID,

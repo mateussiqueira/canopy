@@ -1,7 +1,7 @@
-import * as Log from "@opencode-ai/core/util/log"
+import * as EffectLogger from "@opencode-ai/core/effect/logger"
 import { Bonjour } from "bonjour-service"
 
-const log = Log.create({ service: "mdns" })
+const log = EffectLogger.create({ service: "mdns" })
 
 let bonjour: Bonjour | undefined
 let currentPort: number | undefined

@@ -16,10 +16,10 @@ import { MessageV2 } from "./message-v2"
 import * as Session from "./session"
 import { SessionProcessor } from "./processor"
 import { PartID } from "./schema"
-import * as Log from "@opencode-ai/core/util/log"
+import * as EffectLogger from "@opencode-ai/core/effect/logger"
 import { EffectBridge } from "@/effect/bridge"
 
-const log = Log.create({ service: "session.tools" })
+const log = EffectLogger.create({ service: "session.tools" })
 
 export const resolve = Effect.fn("SessionTools.resolve")(function* (input: {
   agent: Agent.Info

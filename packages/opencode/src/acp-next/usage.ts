@@ -1,5 +1,5 @@
 import type { AgentSideConnection, Usage } from "@agentclientprotocol/sdk"
-import * as Log from "@opencode-ai/core/util/log"
+import * as EffectLogger from "@opencode-ai/core/effect/logger"
 import type { AssistantMessage as OpenCodeAssistantMessage, Message } from "@opencode-ai/sdk/v2"
 import { InstanceRef } from "@/effect/instance-ref"
 import { InstanceStore } from "@/project/instance-store"
@@ -7,7 +7,7 @@ import { ModelID, ProviderID } from "@/provider/schema"
 import { Provider } from "@/provider/provider"
 import { Context, Effect, Layer, SynchronizedRef } from "effect"
 
-const log = Log.create({ service: "acp-next-usage" })
+const log = EffectLogger.create({ service: "acp-next-usage" })
 
 export type AssistantTokenCost = Pick<OpenCodeAssistantMessage, "cost" | "tokens">
 

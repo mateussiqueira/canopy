@@ -19,7 +19,7 @@ import permissionSoundPath from "@opencode-ai/ui/audio/staplebops-06.mp3" with {
 import errorSoundPath from "@opencode-ai/ui/audio/nope-03.mp3" with { type: "file" }
 import doneSoundPath from "@opencode-ai/ui/audio/bip-bop-01.mp3" with { type: "file" }
 import subagentDoneSoundPath from "@opencode-ai/ui/audio/yup-01.mp3" with { type: "file" }
-import * as Log from "@opencode-ai/core/util/log"
+import * as EffectLogger from "@opencode-ai/core/effect/logger"
 
 type FocusState = "unknown" | "focused" | "blurred"
 
@@ -38,7 +38,7 @@ type TuiAttentionHost = TuiAttention & {
   dispose(): void
 }
 
-const log = Log.create({ service: "tui.attention" })
+const log = EffectLogger.create({ service: "tui.attention" })
 
 const DEFAULT_TITLE = "opencode"
 const DEFAULT_PACK_ID = "opencode.default"

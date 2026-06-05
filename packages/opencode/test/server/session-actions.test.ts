@@ -2,11 +2,8 @@ import { afterEach, describe, expect, mock } from "bun:test"
 import { Effect } from "effect"
 import { Server } from "../../src/server/server"
 import { Session as SessionNs } from "@/session/session"
-import * as Log from "@opencode-ai/core/util/log"
 import { disposeAllInstances, TestInstance } from "../fixture/fixture"
 import { testEffect } from "../lib/effect"
-
-void Log.init({ print: false })
 
 const it = testEffect(SessionNs.defaultLayer)
 

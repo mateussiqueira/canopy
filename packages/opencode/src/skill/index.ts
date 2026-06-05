@@ -12,12 +12,12 @@ import { Config } from "@/config/config"
 import { ConfigMarkdown } from "@/config/markdown"
 import { RuntimeFlags } from "@/effect/runtime-flags"
 import { Glob } from "@opencode-ai/core/util/glob"
-import * as Log from "@opencode-ai/core/util/log"
+import * as EffectLogger from "@opencode-ai/core/effect/logger"
 import { Discovery } from "./discovery"
 import CUSTOMIZE_OPENCODE_SKILL_BODY from "./prompt/customize-opencode.md" with { type: "text" }
 import { isRecord } from "@/util/record"
 
-const log = Log.create({ service: "skill" })
+const log = EffectLogger.create({ service: "skill" })
 const CLAUDE_EXTERNAL_DIR = ".claude"
 const AGENTS_EXTERNAL_DIR = ".agents"
 const EXTERNAL_SKILL_PATTERN = "skills/**/SKILL.md"

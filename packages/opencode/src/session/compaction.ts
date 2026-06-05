@@ -5,7 +5,7 @@ import { SessionID, MessageID, PartID } from "./schema"
 import { Provider } from "@/provider/provider"
 import { MessageV2 } from "./message-v2"
 import { Token } from "@/util/token"
-import * as Log from "@opencode-ai/core/util/log"
+import * as EffectLogger from "@opencode-ai/core/effect/logger"
 import { SessionProcessor } from "./processor"
 import { Agent } from "@/agent/agent"
 import { Plugin } from "@/plugin"
@@ -21,7 +21,7 @@ import { RuntimeFlags } from "@/effect/runtime-flags"
 import { EventV2Bridge } from "@/event-v2-bridge"
 import { SessionEvent } from "@opencode-ai/core/session-event"
 
-const log = Log.create({ service: "session.compaction" })
+const log = EffectLogger.create({ service: "session.compaction" })
 
 export const Event = {
   Compacted: BusEvent.define(

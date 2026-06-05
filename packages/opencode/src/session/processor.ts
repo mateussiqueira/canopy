@@ -19,7 +19,7 @@ import { SessionSummary } from "./summary"
 import type { Provider } from "@/provider/provider"
 import { Question } from "@/question"
 import { errorMessage } from "@/util/error"
-import * as Log from "@opencode-ai/core/util/log"
+import * as EffectLogger from "@opencode-ai/core/effect/logger"
 import { isRecord } from "@/util/record"
 import { EventV2Bridge } from "@/event-v2-bridge"
 import { SessionEvent } from "@opencode-ai/core/session-event"
@@ -30,7 +30,7 @@ import { RuntimeFlags } from "@/effect/runtime-flags"
 import { Usage, type LLMEvent } from "@opencode-ai/llm"
 
 const DOOM_LOOP_THRESHOLD = 3
-const log = Log.create({ service: "session.processor" })
+const log = EffectLogger.create({ service: "session.processor" })
 
 export type Result = "compact" | "stop" | "continue"
 

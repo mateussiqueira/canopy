@@ -1,12 +1,12 @@
 import type { Hooks, PluginInput } from "@opencode-ai/plugin"
-import * as Log from "@opencode-ai/core/util/log"
+import * as EffectLogger from "@opencode-ai/core/effect/logger"
 import { InstallationVersion } from "@opencode-ai/core/installation/version"
 import { OAUTH_DUMMY_KEY } from "../auth"
 import os from "os"
 import { setTimeout as sleep } from "node:timers/promises"
 import { createServer } from "http"
 
-const log = Log.create({ service: "plugin.codex" })
+const log = EffectLogger.create({ service: "plugin.codex" })
 
 const CLIENT_ID = "app_EMoamEEZ73f0CkXaXp7hrann"
 const ISSUER = "https://auth.openai.com"

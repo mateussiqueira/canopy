@@ -6,11 +6,11 @@ import { AppFileSystem } from "@opencode-ai/core/filesystem"
 import { evaluate } from "@/permission/evaluate"
 import { Config } from "@/config/config"
 import { Identifier } from "../id/id"
-import * as Log from "@opencode-ai/core/util/log"
+import * as EffectLogger from "@opencode-ai/core/effect/logger"
 import { ToolID } from "./schema"
 import { TRUNCATION_DIR } from "./truncation-dir"
 
-const log = Log.create({ service: "truncation" })
+const log = EffectLogger.create({ service: "truncation" })
 const RETENTION = Duration.days(7)
 
 export const MAX_LINES = 2000

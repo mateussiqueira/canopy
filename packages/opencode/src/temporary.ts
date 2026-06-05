@@ -2,9 +2,9 @@ import yargs from "yargs"
 import { TuiThreadCommand } from "./cli/cmd/tui/thread"
 import { InstallationVersion } from "@opencode-ai/core/installation/version"
 import { hideBin } from "yargs/helpers"
-import { Log } from "./node"
 
 const args = hideBin(process.argv)
+type LogLevel = "DEBUG" | "INFO" | "WARN" | "ERROR"
 
 function flag(name: string) {
   const index = args.indexOf(name)
@@ -13,16 +13,16 @@ function flag(name: string) {
   return value?.slice(name.length + 1)
 }
 
-function parseLogLevel(value: string | undefined): Log.Level | undefined {
+function parseLogLevel(value: string | undefined): LogLevel | undefined {
   if (value === "DEBUG" || value === "INFO" || value === "WARN" || value === "ERROR") return value
   return undefined
 }
 
-Log.init({
-  print: args.includes("--print-logs"),
-  file: flag("--log-file"),
-  level: parseLogLevel(flag("--log-level")),
-})
+if (args.includes("--print-logs")) process.env.OPENCODE_PRINT_LOGS = "1"
+const logFile = flag("--log-file")
+if (logFile) process.env.OPENCODE_LOG_FILE = logFile
+const logLevel = parseLogLevel(flag("--log-level"))
+if (logLevel) process.env.OPENCODE_LOG_LEVEL = logLevel
 
 const cli = yargs(args)
   .parserConfiguration({ "populate--": true })

@@ -3,7 +3,7 @@ import { Database } from "@/storage/db"
 import { ProjectTable } from "./project.sql"
 import { PermissionTable, SessionTable } from "../session/session.sql"
 import { WorkspaceTable } from "../control-plane/workspace.sql"
-import * as Log from "@opencode-ai/core/util/log"
+import * as EffectLogger from "@opencode-ai/core/effect/logger"
 import { Flag } from "@opencode-ai/core/flag/flag"
 import { BusEvent } from "@/bus/bus-event"
 import { GlobalBus } from "@/bus/global"
@@ -22,7 +22,7 @@ import { AbsolutePath, NonNegativeInt, optionalOmitUndefined } from "@opencode-a
 import { serviceUse } from "@opencode-ai/core/effect/service-use"
 import { RuntimeFlags } from "@/effect/runtime-flags"
 
-const log = Log.create({ service: "project" })
+const log = EffectLogger.create({ service: "project" })
 
 const ProjectVcs = Schema.Literal("git")
 

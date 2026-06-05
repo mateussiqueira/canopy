@@ -33,7 +33,7 @@ import {
   type Usage,
 } from "@agentclientprotocol/sdk"
 
-import * as Log from "@opencode-ai/core/util/log"
+import * as EffectLogger from "@opencode-ai/core/effect/logger"
 import { pathToFileURL } from "url"
 import { Filesystem } from "@/util/filesystem"
 import { Hash } from "@opencode-ai/core/util/hash"
@@ -58,7 +58,7 @@ const decodeTodos = Schema.decodeUnknownResult(Schema.fromJsonString(Schema.Arra
 
 const DEFAULT_VARIANT_VALUE = "default"
 
-const log = Log.create({ service: "acp-agent" })
+const log = EffectLogger.create({ service: "acp-agent" })
 
 async function getContextLimit(
   sdk: OpencodeClient,

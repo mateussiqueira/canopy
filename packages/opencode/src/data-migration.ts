@@ -1,7 +1,7 @@
 import { Context, Effect, Layer } from "effect"
 import { Database } from "./storage/db"
 import { DataMigrationTable } from "./data-migration.sql"
-import * as Log from "@opencode-ai/core/util/log"
+import * as EffectLogger from "@opencode-ai/core/effect/logger"
 import { and, asc, eq, gt, inArray, sql } from "drizzle-orm"
 import { MessageTable, SessionTable } from "./session/session.sql"
 import type { SessionID } from "./session/schema"
@@ -11,7 +11,7 @@ export type Migration<R = never> = {
   run: Effect.Effect<void, unknown, R>
 }
 
-const log = Log.create({ service: "data-migration" })
+const log = EffectLogger.create({ service: "data-migration" })
 
 export interface Interface {}
 

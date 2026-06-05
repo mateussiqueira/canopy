@@ -12,7 +12,7 @@ import { Auth } from "@/auth"
 import { SyncEvent } from "@/sync"
 import { EventSequenceTable, EventTable } from "@/sync/event.sql"
 import { AppFileSystem } from "@opencode-ai/core/filesystem"
-import * as Log from "@opencode-ai/core/util/log"
+import * as EffectLogger from "@opencode-ai/core/effect/logger"
 import { RuntimeFlags } from "@/effect/runtime-flags"
 import { ProjectID } from "@/project/schema"
 import { Slug } from "@opencode-ai/core/util/slug"
@@ -77,7 +77,7 @@ function fromRow(row: typeof WorkspaceTable.$inferSelect): Info {
 const db = <T>(fn: (d: Parameters<typeof Database.use>[0] extends (trx: infer D) => any ? D : never) => T) =>
   Effect.sync(() => Database.use(fn))
 
-const log = Log.create({ service: "workspace-sync" })
+const log = EffectLogger.create({ service: "workspace-sync" })
 
 export const CreateInput = Schema.Struct({
   id: Schema.optional(WorkspaceID),

@@ -3,10 +3,10 @@ export * as ConfigManaged from "./managed"
 import { existsSync } from "fs"
 import os from "os"
 import path from "path"
-import * as Log from "@opencode-ai/core/util/log"
+import * as EffectLogger from "@opencode-ai/core/effect/logger"
 import { Process } from "@/util/process"
 
-const log = Log.create({ service: "config" })
+const log = EffectLogger.create({ service: "config" })
 
 const MANAGED_PLIST_DOMAIN = "ai.opencode.managed"
 

@@ -14,7 +14,7 @@ import {
 import path from "path"
 import { fileURLToPath } from "url"
 import { TuiConfig } from "@/cli/cmd/tui/config/tui"
-import * as Log from "@opencode-ai/core/util/log"
+import * as EffectLogger from "@opencode-ai/core/effect/logger"
 import { errorData, errorMessage } from "@/util/error"
 import { isRecord } from "@/util/record"
 import { resolveAttentionSoundPaths } from "../config/tui-schema"
@@ -117,7 +117,7 @@ type RuntimeState = {
   dispose_timeout_ms: number
 }
 
-const log = Log.create({ service: "tui.plugin" })
+const log = EffectLogger.create({ service: "tui.plugin" })
 const DISPOSE_TIMEOUT_MS = 5000
 const KV_KEY = "plugin_enabled"
 const EMPTY_TUI: TuiPluginModule = {

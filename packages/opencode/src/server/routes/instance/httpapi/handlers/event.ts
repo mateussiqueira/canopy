@@ -1,5 +1,5 @@
 import { Bus } from "@/bus"
-import * as Log from "@opencode-ai/core/util/log"
+import * as EffectLogger from "@opencode-ai/core/effect/logger"
 import { Effect } from "effect"
 import * as Stream from "effect/Stream"
 import { HttpServerResponse } from "effect/unstable/http"
@@ -7,7 +7,7 @@ import { HttpApiBuilder } from "effect/unstable/httpapi"
 import * as Sse from "effect/unstable/encoding/Sse"
 import { EventApi } from "../groups/event"
 
-const log = Log.create({ service: "server" })
+const log = EffectLogger.create({ service: "server" })
 
 function eventData(data: unknown): Sse.Event {
   return {

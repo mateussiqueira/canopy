@@ -8,12 +8,9 @@ import { InstanceStore } from "../../src/project/instance-store"
 import { GlobalBus, type GlobalEvent } from "../../src/bus/global"
 import { Snapshot } from "../../src/snapshot"
 import { Server } from "../../src/server/server"
-import * as Log from "@opencode-ai/core/util/log"
 import { resetDatabase } from "../fixture/db"
 import { disposeAllInstances, TestInstance } from "../fixture/fixture"
 import { testEffect } from "../lib/effect"
-
-void Log.init({ print: false })
 
 afterEach(async () => {
   await disposeAllInstances()

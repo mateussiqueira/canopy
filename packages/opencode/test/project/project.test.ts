@@ -1,7 +1,6 @@
 import { describe, expect, test } from "bun:test"
 import { Bus } from "@/bus"
 import { Project } from "@/project/project"
-import * as Log from "@opencode-ai/core/util/log"
 import { $ } from "bun"
 import path from "path"
 import { tmpdirScoped } from "../fixture/fixture"
@@ -16,8 +15,6 @@ import { Project as ProjectV2 } from "@opencode-ai/core/project"
 import { CrossSpawnSpawner } from "@opencode-ai/core/cross-spawn-spawner"
 import { testEffect } from "../lib/effect"
 import { RuntimeFlags } from "@/effect/runtime-flags"
-
-void Log.init({ print: false })
 
 const encoder = new TextEncoder()
 

@@ -1,6 +1,5 @@
 import { afterEach, describe, expect } from "bun:test"
 import { Effect, Schema } from "effect"
-import * as Log from "@opencode-ai/core/util/log"
 import { Bus } from "../../src/bus"
 import { Event as ServerEvent } from "../../src/server/event"
 import { Server } from "../../src/server/server"
@@ -8,8 +7,6 @@ import { EventPaths } from "../../src/server/routes/instance/httpapi/groups/even
 import { resetDatabase } from "../fixture/db"
 import { disposeAllInstances, TestInstance } from "../fixture/fixture"
 import { testEffectShared } from "../lib/effect"
-
-void Log.init({ print: false })
 
 const EventData = Schema.Struct({
   id: Schema.optional(Schema.String),

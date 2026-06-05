@@ -4,7 +4,7 @@ import path from "path"
 import { pathToFileURL, fileURLToPath } from "url"
 import { createMessageConnection, StreamMessageReader, StreamMessageWriter } from "vscode-jsonrpc/node"
 import type { Diagnostic as VSCodeDiagnostic } from "vscode-languageserver-types"
-import * as Log from "@opencode-ai/core/util/log"
+import * as EffectLogger from "@opencode-ai/core/effect/logger"
 import { Process } from "@/util/process"
 import { LANGUAGE_EXTENSIONS } from "./language"
 import { Effect, Schema } from "effect"
@@ -27,7 +27,7 @@ const FILE_CHANGE_CREATED = 1
 const FILE_CHANGE_CHANGED = 2
 const TEXT_DOCUMENT_SYNC_INCREMENTAL = 2
 
-const log = Log.create({ service: "lsp.client" })
+const log = EffectLogger.create({ service: "lsp.client" })
 const busRuntime = makeRuntime(Bus.Service, Bus.layer)
 
 export type Info = NonNullable<Awaited<ReturnType<typeof create>>>

@@ -1,7 +1,7 @@
 export * as ConfigCommand from "./command"
 
 import path from "path"
-import * as Log from "@opencode-ai/core/util/log"
+import * as EffectLogger from "@opencode-ai/core/effect/logger"
 import { Cause, Exit, Schema } from "effect"
 import { Glob } from "@opencode-ai/core/util/glob"
 import { configEntryNameFromPath } from "./entry-name"
@@ -9,7 +9,7 @@ import { InvalidError } from "./error"
 import * as ConfigMarkdown from "./markdown"
 import { ConfigModelID } from "./model-id"
 
-const log = Log.create({ service: "config" })
+const log = EffectLogger.create({ service: "config" })
 
 export const Info = Schema.Struct({
   template: Schema.String,

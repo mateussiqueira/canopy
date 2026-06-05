@@ -10,7 +10,6 @@ import type { WorkspaceAdapter } from "../../src/control-plane/types"
 import { Workspace } from "../../src/control-plane/workspace"
 import { WorkspacePaths } from "../../src/server/routes/instance/httpapi/groups/workspace"
 import { Session } from "@/session/session"
-import * as Log from "@opencode-ai/core/util/log"
 import { Server } from "../../src/server/server"
 import { resetDatabase } from "../fixture/db"
 import { disposeAllInstances, provideInstance, tmpdirScoped } from "../fixture/fixture"
@@ -20,8 +19,6 @@ import { Project } from "../../src/project/project"
 import { InstancePaths } from "../../src/server/routes/instance/httpapi/groups/instance"
 import { WorkspaceRef } from "../../src/effect/instance-ref"
 import { testEffect } from "../lib/effect"
-
-void Log.init({ print: false })
 
 const originalWorkspaces = Flag.OPENCODE_EXPERIMENTAL_WORKSPACES
 const workspaceLayer = Workspace.defaultLayer.pipe(

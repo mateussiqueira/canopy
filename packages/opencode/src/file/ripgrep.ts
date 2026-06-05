@@ -9,12 +9,12 @@ import { ChildProcessSpawner } from "effect/unstable/process/ChildProcessSpawner
 
 import { CrossSpawnSpawner } from "@opencode-ai/core/cross-spawn-spawner"
 import { Global } from "@opencode-ai/core/global"
-import * as Log from "@opencode-ai/core/util/log"
+import * as EffectLogger from "@opencode-ai/core/effect/logger"
 import { sanitizedProcessEnv } from "@opencode-ai/core/util/opencode-process"
 import { which } from "@/util/which"
 import { NonNegativeInt } from "@opencode-ai/core/schema"
 
-const log = Log.create({ service: "ripgrep" })
+const log = EffectLogger.create({ service: "ripgrep" })
 const VERSION = "15.1.0"
 const PLATFORM = {
   "arm64-darwin": { platform: "aarch64-apple-darwin", extension: "tar.gz" },

@@ -22,7 +22,6 @@ import { SessionPrompt } from "../../src/session/prompt"
 import { SessionRevert } from "../../src/session/revert"
 import { SessionSummary } from "../../src/session/summary"
 import { MessageV2 } from "../../src/session/message-v2"
-import * as Log from "@opencode-ai/core/util/log"
 import { provideTmpdirServer } from "../fixture/fixture"
 import { testEffect } from "../lib/effect"
 import { TestLLMServer } from "../lib/llm-server"
@@ -63,8 +62,6 @@ import { RepositoryCache } from "../../src/reference/repository-cache"
 import { SyncEvent } from "@/sync"
 import { RuntimeFlags } from "@/effect/runtime-flags"
 import { EventV2Bridge } from "@/event-v2-bridge"
-
-void Log.init({ print: false })
 
 const mcp = Layer.succeed(
   MCP.Service,

@@ -1,9 +1,9 @@
 import { RequestError, type McpServer } from "@agentclientprotocol/sdk"
 import type { ACPSessionState } from "./types"
-import * as Log from "@opencode-ai/core/util/log"
+import * as EffectLogger from "@opencode-ai/core/effect/logger"
 import type { OpencodeClient } from "@opencode-ai/sdk/v2"
 
-const log = Log.create({ service: "acp-session-manager" })
+const log = EffectLogger.create({ service: "acp-session-manager" })
 
 export class ACPSessionManager {
   private sessions = new Map<string, ACPSessionState>()

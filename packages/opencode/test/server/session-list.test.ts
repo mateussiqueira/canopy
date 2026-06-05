@@ -1,7 +1,6 @@
 import { afterEach, describe, expect } from "bun:test"
 import { Effect, Layer } from "effect"
 import { Session as SessionNs } from "@/session/session"
-import * as Log from "@opencode-ai/core/util/log"
 import { disposeAllInstances, provideInstance, TestInstance } from "../fixture/fixture"
 import { mkdir } from "fs/promises"
 import path from "path"
@@ -14,8 +13,6 @@ import { Storage } from "@/storage/storage"
 import { SyncEvent } from "@/sync"
 import { RuntimeFlags } from "@/effect/runtime-flags"
 import { BackgroundJob } from "@/background/job"
-
-void Log.init({ print: false })
 const it = testEffect(
   SessionNs.layer.pipe(
     Layer.provide(Bus.layer),

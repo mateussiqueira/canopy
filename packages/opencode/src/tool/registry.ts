@@ -25,7 +25,7 @@ import { WebSearchTool } from "./websearch"
 import { RepoCloneTool } from "./repo_clone"
 import { RepoOverviewTool } from "./repo_overview"
 import { RepositoryCache } from "@/reference/repository-cache"
-import * as Log from "@opencode-ai/core/util/log"
+import * as EffectLogger from "@opencode-ai/core/effect/logger"
 import { LspTool } from "./lsp"
 import * as Truncate from "./truncate"
 import { ApplyPatchTool } from "./apply_patch"
@@ -54,7 +54,7 @@ import { Reference } from "@/reference/reference"
 import { BackgroundJob } from "@/background/job"
 import { RuntimeFlags } from "@/effect/runtime-flags"
 
-const log = Log.create({ service: "tool.registry" })
+const log = EffectLogger.create({ service: "tool.registry" })
 
 export function webSearchEnabled(providerID: ProviderID, flags = { exa: false, parallel: false }) {
   return providerID === ProviderID.opencode || flags.exa || flags.parallel

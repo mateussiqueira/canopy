@@ -3,12 +3,12 @@ import { inArray } from "drizzle-orm"
 import { EventSequenceTable } from "@/sync/event.sql"
 import { Workspace } from "@/control-plane/workspace"
 import type { WorkspaceID } from "@/control-plane/schema"
-import * as Log from "@opencode-ai/core/util/log"
+import * as EffectLogger from "@opencode-ai/core/effect/logger"
 import { Effect } from "effect"
 
 export const HEADER = "x-opencode-sync"
 export type State = Record<string, number>
-const log = Log.create({ service: "fence" })
+const log = EffectLogger.create({ service: "fence" })
 
 export function load(ids?: string[]) {
   const rows = Database.use((db) => {

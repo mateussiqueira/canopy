@@ -1,10 +1,10 @@
 import { Effect } from "effect"
 import { HttpServerResponse } from "effect/unstable/http"
 import { HttpApiMiddleware } from "effect/unstable/httpapi"
-import * as Log from "@opencode-ai/core/util/log"
+import * as EffectLogger from "@opencode-ai/core/effect/logger"
 import { InvalidRequestError } from "../errors"
 
-const log = Log.create({ service: "server" })
+const log = EffectLogger.create({ service: "server" })
 
 // Effect's Issue formatter recursively dumps the rejected `actual` value with
 // no truncation, so a 5KB invalid array produces a ~360KB string. Cap to keep

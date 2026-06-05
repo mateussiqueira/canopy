@@ -8,7 +8,6 @@ import { Effect, Exit, Fiber, Layer, Schema } from "effect"
 import { FetchHttpClient, HttpServer, HttpServerRequest, HttpServerResponse } from "effect/unstable/http"
 import { eq } from "drizzle-orm"
 import { AppFileSystem } from "@opencode-ai/core/filesystem"
-import * as Log from "@opencode-ai/core/util/log"
 import { GlobalBus, type GlobalEvent } from "@/bus/global"
 import { Database } from "@/storage/db"
 import { ProjectID } from "@/project/schema"
@@ -33,8 +32,6 @@ import { SessionPrompt } from "@/session/prompt"
 import { Project } from "@/project/project"
 import { Vcs } from "@/project/vcs"
 import { RuntimeFlags } from "@/effect/runtime-flags"
-
-void Log.init({ print: false })
 
 const originalEnv = {
   OPENCODE_AUTH_CONTENT: process.env.OPENCODE_AUTH_CONTENT,

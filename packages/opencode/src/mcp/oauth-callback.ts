@@ -1,9 +1,9 @@
 import { createConnection } from "net"
 import { createServer } from "http"
-import * as Log from "@opencode-ai/core/util/log"
+import * as EffectLogger from "@opencode-ai/core/effect/logger"
 import { OAUTH_CALLBACK_PORT, OAUTH_CALLBACK_PATH, parseRedirectUri } from "./oauth-provider"
 
-const log = Log.create({ service: "mcp.oauth-callback" })
+const log = EffectLogger.create({ service: "mcp.oauth-callback" })
 
 // Current callback server configuration (may differ from defaults if custom redirectUri is used)
 let currentPort = OAUTH_CALLBACK_PORT

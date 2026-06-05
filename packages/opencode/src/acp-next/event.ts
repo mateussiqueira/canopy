@@ -1,5 +1,5 @@
 import type { AgentSideConnection } from "@agentclientprotocol/sdk"
-import * as Log from "@opencode-ai/core/util/log"
+import * as EffectLogger from "@opencode-ai/core/effect/logger"
 import type {
   Event,
   EventMessagePartDelta,
@@ -20,7 +20,7 @@ import {
   completedToolUpdate,
 } from "./tool"
 
-const log = Log.create({ service: "acp-next-event" })
+const log = EffectLogger.create({ service: "acp-next-event" })
 
 type Connection = Pick<AgentSideConnection, "sessionUpdate">
 type GlobalEventEnvelope = {

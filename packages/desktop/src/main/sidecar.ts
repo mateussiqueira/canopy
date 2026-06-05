@@ -57,8 +57,8 @@ async function start(command: StartCommand) {
     ensureLoopbackNoProxy()
     useSystemCertificates()
     useEnvProxy()
-    const { Database, JsonMigration, Log, Server } = await import("virtual:opencode-server")
-    await Log.init({ level: "WARN" })
+    process.env.OPENCODE_LOG_LEVEL = "WARN"
+    const { Database, JsonMigration, Server } = await import("virtual:opencode-server")
 
     if (command.needsMigration) {
       await JsonMigration.run(drizzle({ client: Database.Client().$client }), {

@@ -14,7 +14,7 @@ import {
 } from "@modelcontextprotocol/sdk/types.js"
 import { Config } from "@/config/config"
 import { ConfigMCP } from "../config/mcp"
-import * as Log from "@opencode-ai/core/util/log"
+import * as EffectLogger from "@opencode-ai/core/effect/logger"
 import { NamedError } from "@opencode-ai/core/util/error"
 import { InstallationVersion } from "@opencode-ai/core/installation/version"
 import { withTimeout } from "@/util/timeout"
@@ -32,7 +32,7 @@ import { InstanceState } from "@/effect/instance-state"
 import { ChildProcess, ChildProcessSpawner } from "effect/unstable/process"
 import { CrossSpawnSpawner } from "@opencode-ai/core/cross-spawn-spawner"
 
-const log = Log.create({ service: "mcp" })
+const log = EffectLogger.create({ service: "mcp" })
 const DEFAULT_TIMEOUT = 30_000
 
 const TolerantListToolsResultSchema = ListToolsResultSchema.extend({

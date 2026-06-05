@@ -7,12 +7,12 @@ import { lazy } from "@opencode-ai/core/util/lazy"
 import { Plugin } from "@/plugin"
 import { Shell } from "@/shell/shell"
 import type { Proc } from "#pty"
-import * as Log from "@opencode-ai/core/util/log"
+import * as EffectLogger from "@opencode-ai/core/effect/logger"
 import { PtyID } from "./schema"
 import { Effect, Layer, Context, Schema, Types } from "effect"
 import { NonNegativeInt, PositiveInt } from "@opencode-ai/core/schema"
 
-const log = Log.create({ service: "pty" })
+const log = EffectLogger.create({ service: "pty" })
 
 const BUFFER_LIMIT = 1024 * 1024 * 2
 const BUFFER_CHUNK = 64 * 1024

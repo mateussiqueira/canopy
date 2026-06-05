@@ -1,6 +1,6 @@
 import { Config } from "@/config/config"
 import type { MessageV2 } from "@/session/message-v2"
-import * as Log from "@opencode-ai/core/util/log"
+import * as EffectLogger from "@opencode-ai/core/effect/logger"
 import photonWasm from "@silvia-odwyer/photon-node/photon_rs_bg.wasm" with { type: "file" }
 import { Context, Effect, Layer, Schema } from "effect"
 import path from "node:path"
@@ -11,7 +11,7 @@ const MAX_WIDTH = 2000
 const MAX_HEIGHT = 2000
 const AUTO_RESIZE = true
 const JPEG_QUALITIES = [80, 85, 70, 55, 40]
-const log = Log.create({ service: "image" })
+const log = EffectLogger.create({ service: "image" })
 
 export class ResizerUnavailableError extends Schema.TaggedErrorClass<ResizerUnavailableError>()(
   "ImageResizerUnavailableError",

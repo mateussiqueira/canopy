@@ -4,7 +4,7 @@ import { FetchHttpClient, HttpClient, HttpClientRequest, HttpClientResponse } fr
 import { withTransientReadRetry } from "@/util/effect-http-client"
 import { AppFileSystem } from "@opencode-ai/core/filesystem"
 import { Global } from "@opencode-ai/core/global"
-import * as Log from "@opencode-ai/core/util/log"
+import * as EffectLogger from "@opencode-ai/core/effect/logger"
 
 const skillConcurrency = 4
 const fileConcurrency = 8
@@ -28,7 +28,7 @@ export const layer: Layer.Layer<Service, never, AppFileSystem.Service | Path.Pat
   Layer.effect(
     Service,
     Effect.gen(function* () {
-      const log = Log.create({ service: "skill-discovery" })
+      const log = EffectLogger.create({ service: "skill-discovery" })
       const fs = yield* AppFileSystem.Service
       const path = yield* Path.Path
       const http = HttpClient.filterStatusOk(withTransientReadRetry(yield* HttpClient.HttpClient))

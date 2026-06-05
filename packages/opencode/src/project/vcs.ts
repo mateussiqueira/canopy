@@ -5,9 +5,9 @@ import { BusEvent } from "@/bus/bus-event"
 import { InstanceState } from "@/effect/instance-state"
 import { FileWatcher } from "@/file/watcher"
 import { Git } from "@/git"
-import * as Log from "@opencode-ai/core/util/log"
+import * as EffectLogger from "@opencode-ai/core/effect/logger"
 
-const log = Log.create({ service: "vcs" })
+const log = EffectLogger.create({ service: "vcs" })
 const PATCH_CONTEXT_LINES = 2_147_483_647
 const MAX_PATCH_BYTES = 10_000_000
 const MAX_TOTAL_PATCH_BYTES = 10_000_000

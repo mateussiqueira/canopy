@@ -3,7 +3,7 @@ import fuzzysort from "fuzzysort"
 import { Config } from "@/config/config"
 import { mapValues, mergeDeep, omit, pickBy, sortBy } from "remeda"
 import { NoSuchModelError, type Provider as SDK } from "ai"
-import * as Log from "@opencode-ai/core/util/log"
+import * as EffectLogger from "@opencode-ai/core/effect/logger"
 import { Npm } from "@opencode-ai/core/npm"
 import { Hash } from "@opencode-ai/core/util/hash"
 import { Plugin } from "../plugin"
@@ -29,7 +29,7 @@ import { ModelID, ProviderID } from "./schema"
 import { ModelStatus } from "./model-status"
 import { RuntimeFlags } from "@/effect/runtime-flags"
 
-const log = Log.create({ service: "provider" })
+const log = EffectLogger.create({ service: "provider" })
 
 function shouldUseCopilotResponsesApi(modelID: string): boolean {
   const match = /^gpt-(\d+)/.exec(modelID)

@@ -7,7 +7,7 @@ import type {
 } from "@opencode-ai/plugin"
 import { Config } from "@/config/config"
 import { Bus } from "../bus"
-import * as Log from "@opencode-ai/core/util/log"
+import * as EffectLogger from "@opencode-ai/core/effect/logger"
 import { createOpencodeClient } from "@opencode-ai/sdk"
 import { ServerAuth } from "@/server/auth"
 import { CodexAuthPlugin } from "./codex"
@@ -30,7 +30,7 @@ import { registerAdapter } from "@/control-plane/adapters"
 import type { WorkspaceAdapter } from "@/control-plane/types"
 import { RuntimeFlags } from "@/effect/runtime-flags"
 
-const log = Log.create({ service: "plugin" })
+const log = EffectLogger.create({ service: "plugin" })
 
 type State = {
   hooks: Hooks[]

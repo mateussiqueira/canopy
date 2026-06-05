@@ -3,13 +3,10 @@ import { AppFileSystem } from "@opencode-ai/core/filesystem"
 import { Effect, Layer } from "effect"
 import path from "path"
 import { Server } from "../../src/server/server"
-import * as Log from "@opencode-ai/core/util/log"
 import { resetDatabase } from "../fixture/db"
 import { TestInstance } from "../fixture/fixture"
 import { markPluginDependenciesReady } from "../fixture/plugin"
 import { testEffect } from "../lib/effect"
-
-void Log.init({ print: false })
 
 const testStateLayer = Layer.effectDiscard(
   Effect.acquireRelease(

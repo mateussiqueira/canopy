@@ -2,7 +2,7 @@ import type { ChildProcessWithoutNullStreams } from "child_process"
 import path from "path"
 import os from "os"
 import { Global } from "@opencode-ai/core/global"
-import * as Log from "@opencode-ai/core/util/log"
+import * as EffectLogger from "@opencode-ai/core/effect/logger"
 import { text } from "node:stream/consumers"
 import fs from "fs/promises"
 import { Filesystem } from "@/util/filesystem"
@@ -15,7 +15,7 @@ import { spawn } from "./launch"
 import { Npm } from "@opencode-ai/core/npm"
 import type { RuntimeFlags } from "@/effect/runtime-flags"
 
-const log = Log.create({ service: "lsp.server" })
+const log = EffectLogger.create({ service: "lsp.server" })
 const pathExists = async (p: string) =>
   fs
     .stat(p)

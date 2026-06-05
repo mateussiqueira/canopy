@@ -7,9 +7,9 @@ import type {
 } from "@modelcontextprotocol/sdk/shared/auth.js"
 import { Effect } from "effect"
 import { McpAuth } from "./auth"
-import * as Log from "@opencode-ai/core/util/log"
+import * as EffectLogger from "@opencode-ai/core/effect/logger"
 
-const log = Log.create({ service: "mcp.oauth" })
+const log = EffectLogger.create({ service: "mcp.oauth" })
 
 const OAUTH_CALLBACK_PORT = 19876
 const OAUTH_CALLBACK_PATH = "/mcp/oauth/callback"

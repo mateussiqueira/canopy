@@ -1,7 +1,7 @@
 import { Audio, type AudioErrorContext, type AudioPlayOptions, type AudioSound, type AudioVoice } from "@opentui/core"
-import * as Log from "@opencode-ai/core/util/log"
+import * as EffectLogger from "@opencode-ai/core/effect/logger"
 
-const log = Log.create({ service: "tui.audio" })
+const log = EffectLogger.create({ service: "tui.audio" })
 
 let audio: Audio | null | undefined
 const sounds = new Map<string, Promise<AudioSound | null>>()

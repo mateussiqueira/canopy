@@ -6,7 +6,7 @@ import { Database } from "@/storage/db"
 import { eq } from "drizzle-orm"
 import { ProjectTable } from "../project/project.sql"
 import type { ProjectID } from "../project/schema"
-import * as Log from "@opencode-ai/core/util/log"
+import * as EffectLogger from "@opencode-ai/core/effect/logger"
 import { Slug } from "@opencode-ai/core/util/slug"
 import { errorMessage } from "../util/error"
 import { BusEvent } from "@/bus/bus-event"
@@ -19,7 +19,7 @@ import { AppFileSystem } from "@opencode-ai/core/filesystem"
 import { AppProcess } from "@opencode-ai/core/process"
 import { InstanceState } from "@/effect/instance-state"
 
-const log = Log.create({ service: "worktree" })
+const log = EffectLogger.create({ service: "worktree" })
 
 export const Event = {
   Ready: BusEvent.define(

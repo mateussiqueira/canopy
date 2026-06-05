@@ -1,6 +1,6 @@
 import { BusEvent } from "@/bus/bus-event"
 import { Bus } from "@/bus"
-import * as Log from "@opencode-ai/core/util/log"
+import * as EffectLogger from "@opencode-ai/core/effect/logger"
 import * as LSPClient from "./client"
 import path from "path"
 import { pathToFileURL, fileURLToPath } from "url"
@@ -14,7 +14,7 @@ import { containsPath } from "@/project/instance-context"
 import { NonNegativeInt } from "@opencode-ai/core/schema"
 import { RuntimeFlags } from "@/effect/runtime-flags"
 
-const log = Log.create({ service: "lsp" })
+const log = EffectLogger.create({ service: "lsp" })
 
 export const Event = {
   Updated: BusEvent.define("lsp.updated", Schema.Struct({})),
