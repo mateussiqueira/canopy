@@ -110,11 +110,11 @@ export const layer = Layer.effectDiscard(
             const final = yield* filesystem.resolveReadPath(input)
             if (final.type !== "file" || final.target.resource !== target.resource || final.target.real !== target.real)
               return yield* Effect.die(new Error("File changed after permission approval"))
-            const mime = imageMime(
-              yield* filesystem.readSampleResolved(final.target, FileSystem.READ_SAMPLE_BYTES),
-              FSUtil.mimeType(final.target.real),
-            )
+            const sample = yield* filesystem.readSampleResolved(final.target, FileSystem.READ_SAMPLE_BYTES)
+            const mime = imageMime(sample, FSUtil.mimeType(final.target.real))
             if (!SUPPORTED_IMAGE_MIMES.has(mime)) {
+              if (FileSystem.isBinary(final.target.resource, sample))
+                return yield* Effect.die(new FileSystem.BinaryFileError(final.target.resource))
               if (
                 final.target.size > FileSystem.MAX_READ_BYTES ||
                 input.offset !== undefined ||

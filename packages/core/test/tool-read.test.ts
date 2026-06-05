@@ -43,7 +43,7 @@ const filesystem = Layer.succeed(
             type: "file" as const,
             target: new FileSystem.ReadTarget({
               real,
-              resource: input.reference === undefined ? "README.md" : `${input.reference}:README.md`,
+              resource: input.reference === undefined ? input.path : `${input.reference}:${input.path}`,
               size,
               dev: 1,
             }),
@@ -69,7 +69,7 @@ const filesystem = Layer.succeed(
             ? Effect.succeed(
                 new FileSystem.ReadTarget({
                   real,
-                  resource: input.reference === undefined ? "README.md" : `${input.reference}:README.md`,
+                  resource: input.reference === undefined ? input.path : `${input.reference}:${input.path}`,
                   size,
                   dev: 1,
                 }),
@@ -508,6 +508,34 @@ describe("ReadTool", () => {
           call: { type: "tool-call", id: "call-binary", name: "read", input: { path: "archive.zip" } },
         }),
       ).toEqual({ type: "error", value: "Cannot read binary file: archive.zip" })
+    }),
+  )
+
+  it.effect("rejects unsupported binary files before reading or paging them", () =>
+    Effect.gen(function* () {
+      reads.length = 0
+      textPageInputs.length = 0
+      samples.length = 0
+      allow = true
+      resolveFailure = undefined
+      listResolveFailure = new Error("not a directory")
+      size = 4
+      real = "/project/archive.dat"
+      afterApproval = () => {}
+      readFailure = undefined
+      sample = new Uint8Array([0, 1, 2, 3])
+      configEntries = []
+      const registry = yield* ToolRegistry.Service
+
+      expect(
+        yield* registry.execute({
+          sessionID,
+          call: { type: "tool-call", id: "call-small-binary", name: "read", input: { path: "archive.dat" } },
+        }),
+      ).toEqual({ type: "error", value: "Cannot read binary file: archive.dat" })
+      expect(samples).toEqual([FileSystem.READ_SAMPLE_BYTES])
+      expect(reads).toEqual([])
+      expect(textPageInputs).toEqual([])
     }),
   )
 

@@ -48,6 +48,47 @@ export class BinaryFileError extends Error {
   }
 }
 
+const BINARY_EXTENSIONS = new Set([
+  ".zip",
+  ".tar",
+  ".gz",
+  ".exe",
+  ".dll",
+  ".so",
+  ".class",
+  ".jar",
+  ".war",
+  ".7z",
+  ".doc",
+  ".docx",
+  ".xls",
+  ".xlsx",
+  ".ppt",
+  ".pptx",
+  ".odt",
+  ".ods",
+  ".odp",
+  ".bin",
+  ".dat",
+  ".obj",
+  ".o",
+  ".a",
+  ".lib",
+  ".wasm",
+  ".pyc",
+  ".pyo",
+])
+
+export const isBinary = (resource: string, bytes: Uint8Array) => {
+  if (BINARY_EXTENSIONS.has(path.extname(resource).toLowerCase())) return true
+  if (bytes.length === 0) return false
+  const nonPrintable = bytes.reduce(
+    (count, byte) => count + (byte === 0 || byte < 9 || (byte > 13 && byte < 32) ? 1 : 0),
+    0,
+  )
+  return bytes.includes(0) || nonPrintable / bytes.length > 0.3
+}
+
 export class TextContent extends Schema.Class<TextContent>("FileSystem.TextContent")({
   type: Schema.Literal("text"),
   content: Schema.String,
