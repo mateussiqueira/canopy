@@ -68,6 +68,7 @@ export type RunInput = {
   files: RunFilePart[]
   initialInput?: string
   thinking: boolean
+  backgroundSubagents: boolean
   demo?: boolean
 }
 
@@ -184,6 +185,7 @@ export type FooterSubagentTab = {
   label: string
   description: string
   status: "running" | "completed" | "error"
+  background?: boolean
   title?: string
   toolCalls?: number
   lastUpdatedAt: number
@@ -307,6 +309,21 @@ export type StreamCommit = {
     callID: string
     command: string
   }
+}
+
+export type LocalReplayAnchor = {
+  kind: EntryKind
+  text: string
+  phase: StreamPhase
+  messageID?: string
+  partID?: string
+  toolState?: StreamToolState
+  visible?: string
+}
+
+export type LocalReplayRow = {
+  commit: StreamCommit
+  after?: LocalReplayAnchor
 }
 
 // The public contract between the stream transport / prompt queue and
