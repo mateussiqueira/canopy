@@ -27,6 +27,7 @@ const it = testEffect(
   Layer.merge(
     applicationTools,
     LocationServiceMap.layer.pipe(
+      Layer.provide(applicationTools),
       Layer.provide(
         Layer.mergeAll(
           Project.defaultLayer,

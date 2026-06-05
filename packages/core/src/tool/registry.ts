@@ -115,15 +115,20 @@ export const layer = Layer.effect(
     })
 
     const definitions = Effect.fn("ToolRegistry.definitions")(function* () {
-      const tools = new Map(Array.from(state.get().entries, ([name, entry]) => [name, entry.tool] as const))
+      const tools = new Map(
+        Array.from(state.get().entries, ([name, entry]) => [name, entry.tool] as const).filter(([name]) =>
+          applications.isAvailable(name),
+        ),
+      )
       // Location tools own their names. Application tools fill otherwise-unclaimed names.
       for (const [name, tool] of applications.entries()) {
-        if (!tools.has(name)) tools.set(name, tool.definition)
+        if (applications.isAvailable(name) && !tools.has(name)) tools.set(name, tool.definition)
       }
       return Tool.toDefinitions(Object.fromEntries(tools))
     })
 
     const entry = (name: string): Entry | undefined => {
+      if (!applications.isAvailable(name)) return
       const local = state.get().entries.get(name)
       if (local !== undefined) return local
       const tool = applications.entries().get(name)

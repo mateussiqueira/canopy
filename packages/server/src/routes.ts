@@ -22,7 +22,7 @@ export function createRoutes(password?: string) {
         ? ServerAuth.Config.layer({ username: "opencode", password: Option.some(password) })
         : ServerAuth.Config.defaultLayer,
     ),
-    Layer.provide(LocationServiceMap.layer),
+    Layer.provide(LocationServiceMap.defaultLayer),
     Layer.provide(PermissionSaved.layer),
     Layer.provide(SessionV2.defaultLayer),
     Layer.provide(Database.defaultLayer),

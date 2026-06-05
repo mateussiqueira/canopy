@@ -111,6 +111,9 @@ export class LocationServiceMap extends LayerMap.Service<LocationServiceMap>()("
     LLMClient.layer.pipe(Layer.provide(RequestExecutor.defaultLayer)),
     FetchHttpClient.layer,
     ToolOutputStore.defaultCleanupLayer,
-    ApplicationTools.layer,
   ],
 }) {}
+
+export namespace LocationServiceMap {
+  export const defaultLayer = LocationServiceMap.layer.pipe(Layer.provide(ApplicationTools.layer))
+}

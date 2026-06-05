@@ -15,6 +15,11 @@ import { ApplicationTools } from "../tool/application-tools"
 import { Session } from "./session"
 import { Tool } from "./tool"
 
+export interface HostConfig {
+  /** Tool names that this host cannot service. They are omitted from prompts and rejected at execution. */
+  readonly unavailableTools?: ReadonlyArray<string>
+}
+
 export interface Interface {
   readonly sessions: Session.Interface
   readonly tools: Tool.Service
@@ -32,7 +37,6 @@ class SessionModelValidation extends Context.Service<
   }
 >()("@opencode/public/OpenCode/SessionModelValidation") {}
 
-const LocationServicesLayer = LocationServiceMap.layer
 const SessionModelValidationLayer = Layer.effect(
   SessionModelValidation,
   Effect.gen(function* () {
@@ -77,54 +81,59 @@ const SessionsLayer = Layer.merge(
     Layer.orDie,
   ),
   SessionModelValidationLayer,
-).pipe(Layer.provide(LocationServicesLayer))
-const ApplicationToolsLayer = ApplicationTools.layer
-
+)
 // TODO: Accept explicit storage so tests and embeddings can select disposable or application-owned persistence.
-export const layer = Layer.effect(
-  Service,
-  Effect.gen(function* () {
-    const sessions = yield* SessionV2.Service
-    const tools = yield* ApplicationTools.Service
-    const validation = yield* SessionModelValidation
-    return Service.of({
-      tools: { attach: tools.attach },
-      sessions: {
-        create: (input) =>
-          sessions.create({
-            id: input.id,
-            agent: input.agent,
-            model: input.model,
-            location: input.location,
+export const layerWithHostConfig = (config: HostConfig) => {
+  const applicationTools = ApplicationTools.layerWithUnavailable(new Set(config.unavailableTools ?? []))
+  const locations = LocationServiceMap.layer.pipe(Layer.provide(applicationTools))
+  const sessions = SessionsLayer.pipe(Layer.provide(locations))
+  return Layer.effect(
+    Service,
+    Effect.gen(function* () {
+      const sessions = yield* SessionV2.Service
+      const tools = yield* ApplicationTools.Service
+      const validation = yield* SessionModelValidation
+      return Service.of({
+        tools: { attach: tools.attach },
+        sessions: {
+          create: (input) =>
+            sessions.create({
+              id: input.id,
+              agent: input.agent,
+              model: input.model,
+              location: input.location,
+            }),
+          get: sessions.get,
+          list: sessions.list,
+          switchModel: Effect.fn("OpenCode.sessions.switchModel")(function* (input) {
+            const session = yield* sessions.get(input.sessionID)
+            yield* validation.validate({ ...input, location: session.location })
+            yield* sessions.switchModel(input)
           }),
-        get: sessions.get,
-        list: sessions.list,
-        switchModel: Effect.fn("OpenCode.sessions.switchModel")(function* (input) {
-          const session = yield* sessions.get(input.sessionID)
-          yield* validation.validate({ ...input, location: session.location })
-          yield* sessions.switchModel(input)
-        }),
-        interrupt: sessions.interrupt,
-        prompt: (input) =>
-          sessions.prompt({
-            id: input.id,
-            sessionID: input.sessionID,
-            prompt: input.prompt,
-            delivery: input.delivery,
-          }),
-        messages: (input) =>
-          sessions.messages({
-            sessionID: input.sessionID,
-            limit: input.limit,
-            order: input.order,
-            cursor: input.cursor,
-          }),
-        message: (input) => sessions.message({ sessionID: input.sessionID, messageID: input.messageID }),
-        context: sessions.context,
-        events: (input) => sessions.events({ sessionID: input.sessionID, after: input.after }),
-      },
-    })
-  }),
-).pipe(Layer.provide(Layer.merge(ApplicationToolsLayer, SessionsLayer)))
+          interrupt: sessions.interrupt,
+          prompt: (input) =>
+            sessions.prompt({
+              id: input.id,
+              sessionID: input.sessionID,
+              prompt: input.prompt,
+              delivery: input.delivery,
+            }),
+          messages: (input) =>
+            sessions.messages({
+              sessionID: input.sessionID,
+              limit: input.limit,
+              order: input.order,
+              cursor: input.cursor,
+            }),
+          message: (input) => sessions.message({ sessionID: input.sessionID, messageID: input.messageID }),
+          context: sessions.context,
+          events: (input) => sessions.events({ sessionID: input.sessionID, after: input.after }),
+        },
+      })
+    }),
+  ).pipe(Layer.provide(Layer.merge(applicationTools, sessions)))
+}
+
+export const layer = layerWithHostConfig({})
 
 // TODO: Add OpenCode.create(...) as the Promise facade over the same native API semantics.

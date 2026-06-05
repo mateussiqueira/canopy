@@ -1867,6 +1867,53 @@ describe("SessionRunnerLLM", () => {
     }),
   )
 
+  it.effect("settles a stale unavailable question call and continues without a pending request", () =>
+    Effect.gen(function* () {
+      yield* setup
+      const session = yield* SessionV2.Service
+      const question = yield* QuestionV2.Service
+      yield* session.prompt({ sessionID, prompt: new Prompt({ text: "Do not wait for a question" }), resume: false })
+
+      requests.length = 0
+      responses = [
+        [
+          LLMEvent.stepStart({ index: 0 }),
+          LLMEvent.toolCall({ id: "call-stale-question", name: "question", input: { questions: [] } }),
+          LLMEvent.stepFinish({ index: 0, reason: "tool-calls" }),
+          LLMEvent.finish({ reason: "tool-calls" }),
+        ],
+        [
+          LLMEvent.stepStart({ index: 0 }),
+          LLMEvent.textStart({ id: "text-after-question" }),
+          LLMEvent.textDelta({ id: "text-after-question", text: "Continued" }),
+          LLMEvent.textEnd({ id: "text-after-question" }),
+          LLMEvent.stepFinish({ index: 0, reason: "stop" }),
+          LLMEvent.finish({ reason: "stop" }),
+        ],
+      ]
+
+      yield* session.resume(sessionID)
+
+      expect(requests).toHaveLength(2)
+      expect(requests[0]?.tools.map((tool) => tool.name)).not.toContain("question")
+      expect(yield* question.list()).toEqual([])
+      expect(yield* session.context(sessionID)).toMatchObject([
+        { type: "user", text: "Do not wait for a question" },
+        {
+          type: "assistant",
+          content: [
+            {
+              type: "tool",
+              id: "call-stale-question",
+              state: { status: "error", error: { message: "Unknown tool: question" } },
+            },
+          ],
+        },
+        { type: "assistant", content: [{ type: "text", id: "text-after-question", text: "Continued" }] },
+      ])
+    }),
+  )
+
   it.effect("reloads a model switch before a tool-driven continuation turn", () =>
     Effect.gen(function* () {
       yield* setup

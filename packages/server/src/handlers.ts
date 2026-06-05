@@ -25,7 +25,7 @@ import { SessionStore } from "@opencode-ai/core/session/store"
 const routedSessions = SessionV2.layer.pipe(
   Layer.provide(SessionProjector.layer),
   Layer.provide(SessionExecutionLocal.layer),
-  Layer.provide(LocationServiceMap.layer),
+  Layer.provide(LocationServiceMap.defaultLayer),
   Layer.provide(SessionStore.layer),
   Layer.provide(EventV2.layer),
   Layer.provide(Database.defaultLayer),
@@ -51,7 +51,7 @@ export const v2Handlers = Layer.mergeAll(
   sessionQuestionHandlers,
 ).pipe(
   Layer.provide(v2LocationLayer),
-  Layer.provide(LocationServiceMap.layer),
+  Layer.provide(LocationServiceMap.defaultLayer),
   Layer.provide(PermissionSaved.layer),
   Layer.provide(routedSessions),
 )

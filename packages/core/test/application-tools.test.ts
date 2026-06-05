@@ -18,6 +18,13 @@ const registry = ToolRegistry.layer.pipe(
   Layer.provide(ToolOutputStore.defaultLayer),
 )
 const it = testEffect(Layer.mergeAll(applications, registry))
+const unavailableApplications = ApplicationTools.layerWithUnavailable(new Set(["question"]))
+const unavailableRegistry = ToolRegistry.layer.pipe(
+  Layer.provide(permission),
+  Layer.provide(unavailableApplications),
+  Layer.provide(ToolOutputStore.defaultLayer),
+)
+const unavailableIt = testEffect(Layer.mergeAll(unavailableApplications, unavailableRegistry))
 
 const sessionID = SessionV2.ID.make("ses_application_tool")
 const contextual = (contexts: Tool.Context[]) =>
@@ -184,6 +191,22 @@ describe("ApplicationTools", () => {
       ).toMatchObject({ result: { type: "content" } })
       expect(locationContexts).toEqual([{ sessionID, id: "call-shared", name: "shared" }])
       expect(applicationContexts).toEqual([])
+    }),
+  )
+
+  unavailableIt.effect("omits and rejects tools the host cannot service", () =>
+    Effect.gen(function* () {
+      const registry = yield* ToolRegistry.Service
+      const transform = yield* registry.transform()
+      yield* transform((editor) => editor.set("question", { tool: contextual([]).definition }))
+
+      expect(yield* registry.definitions()).toEqual([])
+      expect(
+        yield* registry.execute({
+          sessionID,
+          call: { type: "tool-call", id: "call-stale-question", name: "question", input: { query: "Continue?" } },
+        }),
+      ).toEqual({ type: "error", value: "Unknown tool: question" })
     }),
   )
 })

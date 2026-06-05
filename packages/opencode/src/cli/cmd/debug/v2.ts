@@ -41,6 +41,6 @@ export const V2Command = effectCmd({
           directory: AbsolutePath.make(process.cwd()),
         }),
       ),
-      Effect.provide(LocationServiceMap.layer),
+      Effect.provide(LocationServiceMap.defaultLayer),
     ),
 })

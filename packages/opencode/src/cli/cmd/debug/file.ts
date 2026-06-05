@@ -10,7 +10,7 @@ import { cmd } from "../cmd"
 const filesystem = <A, E, R>(effect: Effect.Effect<A, E, R>) =>
   effect.pipe(
     Effect.provide(LocationServiceMap.get({ directory: AbsolutePath.make(process.cwd()) })),
-    Effect.provide(LocationServiceMap.layer),
+    Effect.provide(LocationServiceMap.defaultLayer),
   )
 
 const FileSearchCommand = effectCmd({
