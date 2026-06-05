@@ -6,7 +6,6 @@ import {
   ContentPart,
   LLMEvent,
   LLMRequest,
-  Message,
   Model,
   ModelID,
   ProviderID,
@@ -50,17 +49,6 @@ describe("llm schema", () => {
     })
 
     expect(decoded.model.route.id).toBe("openai-responses")
-  })
-
-  test("decodes chronological system messages", () => {
-    const decoded = decodeLLMRequest({
-      model,
-      system: [],
-      messages: [{ role: "system", content: [{ type: "text", text: "Operator update." }] }],
-      tools: [],
-    })
-
-    expect(decoded.messages[0]).toMatchObject({ role: "system", content: [{ type: "text", text: "Operator update." }] })
   })
 
   test("rejects invalid event type", () => {

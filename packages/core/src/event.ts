@@ -381,10 +381,10 @@ export const layerWith = (options?: LayerOptions) =>
         })
       }
 
-      function publishEvent<D extends Definition>(event: Payload<D>, options?: PublishOptions) {
+      function publishEvent<D extends Definition>(event: Payload<D>, commit?: PublishOptions["commit"]) {
         return Effect.gen(function* () {
           const durable = registry.get(event.type)?.sync !== undefined
-          if (!durable && options?.commit)
+          if (!durable && commit)
             return yield* Effect.die(
               new InvalidSyncEventError({
                 type: event.type,
@@ -392,7 +392,7 @@ export const layerWith = (options?: LayerOptions) =>
               }),
             )
           if (durable) {
-            const committed = yield* commitSyncEvent(event as Payload, undefined, options?.commit)
+            const committed = yield* commitSyncEvent(event as Payload, undefined, commit)
             if (committed) {
               event = { ...event, seq: committed.seq }
               yield* Effect.forEach(syncHandlers, (sync) => observe(event as Payload, "sync", sync), { discard: true })
@@ -446,7 +446,7 @@ export const layerWith = (options?: LayerOptions) =>
               ...(location ? { location } : {}),
               data,
             } as Payload<D>,
-            options,
+            options?.commit,
           )
         })
       }

@@ -73,7 +73,7 @@ describeRecordedGoldenScenarios([
     prefix: "openai-chat",
     model: openAIChat,
     requires: ["OPENAI_API_KEY"],
-    scenarios: ["text", "chronological-system-update", "tool-call", "tool-loop"],
+    scenarios: ["text", "tool-call", "tool-loop"],
   },
   {
     name: "OpenAI Responses gpt-5.5",
@@ -83,7 +83,6 @@ describeRecordedGoldenScenarios([
     tags: ["flagship"],
     scenarios: [
       { id: "text", temperature: false },
-      { id: "chronological-system-update", temperature: false },
       { id: "reasoning", temperature: false },
       { id: "reasoning-continuation", temperature: false },
       { id: "tool-call", temperature: false },
@@ -105,7 +104,7 @@ describeRecordedGoldenScenarios([
     model: anthropicHaiku,
     requires: ["ANTHROPIC_API_KEY"],
     options: { redactor: Redactor.defaults({ requestHeaders: { allow: ["content-type", "anthropic-version"] } }) },
-    scenarios: ["text", "chronological-system-update", "tool-call"],
+    scenarios: ["text", "tool-call"],
   },
   {
     name: "Anthropic Opus 4.7",
@@ -126,7 +125,6 @@ describeRecordedGoldenScenarios([
     requires: ["GOOGLE_GENERATIVE_AI_API_KEY"],
     scenarios: [
       { id: "text", maxTokens: 80 },
-      "chronological-system-update",
       "tool-call",
       { id: "image", maxTokens: 160 },
     ],

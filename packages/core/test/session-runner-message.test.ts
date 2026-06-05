@@ -1,4 +1,4 @@
-import { describe, expect } from "bun:test"
+import { describe, expect, test } from "bun:test"
 import { Message, Model } from "@opencode-ai/llm"
 import * as OpenAIChat from "@opencode-ai/llm/protocols/openai-chat"
 import { ModelV2 } from "@opencode-ai/core/model"
@@ -8,16 +8,14 @@ import { AgentAttachment, FileAttachment, ReferenceAttachment } from "@opencode-
 import { toLLMMessages } from "@opencode-ai/core/session/runner/to-llm-message"
 import { SessionV2 } from "@opencode-ai/core/session"
 import { ToolOutput } from "@opencode-ai/core/tool-output"
-import { DateTime, Effect } from "effect"
-import { it } from "./lib/effect"
+import { DateTime } from "effect"
 
 const created = DateTime.makeUnsafe(0)
 const id = (value: string) => SessionMessage.ID.make(`msg_${value}`)
 const model = Model.make({ id: "model", provider: "provider", route: OpenAIChat.route })
 
 describe("toLLMMessages", () => {
-  it.effect("maps every top-level V2 Session message type", () =>
-    Effect.sync(() => {
+  test("maps every top-level V2 Session message type", () => {
     const file = new FileAttachment({ uri: "data:image/png;base64,aGVsbG8=", mime: "image/png", name: "hello.png" })
     const reference = new ReferenceAttachment({ name: "docs", kind: "local", uri: "file:///docs" })
     const messages = toLLMMessages(
@@ -32,6 +30,12 @@ describe("toLLMMessages", () => {
           id: id("model"),
           type: "model-switched",
           model: { id: ModelV2.ID.make("model"), providerID: ProviderV2.ID.make("provider") },
+          time: { created },
+        }),
+        new SessionMessage.System({
+          id: id("system"),
+          type: "system",
+          text: "Updated context\n\nOther context",
           time: { created },
         }),
         new SessionMessage.User({
@@ -69,8 +73,9 @@ describe("toLLMMessages", () => {
       model,
     )
 
-    expect(messages.map((message) => message.role)).toEqual(["user", "user", "user", "user"])
-    expect(messages[0]).toEqual(
+    expect(messages.map((message) => message.role)).toEqual(["system", "user", "user", "user", "user"])
+    expect(messages[0]).toEqual(Message.system("Updated context\n\nOther context"))
+    expect(messages[1]).toEqual(
       Message.make({
         id: id("user"),
         role: "user",
@@ -81,34 +86,14 @@ describe("toLLMMessages", () => {
         metadata: { agents: [{ name: "build" }], references: [reference] },
       }),
     )
-    expect(messages.slice(1).map((message) => message.content)).toEqual([
+    expect(messages.slice(2).map((message) => message.content)).toEqual([
       [{ type: "text", text: "Synthetic context" }],
       [{ type: "text", text: "Shell command: pwd\n\n/project" }],
       [{ type: "text", text: "Summary of earlier conversation:\nEarlier work" }],
     ])
-    }),
-  )
+  })
 
-  it.effect("maps durable Session system messages into chronological system messages", () =>
-    Effect.sync(() => {
-      expect(
-        toLLMMessages(
-          [
-            new SessionMessage.System({
-              id: id("system"),
-              type: "system",
-              text: "Updated context\n\nOther context",
-              time: { created },
-            }),
-          ],
-          model,
-        ),
-      ).toEqual([Message.system("Updated context\n\nOther context")])
-    }),
-  )
-
-  it.effect("expands assistant tool calls and settled outcomes into canonical tool messages", () =>
-    Effect.sync(() => {
+  test("expands assistant tool calls and settled outcomes into canonical tool messages", () => {
     const messages = toLLMMessages(
       [
         new SessionMessage.Assistant({
@@ -263,11 +248,9 @@ describe("toLLMMessages", () => {
         },
       },
     ])
-    }),
-  )
+  })
 
-  it.effect("restores OpenAI encrypted reasoning metadata", () =>
-    Effect.sync(() => {
+  test("restores OpenAI encrypted reasoning metadata", () => {
     const messages = toLLMMessages(
       [
         new SessionMessage.Assistant({
@@ -296,11 +279,9 @@ describe("toLLMMessages", () => {
         providerMetadata: { openai: { itemId: "rs_1", reasoningEncryptedContent: "encrypted-state" } },
       },
     ])
-    }),
-  )
+  })
 
-  it.effect("drops provider-native continuation metadata after a model switch", () =>
-    Effect.sync(() => {
+  test("drops provider-native continuation metadata after a model switch", () => {
     const messages = toLLMMessages(
       [
         new SessionMessage.Assistant({
@@ -398,6 +379,5 @@ describe("toLLMMessages", () => {
         providerMetadata: undefined,
       },
     ])
-    }),
-  )
+  })
 })

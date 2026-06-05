@@ -98,13 +98,6 @@ export const layer = Layer.effect(
     const getContext = Effect.fn("SessionRunner.getContext")(function* (sessionID: SessionSchema.ID) {
       return yield* store.context(sessionID)
     })
-    const getRunnerContext = Effect.fn("SessionRunner.getRunnerContext")(function* (
-      sessionID: SessionSchema.ID,
-      baselineSeq: number,
-    ) {
-      return yield* store.runnerContext(sessionID, baselineSeq)
-    })
-
     const failInterruptedTools = Effect.fn("SessionRunner.failInterruptedTools")(function* (
       sessionID: SessionSchema.ID,
     ) {
@@ -152,7 +145,7 @@ export const layer = Layer.effect(
         }
       }
       const system = initialized ?? (yield* SessionContextEpoch.prepare(db, events, systemContext, session.id))
-      const context = yield* getRunnerContext(session.id, system.baselineSeq)
+      const context = yield* store.runnerContext(session.id, system.baselineSeq)
       const request = LLM.request({
         model,
         system: system.baseline.length > 0 ? [SystemPart.make(system.baseline)] : [],
@@ -251,7 +244,6 @@ export const layer = Layer.effect(
       readonly sessionID: SessionSchema.ID
       readonly force?: boolean
     }) {
-      const session = yield* getSession(input.sessionID)
       const hasSteer = yield* SessionInput.hasPending(db, input.sessionID, "steer")
       const hasQueue = hasSteer ? false : yield* SessionInput.hasPending(db, input.sessionID, "queue")
       if (input.force !== true && !hasSteer && !hasQueue) return
@@ -261,7 +253,7 @@ export const layer = Layer.effect(
       while (openActivity) {
         let needsContinuation = true
         for (let step = 0; step < MAX_STEPS; step++) {
-          needsContinuation = yield* runTurn(session.id, promotion)
+          needsContinuation = yield* runTurn(input.sessionID, promotion)
           promotion = "steer"
           if (!needsContinuation) needsContinuation = yield* SessionInput.hasPending(db, input.sessionID, "steer")
           if (!needsContinuation) break

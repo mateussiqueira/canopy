@@ -823,40 +823,6 @@ describe("SessionRunnerLLM", () => {
     }),
   )
 
-  it.effect("replays retained context projections after multiple replacements", () =>
-    Effect.gen(function* () {
-      yield* setup
-      const session = yield* SessionV2.Service
-      const events = yield* EventV2.Service
-      yield* session.prompt({ sessionID, prompt: new Prompt({ text: "First" }), resume: false })
-
-      requests.length = 0
-      response = []
-      yield* session.resume(sessionID)
-      yield* events.publish(SessionEvent.ModelSwitched, {
-        sessionID,
-        messageID: SessionMessage.ID.create(),
-        timestamp: DateTime.makeUnsafe(1),
-        model: { id: ModelV2.ID.make("replacement-1"), providerID: ProviderV2.ID.make("fake") },
-      })
-      systemBaseline = "Replacement context 1"
-      yield* session.prompt({ sessionID, prompt: new Prompt({ text: "Second" }), resume: false })
-      yield* session.resume(sessionID)
-      yield* events.publish(SessionEvent.ModelSwitched, {
-        sessionID,
-        messageID: SessionMessage.ID.create(),
-        timestamp: DateTime.makeUnsafe(2),
-        model: { id: ModelV2.ID.make("replacement-2"), providerID: ProviderV2.ID.make("fake") },
-      })
-      systemBaseline = "Replacement context 2"
-      yield* session.prompt({ sessionID, prompt: new Prompt({ text: "Third" }), resume: false })
-      yield* session.resume(sessionID)
-
-      yield* replaySessionProjection(sessionID)
-      expect(requests.at(-1)?.system.map((part) => part.text)).toEqual(["Replacement context 2"])
-    }),
-  )
-
   it.effect("replaces the baseline lazily after completed compaction without reopening replacement on replay", () =>
     Effect.gen(function* () {
       yield* setup

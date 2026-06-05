@@ -57,7 +57,7 @@ export class LocationServiceMap extends LayerMap.Service<LocationServiceMap>()("
       Catalog.locationLayer,
       CommandV2.locationLayer,
       AgentV2.locationLayer,
-      PluginBoot.locationLayer.pipe(Layer.provide(systemContext)),
+      PluginBoot.locationLayer,
       FileSystem.locationLayer,
       Watcher.locationLayer,
       Pty.locationLayer,

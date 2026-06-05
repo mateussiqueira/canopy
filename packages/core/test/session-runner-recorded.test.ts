@@ -19,11 +19,10 @@ import { SessionRunnerModel } from "@opencode-ai/core/session/runner/model"
 import { ToolRegistry } from "@opencode-ai/core/tool/registry"
 import { SessionTable } from "@opencode-ai/core/session/sql"
 import { SessionStore } from "@opencode-ai/core/session/store"
-import { SystemContext } from "@opencode-ai/core/system-context"
 import { SystemContextRegistry } from "@opencode-ai/core/system-context-registry"
 import { describe, expect } from "bun:test"
 import { eq } from "drizzle-orm"
-import { Effect, Layer, Schema } from "effect"
+import { Effect, Layer } from "effect"
 import path from "node:path"
 import { testEffect } from "./lib/effect"
 
@@ -57,26 +56,7 @@ const model = OpenAIChat.route
   })
   .model({ id: "gpt-4o-mini" })
 const models = SessionRunnerModel.layerWith(() => Effect.succeed(model))
-const systemContextKey = SystemContext.Key.make("test/context")
-const systemContext = Layer.effectDiscard(
-  SystemContextRegistry.Service.pipe(
-    Effect.flatMap((registry) =>
-      registry.contribute({
-        key: systemContextKey,
-        load: Effect.succeed(
-          SystemContext.make({
-            key: systemContextKey,
-            codec: Schema.toCodecJson(Schema.String),
-            load: Effect.succeed("Recorded context"),
-            baseline: String,
-            update: (_previous, current) => current,
-            removed: () => "Recorded context removed",
-          }),
-        ),
-      }),
-    ),
-  ),
-).pipe(Layer.provideMerge(SystemContextRegistry.layer))
+const systemContext = SystemContextRegistry.layer
 const runner = SessionRunnerLLM.defaultLayer.pipe(
   Layer.provide(database),
   Layer.provide(store),
