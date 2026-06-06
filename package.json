@@ -14,7 +14,7 @@
     "dev:storybook": "bun --cwd packages/storybook storybook",
     "lint": "oxlint",
     "changeset": "changeset",
-    "version:http-recorder": "changeset version",
+    "version:http-recorder": "bun ./packages/http-recorder/script/version.ts",
     "release:http-recorder": "bun ./packages/http-recorder/script/publish.ts",
     "typecheck": "bun turbo typecheck",
     "upgrade-opentui": "bun run script/upgrade-opentui.ts",
