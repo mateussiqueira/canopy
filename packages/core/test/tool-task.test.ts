@@ -10,7 +10,8 @@ import { SessionInput } from "@opencode-ai/core/session/input"
 import { SessionMessage } from "@opencode-ai/core/session/message"
 import { TaskTool } from "@opencode-ai/core/tool/task"
 import { Tool } from "@opencode-ai/core/tool/tool"
-import { DateTime, Deferred, Effect, Layer, Stream } from "effect"
+import { DateTime, Deferred, Effect, Fiber, Layer } from "effect"
+import { toolIdentity } from "./lib/tool"
 import { testEffect } from "./lib/effect"
 
 const parentID = SessionV2.ID.make("ses_task_parent")
@@ -47,6 +48,11 @@ const assistant = new SessionMessage.Assistant({
   content: [new SessionMessage.AssistantText({ type: "text", id: "text", text: "Task output" })],
   time: { created: DateTime.makeUnsafe(1), completed: DateTime.makeUnsafe(2) },
 })
+const input = {
+  description: "Map auth",
+  prompt: "Map the authentication flow",
+  subagent_type: "explore",
+}
 
 describe("TaskTool", () => {
   const it = testEffect(Layer.empty)
@@ -66,16 +72,7 @@ describe("TaskTool", () => {
       })
       const tool = yield* TaskTool.make(sessions, resolveAgent)
 
-      const result = yield* execute(
-        tool,
-        {
-          description: "Map auth",
-          prompt: "Map the authentication flow",
-          subagent_type: "explore",
-          background: false,
-        },
-        "call_task",
-      )
+      const result = yield* execute(tool, { ...input, background: false }, "call_task")
 
       expect(result.structured).toEqual({ sessionID: childID, status: "completed", output: "Task output" })
       expect(inputs).toHaveLength(1)
@@ -98,18 +95,48 @@ describe("TaskTool", () => {
       })
       const tool = yield* TaskTool.make(sessions, () => Effect.succeed(undefined))
 
-      const error = yield* execute(
-        tool,
-        {
-          description: "Map auth",
-          prompt: "Map the authentication flow",
-          subagent_type: "missing",
-        },
-        "call_task_unknown",
-      ).pipe(Effect.flip)
+      const error = yield* execute(tool, { ...input, subagent_type: "missing" }, "call_task_unknown").pipe(Effect.flip)
 
       expect(error.message).toBe("Unknown subagent: missing")
       expect(created).toBe(false)
+    }),
+  )
+
+  it.live("interrupts the child when foreground waiting is interrupted", () =>
+    Effect.gen(function* () {
+      const resumed = yield* Deferred.make<void>()
+      const interrupts: SessionV2.ID[] = []
+      const sessions = mockSessions({
+        prompt: (input) => Effect.succeed(admission(input)),
+        resume: () => Deferred.succeed(resumed, undefined).pipe(Effect.andThen(Effect.never)),
+        interrupt: (sessionID) => Effect.sync(() => interrupts.push(sessionID)),
+      })
+      const tool = yield* TaskTool.make(sessions, resolveAgent)
+      const fiber = yield* execute(tool, input, "call_task_interrupt").pipe(Effect.forkChild)
+
+      yield* Deferred.await(resumed)
+      yield* Fiber.interrupt(fiber)
+      expect(interrupts).toEqual([childID])
+    }),
+  )
+
+  it.live("does not notify the parent when background work is interrupted", () =>
+    Effect.gen(function* () {
+      let notified = false
+      const sessions = mockSessions({
+        prompt: (value) => {
+          if (value.sessionID === parentID) notified = true
+          return Effect.succeed(admission(value))
+        },
+        resume: () => Effect.interrupt,
+      })
+      const tool = yield* TaskTool.make(sessions, resolveAgent)
+
+      const result = yield* execute(tool, { ...input, background: true }, "call_task_background_interrupt")
+
+      expect(result.structured).toEqual({ sessionID: childID, status: "running" })
+      yield* Effect.yieldNow
+      expect(notified).toBe(false)
     }),
   )
 
@@ -129,16 +156,7 @@ describe("TaskTool", () => {
       })
       const tool = yield* TaskTool.make(sessions, resolveAgent)
 
-      const result = yield* execute(
-        tool,
-        {
-          description: "Map auth",
-          prompt: "Map the authentication flow",
-          subagent_type: "explore",
-          background: true,
-        },
-        "call_task_background",
-      )
+      const result = yield* execute(tool, { ...input, background: true }, "call_task_background")
 
       expect(result.structured).toEqual({ sessionID: childID, status: "running" })
       expect(inputs).toHaveLength(1)
@@ -153,26 +171,17 @@ describe("TaskTool", () => {
 
 function mockSessions(overrides: {
   create?: SessionV2.Interface["create"]
-  prompt: SessionV2.Interface["prompt"]
-  resume: SessionV2.Interface["resume"]
-}): SessionV2.Interface {
+  interrupt?: SessionV2.Interface["interrupt"]
+  prompt?: SessionV2.Interface["prompt"]
+  resume?: SessionV2.Interface["resume"]
+}): Pick<SessionV2.Interface, "create" | "get" | "interrupt" | "messages" | "prompt" | "resume"> {
   return {
     create: overrides.create ?? (() => Effect.succeed(child)),
     get: (id) => Effect.succeed(id === parentID ? parent : child),
-    prompt: overrides.prompt,
-    resume: overrides.resume,
+    prompt: overrides.prompt ?? ((value) => Effect.succeed(admission(value))),
+    resume: overrides.resume ?? (() => Effect.void),
     messages: () => Effect.succeed([assistant]),
-    list: () => Effect.succeed([]),
-    message: () => Effect.succeed(undefined),
-    context: () => Effect.succeed([]),
-    events: () => Stream.die("unused"),
-    switchAgent: () => Effect.die("unused"),
-    switchModel: () => Effect.die("unused"),
-    shell: () => Effect.die("unused"),
-    skill: () => Effect.die("unused"),
-    compact: () => Effect.die("unused"),
-    wait: () => Effect.die("unused"),
-    interrupt: () => Effect.void,
+    interrupt: overrides.interrupt ?? (() => Effect.void),
   }
 }
 
@@ -193,8 +202,7 @@ function execute(tool: Tool.AnyTool, input: unknown, toolCallID: string) {
     { type: "tool-call", id: toolCallID, name: "task", input },
     {
       sessionID: parentID,
-      agent: AgentV2.ID.make("build"),
-      assistantMessageID: SessionMessage.ID.make("msg_task_tool"),
+      ...toolIdentity,
       toolCallID,
     },
   )

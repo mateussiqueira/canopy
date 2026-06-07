@@ -50,6 +50,8 @@ export const make = Effect.fn("TaskTool.make")(function* (
           model: agent.model ?? parent.model,
         })
 
+        // TODO: Replace this fresh-child composition with Session.run, preserving admission/execution
+        // separation while returning the assistant response after the admitted boundary.
         const run = Effect.gen(function* () {
           yield* sessions.prompt({
             sessionID: child.id,
@@ -67,10 +69,11 @@ export const make = Effect.fn("TaskTool.make")(function* (
             .filter((part): part is SessionMessage.AssistantText => part.type === "text")
             .map((part) => part.text)
             .join("\n")
-        }).pipe(Effect.onInterrupt(() => sessions.interrupt(child.id)))
+        })
 
         if (parameters.background !== true) {
           const output = yield* run.pipe(
+            Effect.onInterrupt(() => sessions.interrupt(child.id)),
             Effect.mapError((error) => new ToolFailure({ message: `Task failed: ${String(error)}`, error })),
           )
           return { sessionID: child.id, status: "completed" as const, output }
@@ -79,7 +82,8 @@ export const make = Effect.fn("TaskTool.make")(function* (
         yield* run.pipe(
           Effect.matchCauseEffect({
             onSuccess: (output) => notify("completed", output),
-            onFailure: (cause) => notify("error", String(Cause.squash(cause))),
+            onFailure: (cause) =>
+              Cause.hasInterruptsOnly(cause) ? Effect.void : notify("error", String(Cause.squash(cause))),
           }),
           Effect.tapCause((cause) => Effect.logError("Background task notification failed", Cause.squash(cause))),
           Effect.ignore,
