@@ -18,7 +18,7 @@ import {
   isContextOverflowFailure,
   type ProviderErrorEvent,
 } from "@opencode-ai/llm"
-import { Cause, DateTime, Effect, FiberSet, Option, Schema, Semaphore, Stream } from "effect"
+import { Cause, DateTime, Effect, Exit, FiberSet, Option, Schema, Semaphore, Stream } from "effect"
 import { AgentV2 } from "../../agent"
 import { Config } from "../../config"
 import { Database } from "../../database/database"
@@ -209,34 +209,71 @@ export const make = Effect.gen(function* () {
           ),
         )
     })
+    const handleProviderEvent = Effect.fnUntraced(function* (
+      event: LLMEvent,
+      tools: FiberSet.FiberSet<void, ToolOutputStore.Error>,
+    ) {
+      if (overflowFailure || publisher.hasProviderError()) return
+      if (LLMEvent.is.providerError(event) && isContextOverflowFailure(event) && !publisher.hasAssistantStarted()) {
+        overflowFailure = event
+        return
+      }
+      yield* publish(event)
+      if (event.type !== "tool-call" || event.providerExecuted) return
+      yield* toolEffect(event).pipe(FiberSet.run(tools))
+    })
+    const providerStream = (tools: FiberSet.FiberSet<void, ToolOutputStore.Error>) =>
+      llm.stream(prepared.request).pipe(
+        Stream.runForEach((event) => handleProviderEvent(event, tools)),
+        Effect.ensuring(withPublication(publisher.flush())),
+      )
+    const projectProviderFailure = Effect.fnUntraced(function* (failure: unknown) {
+      if (overflowFailure) yield* publish(overflowFailure)
+      if (!(failure instanceof LLMError) || publisher.hasProviderError()) return
+      yield* failUnsettled("Provider did not return a tool result", true)
+      yield* withPublication(
+        events.publish(SessionEvent.Step.Failed, {
+          sessionID: prepared.session.id,
+          timestamp: yield* DateTime.now,
+          assistantMessageID: yield* publisher.startAssistant(),
+          error: { type: "unknown", message: failure.reason.message },
+        }),
+      )
+    })
+    const finishTools = Effect.fnUntraced(function* <A, E>(
+      stream: Exit.Exit<A, E>,
+      tools: FiberSet.FiberSet<void, ToolOutputStore.Error>,
+      wait: Effect.Effect<void, ToolOutputStore.Error>,
+    ) {
+      const streamInterrupted = stream._tag === "Failure" && Cause.hasInterrupts(stream.cause)
+      if (streamInterrupted) yield* FiberSet.clear(tools)
+      const settled = yield* wait.pipe(Effect.exit)
+      if (settled._tag === "Failure" && isQuestionRejected(settled.cause)) {
+        yield* FiberSet.clear(tools)
+        yield* failUnsettled("Tool execution interrupted")
+        return yield* Effect.interrupt
+      }
+      const toolInterrupted = settled._tag === "Failure" && Cause.hasInterrupts(settled.cause)
+      if (toolInterrupted) yield* FiberSet.clear(tools)
+      if (streamInterrupted || toolInterrupted || publisher.hasProviderError())
+        yield* failUnsettled("Tool execution interrupted")
+      if (settled._tag === "Failure" && !toolInterrupted) {
+        const failure = Cause.squash(settled.cause)
+        yield* failUnsettled(`Tool execution failed: ${failure instanceof Error ? failure.message : String(failure)}`)
+      }
+      if (stream._tag === "Success" && !publisher.hasProviderError())
+        yield* failUnsettled("Provider did not return a tool result", true)
+      if (stream._tag === "Failure") return yield* Effect.failCause(stream.cause)
+      if (settled._tag === "Failure") return yield* Effect.failCause(settled.cause)
+    })
     const settleProviderTurn = Effect.fnUntraced(function* () {
       const tools = yield* FiberSet.make<void, ToolOutputStore.Error>()
       return yield* Effect.uninterruptibleMask((restore) =>
         Effect.gen(function* () {
-          const stream = yield* restore(
-            llm.stream(prepared.request).pipe(
-              Stream.runForEach((event) =>
-                Effect.gen(function* () {
-                  if (overflowFailure || publisher.hasProviderError()) return
-                  if (
-                    LLMEvent.is.providerError(event) &&
-                    isContextOverflowFailure(event) &&
-                    !publisher.hasAssistantStarted()
-                  ) {
-                    overflowFailure = event
-                    return
-                  }
-                  yield* publish(event)
-                  if (event.type !== "tool-call" || event.providerExecuted) return
-                  yield* toolEffect(event).pipe(FiberSet.run(tools))
-                }),
-              ),
-              Effect.ensuring(withPublication(publisher.flush())),
-            ),
-          ).pipe(Effect.exit)
+          const stream = yield* restore(providerStream(tools)).pipe(Effect.exit)
           const failure =
             stream._tag === "Failure" ? Option.getOrUndefined(Cause.findErrorOption(stream.cause)) : undefined
-          if (
+          const recovered =
             canRecoverOverflow &&
             !publisher.hasAssistantStarted() &&
             isContextOverflowFailure(overflowFailure ?? failure) &&
@@ -248,43 +285,10 @@ export const make = Effect.gen(function* () {
                 request: prepared.request,
               }),
             ))
-          )
-            return AttemptResult.cases.CompactedOverflow.make({})
+          if (recovered) return AttemptResult.cases.CompactedOverflow.make({})
 
-          if (overflowFailure) yield* publish(overflowFailure)
-          if (failure instanceof LLMError && !publisher.hasProviderError()) {
-            yield* failUnsettled("Provider did not return a tool result", true)
-            yield* withPublication(
-              events.publish(SessionEvent.Step.Failed, {
-                sessionID: prepared.session.id,
-                timestamp: yield* DateTime.now,
-                assistantMessageID: yield* publisher.startAssistant(),
-                error: { type: "unknown", message: failure.reason.message },
-              }),
-            )
-          }
-          const streamInterrupted = stream._tag === "Failure" && Cause.hasInterrupts(stream.cause)
-          if (streamInterrupted) yield* FiberSet.clear(tools)
-          const settled = yield* restore(awaitTools(tools)).pipe(Effect.exit)
-          if (settled._tag === "Failure" && isQuestionRejected(settled.cause)) {
-            yield* FiberSet.clear(tools)
-            yield* failUnsettled("Tool execution interrupted")
-            return yield* Effect.interrupt
-          }
-          const toolInterrupted = settled._tag === "Failure" && Cause.hasInterrupts(settled.cause)
-          if (toolInterrupted) yield* FiberSet.clear(tools)
-          if (streamInterrupted || toolInterrupted || publisher.hasProviderError())
-            yield* failUnsettled("Tool execution interrupted")
-          if (settled._tag === "Failure" && !toolInterrupted) {
-            const failure = Cause.squash(settled.cause)
-            yield* failUnsettled(
-              `Tool execution failed: ${failure instanceof Error ? failure.message : String(failure)}`,
-            )
-          }
-          if (stream._tag === "Success" && !publisher.hasProviderError())
-            yield* failUnsettled("Provider did not return a tool result", true)
-          if (stream._tag === "Failure") return yield* Effect.failCause(stream.cause)
-          if (settled._tag === "Failure") return yield* Effect.failCause(settled.cause)
+          yield* projectProviderFailure(failure)
+          yield* finishTools(stream, tools, restore(awaitTools(tools)))
           return AttemptResult.cases.Complete.make({
             needsContinuation: !publisher.hasProviderError() && needsContinuation,
           })
