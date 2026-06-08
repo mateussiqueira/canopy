@@ -88,6 +88,12 @@ OpenCode Go includes the following limits:
 
 Limits are defined in dollar value. This means your actual request count depends on the model you use. Cheaper models like DeepSeek V4 Flash allow for more requests, while higher-cost models like GLM-5.1 allow for fewer.
 
+### Why Go prices may differ from provider prices
+
+Go pools demand across subscribers and uses bulk discounts and reserved capacity to offer up to $60 of usage for a $10 subscription. Usage is therefore calculated using Go's prices, which reflect the cost of sustainably serving all Go subscribers and may differ from a model provider's public API prices.
+
+For most models, bulk discounts create enough savings to fund this multiplier. Some providers already offer models such as DeepSeek V4 Pro and MiMo-V2.5-Pro at very low public prices, leaving little room for an additional bulk discount. Applying those public prices to Go would combine the provider's discount with Go's subscription multiplier and make those models unsustainable to include. As a result, their Go prices may be higher than their public API prices. We balance costs across users and models, with the goal of operating Go at break even.
+
 The table below provides an estimated request count based on typical Go usage patterns:
 
 | Model             | requests per 5 hour | requests per week | requests per month |
