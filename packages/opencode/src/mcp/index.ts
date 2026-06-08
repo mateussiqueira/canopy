@@ -12,6 +12,7 @@ import {
   ToolSchema,
   type Tool as MCPToolDef,
   ToolListChangedNotificationSchema,
+  ResourceUpdatedNotificationSchema,
 } from "@modelcontextprotocol/sdk/types.js"
 import { Config } from "@/config/config"
 import { ConfigMCPV1 } from "@opencode-ai/core/v1/config/mcp"
@@ -53,6 +54,14 @@ export const ToolsChanged = EventV2.define({
   type: "mcp.tools.changed",
   schema: {
     server: Schema.String,
+  },
+})
+
+export const ResourceUpdated = EventV2.define({
+  type: "mcp.resource.updated",
+  schema: {
+    server: Schema.String,
+    uri: Schema.String,
   },
 })
 
@@ -508,18 +517,29 @@ export const layer = Layer.effect(
     )
 
     function watch(s: State, name: string, client: MCPClient, bridge: EffectBridge.Shape, timeout?: number) {
-      if (!client.getServerCapabilities()?.tools) return
-      client.setNotificationHandler(ToolListChangedNotificationSchema, async () => {
-        log.info("tools list changed notification received", { server: name })
-        if (s.clients[name] !== client || s.status[name]?.status !== "connected") return
+      const capabilities = client.getServerCapabilities()
+      if (capabilities?.tools) {
+        client.setNotificationHandler(ToolListChangedNotificationSchema, async () => {
+          log.info("tools list changed notification received", { server: name })
+          if (s.clients[name] !== client || s.status[name]?.status !== "connected") return
 
-        const listed = await bridge.promise(defs(name, client, timeout))
-        if (!listed) return
-        if (s.clients[name] !== client || s.status[name]?.status !== "connected") return
+          const listed = await bridge.promise(defs(name, client, timeout))
+          if (!listed) return
+          if (s.clients[name] !== client || s.status[name]?.status !== "connected") return
 
-        s.defs[name] = listed
-        await bridge.promise(events.publish(ToolsChanged, { server: name }).pipe(Effect.ignore))
-      })
+          s.defs[name] = listed
+          await bridge.promise(events.publish(ToolsChanged, { server: name }).pipe(Effect.ignore))
+        })
+      }
+      if (capabilities?.resources?.subscribe) {
+        client.setNotificationHandler(ResourceUpdatedNotificationSchema, async (notification) => {
+          log.info("resource updated notification received", { server: name, uri: notification.params.uri })
+          if (s.clients[name] !== client || s.status[name]?.status !== "connected") return
+          await bridge.promise(
+            events.publish(ResourceUpdated, { server: name, uri: notification.params.uri }).pipe(Effect.ignore),
+          )
+        })
+      }
     }
 
     const state = yield* InstanceState.make<State>(
@@ -768,9 +788,15 @@ export const layer = Layer.effect(
     })
 
     const readResource = Effect.fn("MCP.readResource")(function* (clientName: string, resourceUri: string) {
-      return yield* withClient(clientName, (client) => client.readResource({ uri: resourceUri }), "readResource", {
-        resourceUri,
-      })
+      return yield* withClient(
+        clientName,
+        async (client) => {
+          if (client.getServerCapabilities()?.resources?.subscribe) await client.subscribeResource({ uri: resourceUri })
+          return client.readResource({ uri: resourceUri })
+        },
+        "readResource",
+        { resourceUri },
+      )
     })
 
     const getMcpConfig = Effect.fnUntraced(function* (mcpName: string) {
