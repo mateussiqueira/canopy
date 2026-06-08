@@ -74,6 +74,7 @@ export type Event =
   | EventTuiToastShow2
   | EventTuiSessionSelect2
   | EventMcpToolsChanged
+  | EventMcpResourcesChanged
   | EventMcpBrowserOpenFailed
   | EventCommandExecuted
   | EventProjectDirectoriesUpdated
@@ -1459,6 +1460,13 @@ export type GlobalEvent = {
     | {
         id: string
         type: "mcp.tools.changed"
+        properties: {
+          server: string
+        }
+      }
+    | {
+        id: string
+        type: "mcp.resources.changed"
         properties: {
           server: string
         }
@@ -5057,6 +5065,14 @@ export type EventPermissionReplied = {
 export type EventMcpToolsChanged = {
   id: string
   type: "mcp.tools.changed"
+  properties: {
+    server: string
+  }
+}
+
+export type EventMcpResourcesChanged = {
+  id: string
+  type: "mcp.resources.changed"
   properties: {
     server: string
   }

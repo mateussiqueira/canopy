@@ -1,6 +1,7 @@
 import { expect, mock, beforeEach } from "bun:test"
 import { Cause, Effect, Exit } from "effect"
 import type { MCP as MCPNS } from "../../src/mcp/index"
+import { GlobalBus, type GlobalEvent } from "../../src/bus/global"
 import { testEffect } from "../lib/effect"
 
 // --- Mock infrastructure ---
@@ -608,6 +609,67 @@ it.instance(
       },
     },
   },
+)
+
+it.instance(
+  "resource list change notifications publish for the active client",
+  () =>
+    Effect.gen(function* () {
+      const mcp = yield* MCP.Service
+      const received: string[] = []
+      const listener = (event: GlobalEvent) => {
+        if (event.payload.type === MCP.ResourcesChanged.type) received.push(event.payload.properties.server)
+      }
+      GlobalBus.on("event", listener)
+      yield* Effect.addFinalizer(() => Effect.sync(() => GlobalBus.off("event", listener)))
+
+      lastCreatedClientName = "resource-server"
+      const firstState = getOrCreateClientState("resource-server")
+      firstState.capabilities = { resources: { listChanged: true } }
+      yield* mcp.add("resource-server", {
+        type: "local",
+        command: ["echo", "test"],
+      })
+
+      expect(firstState.notificationHandlers.size).toBe(1)
+      const staleHandler = Array.from(firstState.notificationHandlers.values())[0]
+
+      clientStates.delete("resource-server")
+      const activeState = getOrCreateClientState("resource-server")
+      activeState.capabilities = { resources: { listChanged: true } }
+      yield* mcp.add("resource-server", {
+        type: "local",
+        command: ["echo", "test"],
+      })
+
+      yield* Effect.promise(() => staleHandler?.())
+      expect(received).toEqual([])
+
+      const activeHandler = Array.from(activeState.notificationHandlers.values())[0]
+      yield* Effect.promise(() => activeHandler?.())
+      expect(received).toEqual(["resource-server"])
+    }),
+  { config: { mcp: {} } },
+)
+
+it.instance(
+  "resource list change notifications require advertised support",
+  () =>
+    MCP.Service.use((mcp: MCPNS.Interface) =>
+      Effect.gen(function* () {
+        lastCreatedClientName = "resource-server"
+        const serverState = getOrCreateClientState("resource-server")
+        serverState.capabilities = { resources: {} }
+
+        yield* mcp.add("resource-server", {
+          type: "local",
+          command: ["echo", "test"],
+        })
+
+        expect(serverState.notificationHandlers.size).toBe(0)
+      }),
+    ),
+  { config: { mcp: {} } },
 )
 
 it.instance(
