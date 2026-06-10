@@ -534,12 +534,9 @@ function App(props: { onSnapshot?: () => Promise<string[]>; pluginHost: TuiPlugi
   )
 
   const connected = useConnected()
-  const currentWorktreeWorkspace = createMemo(() => {
-    const workspaceID = project.workspace.current()
-    if (!workspaceID) return
-    const workspace = project.workspace.get(workspaceID)
-    if (workspace?.type !== "worktree" || !workspace.directory) return
-    return workspace
+  const currentSessionLocation = createMemo(() => {
+    if (route.data.type !== "session") return
+    return sync.session.get(route.data.sessionID)?.directory
   })
   const appCommands = createMemo(() =>
     [
@@ -578,15 +575,15 @@ function App(props: { onSnapshot?: () => Promise<string[]>; pluginHost: TuiPlugi
         },
       },
       {
-        name: "workspace.copy_path",
+        name: "session.copy_location",
         title: "Copy session location",
         category: "Session",
-        enabled: () => currentWorktreeWorkspace() !== undefined,
+        enabled: () => currentSessionLocation() !== undefined,
         run: async () => {
-          const workspace = currentWorktreeWorkspace()
-          if (!workspace?.directory) return
+          const directory = currentSessionLocation()
+          if (!directory) return
           await clipboard
-            .write?.(workspace.directory)
+            .write?.(directory)
             .then(() => toast.show({ message: "Copied session location", variant: "info" }))
             .catch(toast.error)
           dialog.clear()
