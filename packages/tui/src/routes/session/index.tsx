@@ -20,6 +20,7 @@ import { mkdir, writeFile } from "node:fs/promises"
 import { useRoute, useRouteData } from "../../context/route"
 import { useProject } from "../../context/project"
 import { useSync } from "../../context/sync"
+import { useData } from "../../context/data"
 import { useEvent } from "../../context/event"
 import { SplitBorder } from "../../ui/border"
 import { useTuiPaths, useTuiTerminalEnvironment } from "../../context/runtime"
@@ -184,6 +185,7 @@ export function Session() {
   const route = useRouteData("session")
   const { navigate } = useRoute()
   const sync = useSync()
+  const data = useData()
   const event = useEvent()
   const project = useProject()
   const paths = useTuiPaths()
@@ -191,7 +193,7 @@ export function Session() {
   const kv = useKV()
   const { theme } = useTheme()
   const promptRef = usePromptRef()
-  const session = createMemo(() => sync.session.get(route.sessionID))
+  const session = createMemo(() => data.session.get(route.sessionID))
 
   createEffect(() => {
     const title = Locale.truncate(session()?.title ?? "", 50)
@@ -280,8 +282,14 @@ export function Session() {
     const sessionID = route.sessionID
     void (async () => {
       const previousWorkspace = untrack(() => project.workspace.current())
-      const result = await sdk.client.session.get({ sessionID }, { throwOnError: true })
-      if (!result.data) {
+      await Promise.all([
+        data.session.refresh(sessionID),
+        data.session.message.refresh(sessionID),
+        data.session.permission.refresh(sessionID),
+        data.session.question.refresh(sessionID),
+      ])
+      const info = data.session.get(sessionID)
+      if (!info) {
         toast.show({
           message: `Session not found: ${sessionID}`,
           variant: "error",
@@ -291,17 +299,18 @@ export function Session() {
         return
       }
 
-      if (result.data.workspaceID !== previousWorkspace) {
-        project.workspace.set(result.data.workspaceID)
+      if (info.location.workspaceID !== previousWorkspace) {
+        project.workspace.set(info.location.workspaceID)
 
         // Sync all the data for this workspace. Note that this
         // workspace may not exist anymore which is why this is not
         // fatal. If it doesn't we still want to show the session
         // (which will be non-interactive)
-        await sync.bootstrap()
+        try {
+          await sync.bootstrap({ fatal: false })
+        } catch {}
       }
-      editor.reconnect(result.data.directory)
-      await sync.session.sync(sessionID)
+      editor.reconnect(info.location.directory)
       if (route.sessionID === sessionID && scroll) scroll.scrollBy(100_000)
     })().catch((error) => {
       if (route.sessionID !== sessionID) return
@@ -1117,7 +1126,7 @@ export function Session() {
   const revertInfo = createMemo(() => session()?.revert)
   const revertMessageID = createMemo(() => revertInfo()?.messageID)
 
-  const revertDiffFiles = createMemo(() => getRevertDiffFiles(revertInfo()?.diff ?? ""))
+  const revertDiffFiles = createMemo<ReturnType<typeof getRevertDiffFiles>>(() => [])
 
   const revertRevertedMessages = createMemo(() => {
     const messageID = revertMessageID()
@@ -1132,7 +1141,7 @@ export function Session() {
     return {
       messageID: info.messageID,
       reverted: revertRevertedMessages(),
-      diff: info.diff,
+      diff: undefined,
       diffFiles: revertDiffFiles(),
     }
   })
@@ -1141,7 +1150,7 @@ export function Session() {
   createEffect(on(() => route.sessionID, toBottom))
 
   return (
-    <PathFormatterProvider path={session()?.directory}>
+    <PathFormatterProvider path={session()?.location.directory}>
       <context.Provider
         value={{
           get width() {

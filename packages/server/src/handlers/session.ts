@@ -10,6 +10,7 @@ import {
   SessionNotFoundError,
   UnknownError,
 } from "../errors"
+import { AbsolutePath } from "@opencode-ai/core/schema"
 
 const DefaultSessionsLimit = 50
 
@@ -58,6 +59,19 @@ export const SessionHandler = HttpApiBuilder.group(Api, "server.session", (handl
                   })
                 : undefined,
             },
+          }
+        }),
+      )
+      .handle(
+        "session.create",
+        Effect.fn(function* (ctx) {
+          return {
+            data: yield* session.create({
+              id: ctx.payload.id,
+              agent: ctx.payload.agent,
+              model: ctx.payload.model,
+              location: ctx.payload.location ?? { directory: AbsolutePath.make(process.cwd()) },
+            }),
           }
         }),
       )

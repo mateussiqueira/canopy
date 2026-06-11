@@ -991,9 +991,8 @@ export function Prompt(props: PromptProps) {
       if (move.pending() && !directory) return false
       finishMoveProgress = Boolean(move.progress())
 
-      const res = await sdk.client.session.create({
-        directory,
-        workspace: workspaceID,
+      const res = await sdk.client.v2.session.create({
+        location: directory ? { directory, workspaceID } : undefined,
         agent: agent.name,
         model: {
           providerID: selectedModel.providerID,
@@ -1004,8 +1003,6 @@ export function Prompt(props: PromptProps) {
 
       if (res.error) {
         if (finishMoveProgress) move.finishSubmit()
-        console.log("Creating a session failed:", res.error)
-
         toast.show({
           message: "Creating a session failed. Open console for more details.",
           variant: "error",
@@ -1014,7 +1011,7 @@ export function Prompt(props: PromptProps) {
         return true
       }
 
-      sessionID = res.data.id
+      sessionID = res.data.data.id
     }
 
     const inputText = expandTrackedPastedText(

@@ -17,7 +17,10 @@ export default Runtime.handler(
     return yield* Effect.scoped(
       Effect.gen(function* () {
         const daemon = yield* Daemon.Service
-        const password = yield* daemon.password()
+        const standalonePassword = process.env.OPENCODE_SERVER_PASSWORD
+        if (input.stdio) delete process.env.OPENCODE_SERVER_PASSWORD
+        const password = input.stdio ? standalonePassword : yield* daemon.password()
+        if (!password) return yield* Effect.fail(new Error("Missing server password"))
         const address = yield* listen(input.hostname, input.port, password)
         yield* Effect.tryPromise(() =>
           createOpencodeClient({
@@ -26,7 +29,8 @@ export default Runtime.handler(
           }).v2.location.get(undefined, { throwOnError: true }),
         )
         if (input.register) yield* daemon.register(address)
-        console.log(`server listening on ${HttpServer.formatAddress(address)}`)
+        const url = HttpServer.formatAddress(address)
+        console.log(input.stdio ? JSON.stringify({ url }) : `server listening on ${url}`)
         return yield* Effect.never
       }),
     )

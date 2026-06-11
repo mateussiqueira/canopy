@@ -817,6 +817,14 @@ const scenarios: Scenario[] = [
     }))
     .status(400, undefined, "none"),
   http.protected
+    .post("/api/session", "v2.session.create")
+    .at((ctx) => ({
+      path: "/api/session",
+      headers: { ...ctx.headers(), "content-type": "application/json" },
+      body: {},
+    }))
+    .json(200, data(object)),
+  http.protected
     .get("/api/session/{sessionID}", "v2.session.get")
     .seeded((ctx) => ctx.session({ title: "Session get" }))
     .at((ctx) => ({
