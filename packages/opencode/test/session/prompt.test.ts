@@ -262,7 +262,7 @@ const resourceNoLLMServer = testEffect(
               ? [
                   {
                     uri,
-                    mimeType: "text/plain",
+                    mimeType: "text/plain; charset=utf-8",
                     blob: Buffer.from("MCP text blob fixture").toString("base64"),
                   },
                 ]
@@ -2117,8 +2117,8 @@ resourceNoLLMServer.instance(
           (part) =>
             part.type === "file" &&
             !part.source &&
-            part.mime === "text/plain" &&
-            part.url.startsWith("data:text/plain;base64,"),
+            part.mime === "text/plain; charset=utf-8" &&
+            part.url.startsWith("data:text/plain; charset=utf-8;base64,"),
         ),
       ).toBe(true)
       expect(

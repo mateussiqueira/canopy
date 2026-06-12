@@ -344,6 +344,13 @@ describe("session.message-v2.toModelMessage", () => {
               text: { value: "@fixture-guide", start: 0, end: 14 },
             },
           },
+          {
+            ...basePart(messageID, "p3"),
+            type: "file",
+            mime: "text/plain; charset=utf-8",
+            filename: "guide.txt",
+            url: "data:text/plain; charset=utf-8;base64,IyBSZXNvdXJjZSBjb250ZW50cw==",
+          },
         ] as SessionV1.Part[],
       },
     ]

@@ -222,7 +222,7 @@ export const toModelMessagesEffect = Effect.fnUntraced(function* (
         // Text, directories, and MCP references are resolved before provider conversion.
         if (
           part.type === "file" &&
-          part.mime !== "text/plain" &&
+          part.mime.split(";")[0]?.trim().toLowerCase() !== "text/plain" &&
           part.mime !== "application/x-directory" &&
           part.source?.type !== "resource"
         ) {
