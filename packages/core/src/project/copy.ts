@@ -271,9 +271,9 @@ export const layer = Layer.effect(
 )
 
 export const defaultLayer = layer.pipe(
-  Layer.provide(Database.defaultLayer),
   Layer.provide(FSUtil.defaultLayer),
   Layer.provide(Git.defaultLayer),
   Layer.provide(EventV2.defaultLayer),
+  Layer.provide(Database.defaultLayer),
 )
 export const node = LayerNode.make(layer, [FSUtil.node, Git.node, EventV2.node, Database.node])

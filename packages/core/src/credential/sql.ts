@@ -1,5 +1,5 @@
 import { integer, sqliteTable, text } from "drizzle-orm/sqlite-core"
-import { Timestamps } from "../database/schema.sql"
+import { Timestamps } from "../database/schema.sql.js"
 import type { IntegrationSchema } from "../integration/schema"
 import type { Credential } from "../credential"
 

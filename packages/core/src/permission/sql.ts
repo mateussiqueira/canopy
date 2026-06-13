@@ -1,5 +1,5 @@
 import { sqliteTable, text, uniqueIndex } from "drizzle-orm/sqlite-core"
-import { Timestamps } from "../database/schema.sql"
+import { Timestamps } from "../database/schema.sql.js"
 import { ProjectV2 } from "../project"
 import { ProjectTable } from "../project/sql"
 import type { PermissionSaved } from "./saved"

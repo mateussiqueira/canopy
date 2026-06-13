@@ -7,11 +7,10 @@ import Config from "@npmcli/config"
 import { definitions, flatten, nerfDarts, shorthands } from "@npmcli/config/lib/definitions/index.js"
 import { Effect } from "effect"
 
-const npmPath = fileURLToPath(new URL("..", import.meta.url))
-
 export const load = (dir: string) =>
   Effect.tryPromise({
     try: async () => {
+      const npmPath = fileURLToPath(new URL("..", import.meta.url))
       const config = new Config({
         npmPath,
         cwd: dir,

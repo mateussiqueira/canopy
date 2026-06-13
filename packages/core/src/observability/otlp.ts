@@ -2,7 +2,6 @@ import { Layer } from "effect"
 import { OtlpLogger } from "effect/unstable/observability"
 import { Flag } from "../flag/flag"
 import { InstallationChannel, InstallationVersion } from "../installation/version"
-import { runID } from "./shared"
 
 const endpoint = Flag.OTEL_EXPORTER_OTLP_ENDPOINT
 
@@ -33,7 +32,11 @@ function resourceAttributes() {
   }
 }
 
-export function resource(): { serviceName: string; serviceVersion: string; attributes: Record<string, string> } {
+export function resource(runID: string): {
+  serviceName: string
+  serviceVersion: string
+  attributes: Record<string, string>
+} {
   return {
     serviceName: "opencode",
     serviceVersion: InstallationVersion,
@@ -47,12 +50,12 @@ export function resource(): { serviceName: string; serviceVersion: string; attri
   }
 }
 
-export function loggers() {
+export function loggers(runID: string) {
   if (!endpoint) return []
-  return [OtlpLogger.make({ url: `${endpoint}/v1/logs`, resource: resource(), headers })]
+  return [OtlpLogger.make({ url: `${endpoint}/v1/logs`, resource: resource(runID), headers })]
 }
 
-export async function tracingLayer() {
+export async function tracingLayer(runID: string) {
   if (!endpoint) return Layer.empty
   const NodeSdk = await import("@effect/opentelemetry/NodeSdk")
   const OTLP = await import("@opentelemetry/exporter-trace-otlp-http")
@@ -66,7 +69,7 @@ export async function tracingLayer() {
   context.setGlobalContextManager(manager)
 
   return NodeSdk.layer(() => ({
-    resource: resource(),
+    resource: resource(runID),
     spanProcessor: new SdkBase.BatchSpanProcessor(
       new OTLP.OTLPTraceExporter({
         url: `${endpoint}/v1/traces`,

@@ -10,7 +10,7 @@ import { ProjectV2 } from "../project"
 import type { SessionSchema } from "./schema"
 import type { MessageID, PartID, SessionV1 } from "../v1/session"
 import { WorkspaceV2 } from "../workspace"
-import { Timestamps } from "../database/schema.sql"
+import { Timestamps } from "../database/schema.sql.js"
 import type { SystemContext } from "../system-context/index"
 import { AgentV2 } from "../agent"
 

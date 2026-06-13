@@ -1,9 +1,8 @@
 import { Formatter, Logger, type LogLevel } from "effect"
 import path from "path"
 import { Global } from "../global"
-import { runID } from "./shared"
 
-function formatter(id: string = runID) {
+function formatter(id: string) {
   return Logger.map(Logger.formatStructured, (output) => {
     const messages = Array.isArray(output.message) ? output.message : [output.message]
     return [
@@ -46,12 +45,13 @@ function format(input: unknown) {
   return /^[^\s="\\]+$/.test(value) ? value : JSON.stringify(value)
 }
 
-export function fileLogger(file = path.join(Global.Path.log, "opencode.log"), id: string = runID) {
+export function fileLogger(id: string, file = path.join(Global.Path.log, "opencode.log")) {
   // Do not set batchWindow to 0; it causes high idle CPU usage.
   return Logger.toFile(formatter(id), file, { flag: "a" })
 }
 
-const stderrLogger = Logger.make((options) => process.stderr.write(formatter().log(options) + "\n"))
+const stderrLogger = (id: string) =>
+  Logger.make((options) => process.stderr.write(formatter(id).log(options) + "\n"))
 
 export function minimumLogLevel() {
   const value = process.env.OPENCODE_LOG_LEVEL?.toUpperCase()
@@ -64,8 +64,10 @@ export function minimumLogLevel() {
   return value && value in levels ? levels[value as keyof typeof levels] : levels.INFO
 }
 
-export function loggers() {
-  return process.env.OPENCODE_PRINT_LOGS === "1" ? [fileLogger(), stderrLogger] : [fileLogger()]
+export function loggers(runID: string) {
+  return process.env.OPENCODE_PRINT_LOGS === "1"
+    ? [fileLogger(runID), stderrLogger(runID)]
+    : [fileLogger(runID)]
 }
 
 export * as Logging from "./logging"

@@ -9,13 +9,14 @@ import { Otlp } from "./observability/otlp"
 
 export const layer = Layer.unwrap(
   Effect.gen(function* () {
-    const logs = Logger.layer([...Logging.loggers(), ...Otlp.loggers()], { mergeWithExisting: false }).pipe(
+    const runID = crypto.randomUUID().slice(0, 8)
+    const logs = Logger.layer([...Logging.loggers(runID), ...Otlp.loggers(runID)], { mergeWithExisting: false }).pipe(
       Layer.provide(NodeFileSystem.layer),
       Layer.provide(OtlpSerialization.layerJson),
       Layer.provide(FetchHttpClient.layer),
       Layer.orDie,
       Layer.merge(Layer.succeed(References.MinimumLogLevel, Logging.minimumLogLevel())),
     )
-    return Layer.merge(logs, yield* Effect.promise(Otlp.tracingLayer))
+    return Layer.merge(logs, yield* Effect.promise(() => Otlp.tracingLayer(runID)))
   }),
 )

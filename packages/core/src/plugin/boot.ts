@@ -20,7 +20,7 @@ import { Npm } from "../npm"
 import { PluginV2 } from "../plugin"
 import { AgentPlugin } from "./agent"
 import { CommandPlugin } from "./command"
-import { SkillPlugin } from "./skill"
+// import { SkillPlugin } from "./skill"
 import { ConfigProviderPlugin } from "../config/plugin/provider"
 import { EnvPlugin } from "./env"
 import { ModelsDevPlugin } from "./models-dev"
@@ -102,7 +102,7 @@ export const layer = Layer.effect(
       yield* add(EnvPlugin)
       yield* add(AgentPlugin.Plugin)
       yield* add(CommandPlugin.Plugin)
-      yield* add(SkillPlugin.Plugin)
+      // yield* add(SkillPlugin.Plugin)
       for (const item of ProviderPlugins) {
         yield* add(item)
       }

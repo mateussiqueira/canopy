@@ -19,11 +19,13 @@ afterEach(() => {
 })
 
 describe("resource", () => {
+  const runID = "1234abcd"
+
   test("parses and decodes OTEL resource attributes", () => {
     process.env.OTEL_RESOURCE_ATTRIBUTES =
       "service.namespace=anomalyco,team=platform%2Cobservability,label=hello%3Dworld,key%2Fname=value%20here"
 
-    expect(resource().attributes).toMatchObject({
+    expect(resource(runID).attributes).toMatchObject({
       "service.namespace": "anomalyco",
       team: "platform,observability",
       label: "hello=world",
@@ -34,8 +36,8 @@ describe("resource", () => {
   test("drops OTEL resource attributes when any entry is invalid", () => {
     process.env.OTEL_RESOURCE_ATTRIBUTES = "service.namespace=anomalyco,broken"
 
-    expect(resource().attributes["service.namespace"]).toBeUndefined()
-    expect(resource().attributes["opencode.client"]).toBeDefined()
+    expect(resource(runID).attributes["service.namespace"]).toBeUndefined()
+    expect(resource(runID).attributes["opencode.client"]).toBeDefined()
   })
 
   test("keeps built-in attributes when env values conflict", () => {
@@ -43,12 +45,12 @@ describe("resource", () => {
     process.env.OTEL_RESOURCE_ATTRIBUTES =
       "opencode.client=web,service.instance.id=override,service.namespace=anomalyco"
 
-    expect(resource().attributes).toMatchObject({
+    expect(resource(runID).attributes).toMatchObject({
       "opencode.client": "cli",
       "service.namespace": "anomalyco",
     })
-    expect(resource().attributes["service.instance.id"]).not.toBe("override")
-    expect(resource().attributes["opencode.run"]).toMatch(/^[0-9a-f]{8}$/)
+    expect(resource(runID).attributes["service.instance.id"]).toBe(runID)
+    expect(resource(runID).attributes["opencode.run"]).toBe(runID)
   })
 })
 
@@ -65,7 +67,7 @@ test("file logger appends concurrent runs with a run on every line", async () =>
       Array.from({ length: 50 }, (_, index) => index),
       (index) => Effect.logInfo(`entry-${index}`),
     ).pipe(
-      Effect.provide(Logger.layer([fileLogger(file, runID)]).pipe(Layer.provide(NodeFileSystem.layer), Layer.orDie)),
+      Effect.provide(Logger.layer([fileLogger(runID, file)]).pipe(Layer.provide(NodeFileSystem.layer), Layer.orDie)),
       Effect.scoped,
     )
 
@@ -94,7 +96,7 @@ test("file logger flattens nested objects", async () => {
     tags: ["api", "test"],
   }).pipe(
     Effect.annotateLogs({ session: { id: "session-1" } }),
-    Effect.provide(Logger.layer([fileLogger(file, "run-a")]).pipe(Layer.provide(NodeFileSystem.layer), Layer.orDie)),
+    Effect.provide(Logger.layer([fileLogger("run-a", file)]).pipe(Layer.provide(NodeFileSystem.layer), Layer.orDie)),
     Effect.scoped,
     Effect.runPromise,
   )

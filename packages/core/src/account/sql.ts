@@ -1,7 +1,7 @@
 import { sqliteTable, text, integer, primaryKey } from "drizzle-orm/sqlite-core"
 
 import { AccountV2 } from "../account"
-import { Timestamps } from "../database/schema.sql"
+import { Timestamps } from "../database/schema.sql.js"
 
 export const AccountTable = sqliteTable("account", {
   id: text().$type<AccountV2.ID>().primaryKey(),

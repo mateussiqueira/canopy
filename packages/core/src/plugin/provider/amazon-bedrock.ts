@@ -95,8 +95,8 @@ export const AmazonBedrockPlugin = PluginV2.define({
         if (!bearerToken && options.credentialProvider === undefined) {
           // Do not gate SDK creation on explicit AWS env vars. The default chain
           // also handles ~/.aws/credentials, SSO, process creds, and instance roles.
-          const { fromNodeProviderChain } = yield* Effect.promise(() => import("@aws-sdk/credential-providers"))
-          options.credentialProvider = fromNodeProviderChain(profile ? { profile } : {})
+          // const { fromNodeProviderChain } = yield* Effect.promise(() => import("@aws-sdk/credential-providers"))
+          // options.credentialProvider = fromNodeProviderChain(profile ? { profile } : {})
         }
 
         if (evt.package === "@ai-sdk/amazon-bedrock/mantle") {
