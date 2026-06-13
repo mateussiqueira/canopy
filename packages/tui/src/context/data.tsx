@@ -77,6 +77,12 @@ export const { use: useData, provider: DataProvider } = createSimpleContext({
       directory: sdk.directory ?? process.cwd(),
     })
 
+    async function refreshCommands(ref?: LocationRef) {
+      const result = await sdk.client.v2.command.list({ location: locationQuery(ref) }, { throwOnError: true })
+      const key = locationKey(result.data.location)
+      setStore("location", key, "command", result.data.data)
+    }
+
     const message = {
       update(sessionID: string, fn: (messages: SessionMessage[]) => void) {
         setStore(
@@ -133,6 +139,10 @@ export const { use: useData, provider: DataProvider } = createSimpleContext({
             })
           })
           break
+        case "command.changed": {
+          void refreshCommands({ directory: metadata.directory, workspaceID: metadata.workspace })
+          break
+        }
         case "session.next.model.switched":
           message.update(event.properties.sessionID, (draft) => {
             message.prepend(draft, {
@@ -503,9 +513,7 @@ export const { use: useData, provider: DataProvider } = createSimpleContext({
             return store.location[locationKey(location ?? defaultLocation())]?.command
           },
           async refresh(ref?: LocationRef) {
-            const result = await sdk.client.v2.command.list({ location: locationQuery(ref) }, { throwOnError: true })
-            const key = locationKey(result.data.location)
-            setStore("location", key, "command", result.data.data)
+            await refreshCommands(ref)
           },
         },
         integration: {

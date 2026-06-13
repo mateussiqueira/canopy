@@ -5,6 +5,7 @@ import type { InstanceContext } from "@/project/instance-context"
 import { SessionID, MessageID } from "@/session/schema"
 import { Effect, Layer, Context, Schema } from "effect"
 import { Config } from "@/config/config"
+import { EventV2Bridge } from "@/event-v2-bridge"
 import { MCP } from "../mcp"
 import { Skill } from "../skill"
 import { EventV2 } from "@opencode-ai/core/event"
@@ -16,6 +17,10 @@ type State = {
 }
 
 export const Event = {
+  Changed: EventV2.define({
+    type: "command.changed",
+    schema: {},
+  }),
   Executed: EventV2.define({
     type: "command.executed",
     schema: {
@@ -69,8 +74,9 @@ export const layer = Layer.effect(
     const config = yield* Config.Service
     const mcp = yield* MCP.Service
     const skill = yield* Skill.Service
+    const events = yield* EventV2Bridge.Service
 
-    const init = Effect.fn("Command.state")(function* (ctx: InstanceContext) {
+    const build = Effect.fn("Command.build")(function* (ctx: InstanceContext) {
       const cfg = yield* config.get()
       const bridge = yield* EffectBridge.make()
       const commands: Record<string, Info> = {}
@@ -152,9 +158,27 @@ export const layer = Layer.effect(
         }
       }
 
-      return {
-        commands,
+      return commands
+    })
+
+    const init = Effect.fn("Command.state")(function* (ctx: InstanceContext) {
+      const s: State = {
+        commands: yield* build(ctx),
       }
+
+      const unsubscribe = yield* events.listen((event) => {
+        if (event.type !== MCP.CatalogChanged.type) return Effect.void
+        if (event.location?.directory && event.location.directory !== ctx.directory) return Effect.void
+        const data = event.data as EventV2.Data<typeof MCP.CatalogChanged>
+        if (!data.kinds.includes("prompts")) return Effect.void
+        return Effect.gen(function* () {
+          s.commands = yield* build(ctx)
+          yield* events.publish(Event.Changed, {}, event.location ? { location: event.location } : undefined)
+        })
+      })
+      yield* Effect.addFinalizer(() => unsubscribe)
+
+      return s
     })
 
     const state = yield* InstanceState.make<State>((ctx) => init(ctx))
@@ -174,11 +198,12 @@ export const layer = Layer.effect(
 )
 
 export const defaultLayer = layer.pipe(
+  Layer.provide(EventV2Bridge.defaultLayer),
   Layer.provide(Config.defaultLayer),
   Layer.provide(MCP.defaultLayer),
   Layer.provide(Skill.defaultLayer),
 )
 
-export const node = LayerNode.make(layer, [Config.node, MCP.node, Skill.node])
+export const node = LayerNode.make(layer, [Config.node, EventV2Bridge.node, MCP.node, Skill.node])
 
 export * as Command from "."

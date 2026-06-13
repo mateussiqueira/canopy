@@ -96,6 +96,7 @@ export function applyDirectoryEvent(input: {
   setStore: SetStoreFunction<State>
   push: (directory: string) => void
   directory: string
+  loadCommand?: () => void
   loadLsp: () => void
   vcsCache?: VcsCache
   setSessionTodo?: (sessionID: string, todos: Todo[] | undefined) => void
@@ -106,6 +107,10 @@ export function applyDirectoryEvent(input: {
   switch (event.type) {
     case "server.instance.disposed": {
       input.push(input.directory)
+      return
+    }
+    case "command.changed": {
+      input.loadCommand?.()
       return
     }
     case "session.created": {

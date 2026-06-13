@@ -74,7 +74,9 @@ export type Event =
   | EventTuiToastShow2
   | EventTuiSessionSelect2
   | EventMcpToolsChanged
+  | EventMcpCatalogChanged
   | EventMcpBrowserOpenFailed
+  | EventCommandChanged
   | EventCommandExecuted
   | EventProjectUpdated
   | EventSessionStatus
@@ -1470,10 +1472,25 @@ export type GlobalEvent = {
       }
     | {
         id: string
+        type: "mcp.catalog.changed"
+        properties: {
+          server: string
+          kinds: Array<"prompts" | "tools">
+        }
+      }
+    | {
+        id: string
         type: "mcp.browser.open.failed"
         properties: {
           mcpName: string
           url: string
+        }
+      }
+    | {
+        id: string
+        type: "command.changed"
+        properties: {
+          [key: string]: unknown
         }
       }
     | {
@@ -5075,12 +5092,29 @@ export type EventMcpToolsChanged = {
   }
 }
 
+export type EventMcpCatalogChanged = {
+  id: string
+  type: "mcp.catalog.changed"
+  properties: {
+    server: string
+    kinds: Array<"prompts" | "tools">
+  }
+}
+
 export type EventMcpBrowserOpenFailed = {
   id: string
   type: "mcp.browser.open.failed"
   properties: {
     mcpName: string
     url: string
+  }
+}
+
+export type EventCommandChanged = {
+  id: string
+  type: "command.changed"
+  properties: {
+    [key: string]: unknown
   }
 }
 

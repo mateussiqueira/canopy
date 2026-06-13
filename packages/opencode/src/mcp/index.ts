@@ -11,6 +11,7 @@ import { UnauthorizedError } from "@modelcontextprotocol/sdk/client/auth.js"
 import {
   type LoggingMessageNotification,
   LoggingMessageNotificationSchema,
+  PromptListChangedNotificationSchema,
   type Tool as MCPToolDef,
   ToolListChangedNotificationSchema,
 } from "@modelcontextprotocol/sdk/types.js"
@@ -49,6 +50,14 @@ export const ToolsChanged = EventV2.define({
   type: "mcp.tools.changed",
   schema: {
     server: Schema.String,
+  },
+})
+
+export const CatalogChanged = EventV2.define({
+  type: "mcp.catalog.changed",
+  schema: {
+    server: Schema.String,
+    kinds: Schema.Array(Schema.Literals(["prompts", "tools"])),
   },
 })
 
@@ -406,6 +415,7 @@ export const layer = Layer.effect(
         bridge.fork(
           Effect.logWarning("MCP connection closed", { server: name }).pipe(
             Effect.andThen(events.publish(ToolsChanged, { server: name })),
+            Effect.andThen(events.publish(CatalogChanged, { server: name, kinds: ["prompts"] })),
             Effect.ignore,
           ),
         )
@@ -415,16 +425,23 @@ export const layer = Layer.effect(
         bridge.promise(serverLog(name, notification.params)),
       )
 
-      if (!client.getServerCapabilities()?.tools) return
-      client.setNotificationHandler(ToolListChangedNotificationSchema, async () => {
-        if (s.clients[name] !== client || s.status[name]?.status !== "connected") return
+      if (client.getServerCapabilities()?.tools) {
+        client.setNotificationHandler(ToolListChangedNotificationSchema, async () => {
+          if (s.clients[name] !== client || s.status[name]?.status !== "connected") return
 
-        const listed = await bridge.promise(McpCatalog.defs(client, timeout))
-        if (!listed) return
-        if (s.clients[name] !== client || s.status[name]?.status !== "connected") return
+          const listed = await bridge.promise(McpCatalog.defs(client, timeout))
+          if (!listed) return
+          if (s.clients[name] !== client || s.status[name]?.status !== "connected") return
 
-        s.defs[name] = listed
-        await bridge.promise(events.publish(ToolsChanged, { server: name }).pipe(Effect.ignore))
+          s.defs[name] = listed
+          await bridge.promise(events.publish(ToolsChanged, { server: name }).pipe(Effect.ignore))
+        })
+      }
+
+      if (!client.getServerCapabilities()?.prompts) return
+      client.setNotificationHandler(PromptListChangedNotificationSchema, async () => {
+        if (s.clients[name] !== client || s.status[name]?.status !== "connected") return
+        await bridge.promise(events.publish(CatalogChanged, { server: name, kinds: ["prompts"] }).pipe(Effect.ignore))
       })
     }
 
@@ -518,7 +535,10 @@ export const layer = Layer.effect(
       delete s.clients[name]
       delete s.defs[name]
       if (!client) return Effect.void
-      return Effect.tryPromise(() => client.close()).pipe(Effect.ignore)
+      return Effect.tryPromise(() => client.close()).pipe(
+        Effect.ignore,
+        Effect.andThen(events.publish(CatalogChanged, { server: name, kinds: ["prompts"] }).pipe(Effect.ignore)),
+      )
     }
 
     const storeClient = Effect.fnUntraced(function* (
@@ -535,6 +555,9 @@ export const layer = Layer.effect(
       s.defs[name] = listed
       watch(s, name, client, bridge, timeout)
       if (previous) yield* Effect.tryPromise(() => previous.close()).pipe(Effect.ignore)
+      if (client.getServerCapabilities()?.prompts) {
+        yield* events.publish(CatalogChanged, { server: name, kinds: ["prompts"] }).pipe(Effect.ignore)
+      }
       return s.status[name]
     })
 

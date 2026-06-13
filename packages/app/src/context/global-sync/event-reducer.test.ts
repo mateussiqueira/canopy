@@ -134,6 +134,25 @@ describe("applyGlobalEvent", () => {
 })
 
 describe("applyDirectoryEvent", () => {
+  test("refreshes commands when command catalog changes", () => {
+    const [store, setStore] = createStore(baseState())
+    let refreshCount = 0
+
+    applyDirectoryEvent({
+      event: { type: "command.changed" },
+      store,
+      setStore,
+      push() {},
+      directory: "/tmp",
+      loadCommand() {
+        refreshCount += 1
+      },
+      loadLsp() {},
+    })
+
+    expect(refreshCount).toBe(1)
+  })
+
   test("preserves a Home-specific retained session limit", () => {
     const [store, setStore] = createStore(
       baseState({

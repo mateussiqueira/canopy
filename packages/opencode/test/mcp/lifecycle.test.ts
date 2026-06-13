@@ -1,8 +1,9 @@
 import path from "node:path"
 import { expect, mock, beforeEach } from "bun:test"
-import { ToolListChangedNotificationSchema } from "@modelcontextprotocol/sdk/types.js"
+import { PromptListChangedNotificationSchema, ToolListChangedNotificationSchema } from "@modelcontextprotocol/sdk/types.js"
 import { Cause, Effect, Exit } from "effect"
 import type { MCP as MCPNS } from "../../src/mcp/index"
+import { GlobalBus, type GlobalEvent } from "../../src/bus/global"
 import { testEffect } from "../lib/effect"
 import { TestInstance } from "../fixture/fixture"
 
@@ -424,6 +425,36 @@ it.instance(
         expect(serverState.listToolsCalls).toBe(2)
       }),
     ),
+  { config: { mcp: {} } },
+)
+
+it.instance(
+  "prompt change notifications publish catalog invalidation",
+  () =>
+    Effect.gen(function* () {
+      const mcp = yield* MCP.Service
+      lastCreatedClientName = "prompt-server"
+      const serverState = getOrCreateClientState("prompt-server")
+
+      yield* mcp.add("prompt-server", {
+        type: "local",
+        command: ["echo", "test"],
+      })
+
+      let changed = 0
+      const listener = (event: GlobalEvent) => {
+        if (event.payload.type !== MCP.CatalogChanged.type) return
+        changed += 1
+      }
+      GlobalBus.on("event", listener)
+
+      const handler = serverState.notificationHandlers.get(PromptListChangedNotificationSchema)
+      expect(handler).toBeDefined()
+      yield* Effect.promise(() => handler?.())
+      GlobalBus.off("event", listener)
+
+      expect(changed).toBe(1)
+    }),
   { config: { mcp: {} } },
 )
 

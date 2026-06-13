@@ -407,6 +407,13 @@ export function createServerSyncContextInner(_serverSDK?: ServerSDK) {
       setSessionTodo,
       retainedLimit: sessionMeta.get(key)?.limit,
       vcsCache: children.vcsCache.get(key),
+      loadCommand: () => {
+        void retry(() =>
+          sdkFor(directory)
+            .command.list()
+            .then((x) => setStore("command", x.data ?? [])),
+        )
+      },
       loadLsp: () => {
         void queryClient.fetchQuery(queryOptionsApi.lsp(key))
       },
