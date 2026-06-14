@@ -161,4 +161,4 @@ export const locationLayer = Layer.effect(
       }),
     })
   }),
-)
+).pipe(Layer.provideMerge(Layer.merge(Catalog.locationLayer, PluginBoot.locationLayer)))
