@@ -960,6 +960,7 @@ export type GlobalEvent = {
             }
           }
           snapshot?: string
+          files?: Array<string>
         }
       }
     | {
@@ -2744,6 +2745,13 @@ export type ServiceUnavailableError = {
   service?: string
 }
 
+export type MessageNotFoundError = {
+  _tag: "MessageNotFoundError"
+  sessionID: string
+  messageID: string
+  message: string
+}
+
 export type UnknownError1 = {
   _tag: "UnknownError"
   message: string
@@ -3292,6 +3300,7 @@ export type SyncEventSessionNextStepEnded = {
         }
       }
       snapshot?: string
+      files?: Array<string>
     }
   }
 }
@@ -3699,6 +3708,14 @@ export type SessionInputAdmitted = {
   promotedSeq?: number
 }
 
+export type FileDiff = {
+  path: string
+  status: "added" | "modified" | "deleted"
+  additions: number
+  deletions: number
+  patch: string
+}
+
 export type SessionMessageAgentSwitched = {
   id: string
   metadata?: {
@@ -3891,6 +3908,7 @@ export type SessionMessageAssistant = {
   snapshot?: {
     start?: string
     end?: string
+    files?: Array<string>
   }
   finish?: string
   cost?: number
@@ -4472,6 +4490,7 @@ export type EventSessionNextStepEnded = {
       }
     }
     snapshot?: string
+    files?: Array<string>
   }
 }
 
@@ -9644,6 +9663,48 @@ export type V2SessionWaitResponses = {
 }
 
 export type V2SessionWaitResponse = V2SessionWaitResponses[keyof V2SessionWaitResponses]
+
+export type V2SessionRevertPreviewData = {
+  body?: never
+  path: {
+    sessionID: string
+    messageID: string
+  }
+  query?: never
+  url: "/api/session/{sessionID}/message/{messageID}/revert"
+}
+
+export type V2SessionRevertPreviewErrors = {
+  /**
+   * InvalidRequestError
+   */
+  400: InvalidRequestError
+  /**
+   * UnauthorizedError
+   */
+  401: UnauthorizedError
+  /**
+   * MessageNotFoundError | SessionNotFoundError
+   */
+  404: MessageNotFoundError | SessionNotFoundError
+  /**
+   * UnknownError
+   */
+  500: UnknownError1
+}
+
+export type V2SessionRevertPreviewError = V2SessionRevertPreviewErrors[keyof V2SessionRevertPreviewErrors]
+
+export type V2SessionRevertPreviewResponses = {
+  /**
+   * Success
+   */
+  200: {
+    data: Array<FileDiff>
+  }
+}
+
+export type V2SessionRevertPreviewResponse = V2SessionRevertPreviewResponses[keyof V2SessionRevertPreviewResponses]
 
 export type V2SessionContextData = {
   body?: never
