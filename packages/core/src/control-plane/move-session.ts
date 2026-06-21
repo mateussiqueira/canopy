@@ -2,6 +2,7 @@ export * as MoveSession from "./move-session"
 
 import { Context, DateTime, Effect, Layer, Schema } from "effect"
 import { EventV2 } from "../event"
+import { LayerNode } from "../effect/layer-node"
 import { Git } from "../git"
 import { Location } from "../location"
 import { ProjectV2 } from "../project"
@@ -128,3 +129,4 @@ export const defaultLayer = layer.pipe(
   Layer.provide(SessionExecution.noopLayer),
   Layer.provide(SessionV2.defaultLayer),
 )
+export const node = LayerNode.make(layer, [Git.node, EventV2.node, ProjectV2.node, SessionV2.node])
