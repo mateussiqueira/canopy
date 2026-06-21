@@ -17,7 +17,7 @@ export type ID = typeof ID.Type
 export class Error extends Schema.TaggedErrorClass<Error>()("Snapshot.Error", {
   operation: Schema.Literals(["capture", "files", "diff", "preview", "restore"]),
   message: Schema.String,
-  cause: Schema.optional(Schema.Defect),
+  cause: Schema.optional(Schema.Defect()),
 }) {}
 
 export interface CompareInput {

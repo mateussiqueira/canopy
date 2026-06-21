@@ -38,7 +38,7 @@ export class OperationError extends Schema.TaggedErrorClass<OperationError>()("G
   ]),
   message: Schema.String,
   directory: Schema.optional(AbsolutePath),
-  cause: Schema.optional(Schema.Defect),
+  cause: Schema.optional(Schema.Defect()),
 }) {}
 
 export class Worktree extends Schema.Class<Worktree>("Git.Worktree")({
