@@ -2,6 +2,7 @@ import { describe, expect } from "bun:test"
 import { Deferred, Effect, Fiber, Layer } from "effect"
 import { AgentV2 } from "@opencode-ai/core/agent"
 import { Database } from "@opencode-ai/core/database/database"
+import { LayerNode } from "@opencode-ai/core/effect/layer-node"
 import { EventV2 } from "@opencode-ai/core/event"
 import { Location } from "@opencode-ai/core/location"
 import { PermissionV2 } from "@opencode-ai/core/permission"
@@ -12,35 +13,26 @@ import { ProjectTable } from "@opencode-ai/core/project/sql"
 import { AbsolutePath } from "@opencode-ai/core/schema"
 import { SessionV2 } from "@opencode-ai/core/session"
 import { SessionTable } from "@opencode-ai/core/session/sql"
-import { SessionExecution } from "@opencode-ai/core/session/execution"
 import { SessionStore } from "@opencode-ai/core/session/store"
 import { eq } from "drizzle-orm"
 import { location } from "./fixture/location"
 import { testEffect } from "./lib/effect"
 
 const database = Database.layerFromPath(":memory:")
-const current = Layer.succeed(
-  Location.Service,
-  Location.Service.of(location({ directory: AbsolutePath.make("/project") })),
+const current = LayerNode.make(
+  Layer.succeed(Location.Service, Location.Service.of(location({ directory: AbsolutePath.make("/project") }))),
+  [],
 )
-const events = EventV2.layer.pipe(Layer.provide(database))
-const store = SessionStore.layer.pipe(Layer.provide(database))
-const sessions = SessionV2.layer.pipe(
-  Layer.provide(events),
-  Layer.provide(database),
-  Layer.provide(store),
-  Layer.provide(Project.defaultLayer),
-  Layer.provide(SessionExecution.noopLayer),
-)
-const saved = PermissionSaved.layer.pipe(Layer.provide(database))
-const layer = PermissionV2.locationLayer.pipe(
-  Layer.provideMerge(database),
-  Layer.provideMerge(store),
-  Layer.provideMerge(events),
-  Layer.provideMerge(current),
-  Layer.provideMerge(sessions),
-  Layer.provideMerge(SessionExecution.noopLayer),
-  Layer.provideMerge(saved),
+const layer = LayerNode.buildLayer(
+  LayerNode.group([
+    PermissionV2.node(current),
+    Database.node,
+    EventV2.node,
+    AgentV2.node,
+    SessionStore.node,
+    PermissionSaved.node,
+  ]),
+  { replacements: [LayerNode.replace(Database.node, database)] },
 )
 const it = testEffect(layer)
 

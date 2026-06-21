@@ -7,6 +7,7 @@ import { ProjectV2 } from "../project"
 import { withStatics } from "../schema"
 import { Identifier } from "../util/identifier"
 import { PermissionTable } from "./sql"
+import { LayerNode } from "../effect/layer-node"
 
 export const ID = Schema.String.pipe(
   Schema.brand("PermissionSaved.ID"),
@@ -85,3 +86,4 @@ export const layer = Layer.effect(
 )
 
 export const defaultLayer = layer.pipe(Layer.provide(Database.defaultLayer))
+export const node = LayerNode.make(layer, [Database.node])

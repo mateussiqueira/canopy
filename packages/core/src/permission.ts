@@ -11,6 +11,7 @@ import { Identifier } from "./util/identifier"
 import { Wildcard } from "./util/wildcard"
 import { PermissionSchema } from "./permission/schema"
 import { PermissionSaved } from "./permission/saved"
+import { LayerNode } from "./effect/layer-node"
 
 export { Effect, Rule, Ruleset } from "./permission/schema"
 type Effect = PermissionSchema.Effect
@@ -327,3 +328,5 @@ export const layer = Layer.effect(
 )
 
 export const locationLayer = layer.pipe(Layer.provideMerge(AgentV2.locationLayer))
+export const node = (location: LayerNode.Node<Location.Service>) =>
+  LayerNode.make(layer, [EventV2.node, location, AgentV2.node, SessionStore.node, PermissionSaved.node])
