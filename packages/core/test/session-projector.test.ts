@@ -45,6 +45,46 @@ const assistantRow = (
 }
 
 describe("SessionProjector", () => {
+  it.effect("projects a committed revert by removing the message suffix", () =>
+    Effect.gen(function* () {
+      const { db } = yield* Database.Service
+      yield* db
+        .insert(ProjectTable)
+        .values({ id: Project.ID.global, worktree: AbsolutePath.make("/project"), sandboxes: [] })
+        .run()
+      yield* db
+        .insert(SessionTable)
+        .values({
+          id: sessionID,
+          project_id: Project.ID.global,
+          slug: "test",
+          directory: "/project",
+          title: "test",
+          version: "test",
+        })
+        .run()
+      const boundary = SessionMessage.ID.make("msg_boundary")
+      yield* db
+        .insert(SessionMessageTable)
+        .values([assistantRow(boundary, 1), assistantRow(SessionMessage.ID.make("msg_later"), 2)])
+        .run()
+
+      yield* (yield* EventV2.Service).publish(SessionEvent.Reverted, {
+        sessionID,
+        messageID: boundary,
+        timestamp: DateTime.makeUnsafe(3),
+      })
+
+      expect(
+        (yield* db
+          .select({ id: SessionMessageTable.id })
+          .from(SessionMessageTable)
+          .where(eq(SessionMessageTable.session_id, sessionID))
+          .all()).map((row) => row.id),
+      ).toEqual([boundary])
+    }),
+  )
+
   it.effect("orders projected messages and context by durable aggregate sequence", () =>
     Effect.gen(function* () {
       const { db } = yield* Database.Service

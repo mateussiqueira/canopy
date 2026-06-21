@@ -9,6 +9,7 @@ import { Git } from "./git"
 import { Global } from "./global"
 import { Location } from "./location"
 import { AbsolutePath, RelativePath } from "./schema"
+import { Hash } from "./util/hash"
 
 export const ID = Schema.String.pipe(Schema.brand("Snapshot.ID"))
 export type ID = typeof ID.Type
@@ -56,26 +57,29 @@ export const layer = Layer.effect(
     const git = yield* Git.Service
     const global = yield* Global.Service
     const location = yield* Location.Service
-    const gitDirectory = AbsolutePath.make(path.join(global.data, "snapshot", location.project.id))
+    const source = yield* git.repo.discover(location.project.directory)
+    const worktree = source
+      ? AbsolutePath.make(yield* fs.realPath(source.worktree).pipe(Effect.orDie))
+      : location.project.directory
+    const gitDirectory = AbsolutePath.make(path.join(global.data, "snapshot", location.project.id, Hash.fast(worktree)))
 
     const scope = Effect.fnUntraced(function* () {
-      const relative = path.relative(location.project.directory, location.directory)
+      const relative = path.relative(worktree, location.directory)
       if (relative.startsWith("..") || path.isAbsolute(relative))
         return yield* new Error({ operation: "capture", message: "Location is outside the project" })
       return RelativePath.make(relative.replaceAll("\\", "/") || ".")
     })
 
     const repository = Effect.fnUntraced(function* () {
-      const source = yield* git.repo.discover(location.project.directory)
       if (!source) return yield* new Error({ operation: "capture", message: "Project is not a Git repository" })
       if (yield* fs.existsSafe(path.join(gitDirectory, "HEAD")))
         return new Git.Repository({
-          worktree: location.project.directory,
+          worktree,
           gitDirectory,
           commonDirectory: gitDirectory,
         })
       return yield* git.repo.create({
-        worktree: location.project.directory,
+        worktree,
         gitDirectory,
         seed: source,
       }).pipe(Effect.mapError((cause) => failure("capture", cause)))
@@ -94,7 +98,7 @@ export const layer = Layer.effect(
           yield* git.tree.capture({
             repository: repo,
             scopes: [yield* scope()],
-            ignores: yield* git.repo.discover(location.project.directory),
+            ignores: source,
             maximumUntrackedFileBytes: 2 * 1024 * 1024,
           }),
         )
@@ -125,8 +129,8 @@ export const layer = Layer.effect(
     const plan = Effect.fnUntraced(function* (operation: "preview" | "restore", input: RestoreInput) {
       const files = new Map<RelativePath, Git.TreeID>()
       for (const [file, snapshot] of input.files) {
-        const absolute = path.resolve(location.project.directory, file)
-        if (!FSUtil.contains(location.project.directory, absolute))
+        const absolute = path.resolve(worktree, file)
+        if (!FSUtil.contains(worktree, absolute))
           return yield* new Error({ operation, message: `Path escapes the project: ${file}` })
         files.set(file, Git.TreeID.make(snapshot))
       }
@@ -137,11 +141,10 @@ export const layer = Layer.effect(
       if (!(yield* enabled())) return yield* new Error({ operation: "preview", message: "Snapshots are disabled" })
       const repo = yield* repository().pipe(Effect.mapError((cause) => failure("preview", cause)))
       const files = yield* plan("preview", input)
-      const ignores = yield* git.repo.discover(location.project.directory)
       const current = yield* git.tree.capture({
         repository: repo,
         scopes: Array.from(files.keys()),
-        ignores,
+        ignores: source,
         maximumUntrackedFileBytes: 2 * 1024 * 1024,
       }).pipe(Effect.mapError((cause) => failure("preview", cause)))
       return yield* git.tree

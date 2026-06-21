@@ -1,6 +1,6 @@
 export * as SessionProjector from "./projector"
 
-import { and, desc, eq, sql } from "drizzle-orm"
+import { and, desc, eq, gt, or, sql } from "drizzle-orm"
 import { DateTime, Effect, Layer, Schema } from "effect"
 import { Database } from "../database/database"
 import { EventV2 } from "../event"
@@ -13,7 +13,7 @@ import { SessionMessageUpdater } from "./message-updater"
 import { SessionInput } from "./input"
 import { WorkspaceV2 } from "../workspace"
 import { SessionContextEpoch } from "./context-epoch"
-import { MessageTable, PartTable, SessionMessageTable, SessionTable } from "./sql"
+import { MessageTable, PartTable, SessionInputTable, SessionMessageTable, SessionTable } from "./sql"
 import type { DeepMutable } from "../schema"
 
 type DatabaseService = Database.Interface["db"]
@@ -444,6 +444,52 @@ export const layer = Layer.effectDiscard(
         yield* SessionContextEpoch.requestReplacement(db, event.data.sessionID, seq)
       })
     })
+    yield* events.project(SessionEvent.Reverted, (event) =>
+      Effect.gen(function* () {
+        const boundary = yield* db
+          .select({ seq: SessionMessageTable.seq })
+          .from(SessionMessageTable)
+          .where(
+            and(
+              eq(SessionMessageTable.session_id, event.data.sessionID),
+              eq(SessionMessageTable.id, event.data.messageID),
+            ),
+          )
+          .get()
+          .pipe(Effect.orDie)
+        if (!boundary) return yield* Effect.die(`Revert boundary message not found: ${event.data.messageID}`)
+        yield* db
+          .delete(SessionMessageTable)
+          .where(
+            and(
+              eq(SessionMessageTable.session_id, event.data.sessionID),
+              gt(SessionMessageTable.seq, boundary.seq),
+            ),
+          )
+          .run()
+          .pipe(Effect.orDie)
+        yield* db
+          .delete(SessionInputTable)
+          .where(
+            and(
+              eq(SessionInputTable.session_id, event.data.sessionID),
+              or(
+                gt(SessionInputTable.admitted_seq, boundary.seq),
+                gt(SessionInputTable.promoted_seq, boundary.seq),
+              ),
+            ),
+          )
+          .run()
+          .pipe(Effect.orDie)
+        yield* db
+          .update(SessionTable)
+          .set({ time_updated: DateTime.toEpochMillis(event.data.timestamp) })
+          .where(eq(SessionTable.id, event.data.sessionID))
+          .run()
+          .pipe(Effect.orDie)
+        yield* SessionContextEpoch.reset(db, event.data.sessionID)
+      }),
+    )
   }),
 )
 

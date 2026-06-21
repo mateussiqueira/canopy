@@ -209,6 +209,22 @@ export const SessionGroup = HttpApiGroup.make("server.session")
       ),
   )
   .add(
+    HttpApiEndpoint.post("session.revert.commit", "/api/session/:sessionID/message/:messageID/revert", {
+      params: { sessionID: SessionV2.ID, messageID: SessionMessage.ID },
+      payload: Schema.Struct({ files: Schema.Boolean.pipe(Schema.optional) }),
+      success: HttpApiSchema.NoContent,
+      error: [MessageNotFoundError, SessionNotFoundError, UnknownError],
+    })
+      .middleware(SessionLocationMiddleware)
+      .annotateMerge(
+        OpenApi.annotations({
+          identifier: "v2.session.revert.commit",
+          summary: "Commit message revert",
+          description: "Permanently remove all history after a message and optionally restore affected files.",
+        }),
+      ),
+  )
+  .add(
     HttpApiEndpoint.get("session.context", "/api/session/:sessionID/context", {
       params: { sessionID: SessionV2.ID },
       success: Schema.Struct({ data: Schema.Array(SessionMessage.Message) }),

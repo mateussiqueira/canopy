@@ -30,6 +30,7 @@ import { SessionEvent } from "./session/event"
 import { SessionInput } from "./session/input"
 import { File } from "./file"
 import { Snapshot } from "./snapshot"
+import { SessionRevert } from "./session/revert"
 
 // get project -> project.locations
 //
@@ -101,10 +102,8 @@ export class PromptConflictError extends Schema.TaggedErrorClass<PromptConflictE
   messageID: SessionMessage.ID,
 }) {}
 
-export class MessageNotFoundError extends Schema.TaggedErrorClass<MessageNotFoundError>()("Session.MessageNotFoundError", {
-  sessionID: SessionSchema.ID,
-  messageID: SessionMessage.ID,
-}) {}
+export const MessageNotFoundError = SessionRevert.MessageNotFoundError
+export type MessageNotFoundError = SessionRevert.MessageNotFoundError
 
 export type Error = NotFoundError | OperationUnavailableError | PromptConflictError
 
@@ -171,6 +170,11 @@ export interface Interface {
       readonly File.Diff[],
       NotFoundError | MessageNotFoundError | Snapshot.Error
     >
+    readonly commit: (input: {
+      sessionID: SessionSchema.ID
+      messageID: SessionMessage.ID
+      files?: boolean
+    }) => Effect.Effect<void, NotFoundError | MessageNotFoundError | Snapshot.Error>
   }
 }
 
@@ -182,7 +186,8 @@ export const layer = Layer.unwrap(
       Layer.effect(
         Service,
         Effect.gen(function* () {
-    const db = (yield* Database.Service).db
+    const database = yield* Database.Service
+    const db = database.db
     const events = yield* EventV2.Service
     const projects = yield* ProjectV2.Service
     const execution = yield* SessionExecution.Service
@@ -433,41 +438,18 @@ export const layer = Layer.unwrap(
       revert: {
         preview: Effect.fn("V2Session.revert.preview")(function* (input) {
           const session = yield* result.get(input.sessionID)
-          const boundary = yield* db
-            .select({ seq: SessionMessageTable.seq })
-            .from(SessionMessageTable)
-            .where(
-              and(
-                eq(SessionMessageTable.session_id, input.sessionID),
-                eq(SessionMessageTable.id, input.messageID),
-              ),
-            )
-            .get()
-            .pipe(Effect.orDie)
-          if (!boundary) return yield* new MessageNotFoundError(input)
-          const rows = yield* db
-            .select()
-            .from(SessionMessageTable)
-            .where(
-              and(
-                eq(SessionMessageTable.session_id, input.sessionID),
-                eq(SessionMessageTable.type, "assistant"),
-                gt(SessionMessageTable.seq, boundary.seq),
-              ),
-            )
-            .orderBy(asc(SessionMessageTable.seq))
-            .all()
-            .pipe(Effect.orDie)
-          const files = new Map<RelativePath, Snapshot.ID>()
-          for (const row of rows) {
-            const message = yield* decode(row).pipe(Effect.orDie)
-            if (message.type !== "assistant" || !message.snapshot?.start) continue
-            for (const file of message.snapshot.files ?? [])
-              if (!files.has(file)) files.set(file, Snapshot.ID.make(message.snapshot.start))
-          }
-          return yield* Effect.gen(function* () {
-            return yield* (yield* Snapshot.Service).preview({ files })
-          }).pipe(Effect.provide(locations.get(session.location)))
+          return yield* SessionRevert.preview(input).pipe(
+            Effect.provideService(Database.Service, database),
+            Effect.provide(locations.get(session.location)),
+          )
+        }),
+        commit: Effect.fn("V2Session.revert.commit")(function* (input) {
+          const session = yield* result.get(input.sessionID)
+          return yield* SessionRevert.commit(input).pipe(
+            Effect.provideService(Database.Service, database),
+            Effect.provideService(EventV2.Service, events),
+            Effect.provide(locations.get(session.location)),
+          )
         }),
       },
     })

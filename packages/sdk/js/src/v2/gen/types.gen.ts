@@ -46,6 +46,7 @@ export type Event =
   | EventSessionNextCompactionStarted
   | EventSessionNextCompactionDelta
   | EventSessionNextCompactionEnded
+  | EventSessionNextReverted
   | EventMessagePartDelta
   | EventSessionDiff
   | EventSessionError
@@ -1204,6 +1205,15 @@ export type GlobalEvent = {
       }
     | {
         id: string
+        type: "session.next.reverted"
+        properties: {
+          timestamp: number
+          sessionID: string
+          messageID: string
+        }
+      }
+    | {
+        id: string
         type: "message.part.delta"
         properties: {
           sessionID: string
@@ -1660,6 +1670,7 @@ export type GlobalEvent = {
     | SyncEventSessionNextRetried
     | SyncEventSessionNextCompactionStarted
     | SyncEventSessionNextCompactionEnded
+    | SyncEventSessionNextReverted
 }
 
 /**
@@ -3599,6 +3610,22 @@ export type SyncEventSessionNextCompactionEnded = {
   }
 }
 
+export type SyncEventSessionNextReverted = {
+  type: "sync"
+  id: string
+  syncEvent: {
+    type: "session.next.reverted.1"
+    id: string
+    seq: number
+    aggregateID: string
+    data: {
+      timestamp: number
+      sessionID: string
+      messageID: string
+    }
+  }
+}
+
 export type ConfigV2ReferenceGit = {
   repository: string
   branch?: string
@@ -4748,6 +4775,16 @@ export type EventSessionNextCompactionEnded = {
     reason: "auto" | "manual"
     text: string
     recent: string
+  }
+}
+
+export type EventSessionNextReverted = {
+  id: string
+  type: "session.next.reverted"
+  properties: {
+    timestamp: number
+    sessionID: string
+    messageID: string
   }
 }
 
@@ -9705,6 +9742,48 @@ export type V2SessionRevertPreviewResponses = {
 }
 
 export type V2SessionRevertPreviewResponse = V2SessionRevertPreviewResponses[keyof V2SessionRevertPreviewResponses]
+
+export type V2SessionRevertCommitData = {
+  body: {
+    files?: boolean
+  }
+  path: {
+    sessionID: string
+    messageID: string
+  }
+  query?: never
+  url: "/api/session/{sessionID}/message/{messageID}/revert"
+}
+
+export type V2SessionRevertCommitErrors = {
+  /**
+   * InvalidRequestError
+   */
+  400: InvalidRequestError
+  /**
+   * UnauthorizedError
+   */
+  401: UnauthorizedError
+  /**
+   * MessageNotFoundError | SessionNotFoundError
+   */
+  404: MessageNotFoundError | SessionNotFoundError
+  /**
+   * UnknownError
+   */
+  500: UnknownError1
+}
+
+export type V2SessionRevertCommitError = V2SessionRevertCommitErrors[keyof V2SessionRevertCommitErrors]
+
+export type V2SessionRevertCommitResponses = {
+  /**
+   * <No Content>
+   */
+  204: void
+}
+
+export type V2SessionRevertCommitResponse = V2SessionRevertCommitResponses[keyof V2SessionRevertCommitResponses]
 
 export type V2SessionContextData = {
   body?: never

@@ -387,6 +387,7 @@ export function update(adapter: Adapter, event: SessionEvent.Event) {
           }),
         )
       },
+      "session.next.reverted": () => Effect.void,
     })
   })
 }

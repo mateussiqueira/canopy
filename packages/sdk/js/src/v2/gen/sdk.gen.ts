@@ -353,6 +353,8 @@ import type {
   V2SessionQuestionRejectResponses,
   V2SessionQuestionReplyErrors,
   V2SessionQuestionReplyResponses,
+  V2SessionRevertCommitErrors,
+  V2SessionRevertCommitResponses,
   V2SessionRevertPreviewErrors,
   V2SessionRevertPreviewResponses,
   V2SessionWaitErrors,
@@ -5098,6 +5100,47 @@ export class Revert extends HeyApiClient {
       url: "/api/session/{sessionID}/message/{messageID}/revert",
       ...options,
       ...params,
+    })
+  }
+
+  /**
+   * Commit message revert
+   *
+   * Permanently remove all history after a message and optionally restore affected files.
+   */
+  public commit<ThrowOnError extends boolean = false>(
+    parameters: {
+      sessionID: string
+      messageID: string
+      files?: boolean
+    },
+    options?: Options<never, ThrowOnError>,
+  ) {
+    const params = buildClientParams(
+      [parameters],
+      [
+        {
+          args: [
+            { in: "path", key: "sessionID" },
+            { in: "path", key: "messageID" },
+            { in: "body", key: "files" },
+          ],
+        },
+      ],
+    )
+    return (options?.client ?? this.client).post<
+      V2SessionRevertCommitResponses,
+      V2SessionRevertCommitErrors,
+      ThrowOnError
+    >({
+      url: "/api/session/{sessionID}/message/{messageID}/revert",
+      ...options,
+      ...params,
+      headers: {
+        "Content-Type": "application/json",
+        ...options?.headers,
+        ...params.headers,
+      },
     })
   }
 }

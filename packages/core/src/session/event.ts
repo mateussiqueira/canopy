@@ -469,6 +469,16 @@ export namespace Compaction {
   export type Ended = typeof Ended.Type
 }
 
+export const Reverted = EventV2.define({
+  type: "session.next.reverted",
+  ...options,
+  schema: {
+    ...Base,
+    messageID: SessionMessageID.ID,
+  },
+})
+export type Reverted = typeof Reverted.Type
+
 const DurableDefinitions = [
   AgentSwitched,
   ModelSwitched,
@@ -497,6 +507,7 @@ const DurableDefinitions = [
   Retried,
   Compaction.Started,
   Compaction.Ended,
+  Reverted,
 ] as const
 const EphemeralDefinitions = [Text.Delta, Tool.Input.Delta, Reasoning.Delta, Compaction.Delta] as const
 
