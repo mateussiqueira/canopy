@@ -104,8 +104,8 @@ export const TuiThreadCommand = cmd({
         type: "string",
         describe: "agent to use",
       })
-      .option("dangerously-skip-permissions", {
-        alias: ["yolo"],
+      .option("yolo", {
+        alias: ["dangerously-skip-permissions"],
         type: "boolean",
         describe: "auto-approve permissions that are not explicitly denied (dangerous!)",
         default: false,

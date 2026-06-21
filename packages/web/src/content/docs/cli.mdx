@@ -42,7 +42,8 @@ opencode [project]
 | <nobr><code>{"--mdns"}</code></nobr>                         |       | Enable mDNS discovery                                                   |
 | <nobr><code>{"--mdns-domain"}</code></nobr>                  |       | Custom mDNS domain name                                                 |
 | <nobr><code>{"--cors"}</code></nobr>                         |       | Additional browser origin(s) to allow CORS                              |
-| <nobr><code>{"--dangerously-skip-permissions"}</code></nobr> |       | Auto-approve permissions not explicitly denied. Alias: `--yolo`         |
+| <nobr><code>{"--yolo"}</code></nobr>                         |       | Auto-approve permissions not explicitly denied                          |
+| <nobr><code>{"--dangerously-skip-permissions"}</code></nobr> |       | Legacy alias for `--yolo`                                               |
 
 ---
 
@@ -381,7 +382,8 @@ opencode run --attach http://localhost:4096 "Explain async/await in JavaScript"
 | <nobr><code>{"--port"}</code></nobr>                         |       | Port for the local server (defaults to random port)                        |
 | <nobr><code>{"--variant"}</code></nobr>                      |       | Model variant (provider-specific reasoning effort)                         |
 | <nobr><code>{"--thinking"}</code></nobr>                     |       | Show thinking blocks                                                       |
-| <nobr><code>{"--dangerously-skip-permissions"}</code></nobr> |       | Auto-approve permissions that are not explicitly denied. Alias: `--yolo`   |
+| <nobr><code>{"--yolo"}</code></nobr>                         |       | Auto-approve permissions that are not explicitly denied                    |
+| <nobr><code>{"--dangerously-skip-permissions"}</code></nobr> |       | Legacy alias for `--yolo`                                                  |
 
 ---
 
@@ -689,7 +691,8 @@ OpenCode can be configured using environment variables.
 | `OPENCODE_DISABLE_PRUNE`                | boolean | Disable pruning of old data                       |
 | `OPENCODE_DISABLE_TERMINAL_TITLE`       | boolean | Disable automatic terminal title updates          |
 | `OPENCODE_PERMISSION`                   | string  | Inlined json permissions config                   |
-| `OPENCODE_DANGEROUSLY_SKIP_PERMISSIONS` | boolean | Auto-approve permissions not explicitly denied    |
+| `OPENCODE_YOLO`                         | boolean | Auto-approve permissions not explicitly denied    |
+| `OPENCODE_DANGEROUSLY_SKIP_PERMISSIONS` | boolean | Legacy alias for `OPENCODE_YOLO`                  |
 | `OPENCODE_DISABLE_DEFAULT_PLUGINS`      | boolean | Disable default plugins                           |
 | `OPENCODE_DISABLE_LSP_DOWNLOAD`         | boolean | Disable automatic LSP server downloads            |
 | `OPENCODE_ENABLE_EXPERIMENTAL_MODELS`   | boolean | Enable experimental models                        |

@@ -228,8 +228,8 @@ export const RunCommand = effectCmd({
         describe: "run in direct interactive split-footer mode",
         default: false,
       })
-      .option("dangerously-skip-permissions", {
-        alias: ["yolo"],
+      .option("yolo", {
+        alias: ["dangerously-skip-permissions"],
         type: "boolean",
         describe: "auto-approve permissions that are not explicitly denied (dangerous!)",
         default: false,
@@ -733,7 +733,7 @@ export const RunCommand = effectCmd({
               const permission = event.properties
               if (permission.sessionID !== sessionID) continue
 
-              if (args["dangerously-skip-permissions"]) {
+              if (args.yolo) {
                 await client.permission.reply({
                   requestID: permission.id,
                   reply: "once",

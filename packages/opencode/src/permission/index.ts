@@ -91,7 +91,7 @@ export const layer = Layer.effect(
           })
         }
         if (rule.action === "allow") continue
-        if (flags.dangerouslySkipPermissions) continue
+        if (flags.yolo) continue
         needsAsk = true
       }
 

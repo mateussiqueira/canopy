@@ -14,7 +14,7 @@ describe("RuntimeFlags", () => {
       const flags = yield* readFlags.pipe(Effect.provide(fromConfig({})))
 
       expect(flags.autoShare).toBe(false)
-      expect(flags.dangerouslySkipPermissions).toBe(false)
+      expect(flags.yolo).toBe(false)
     }),
   )
 
@@ -24,7 +24,7 @@ describe("RuntimeFlags", () => {
         Effect.provide(
           fromConfig({
             OPENCODE_PURE: "true",
-            OPENCODE_DANGEROUSLY_SKIP_PERMISSIONS: "true",
+            OPENCODE_YOLO: "true",
             OPENCODE_DISABLE_DEFAULT_PLUGINS: "true",
             OPENCODE_AUTO_SHARE: "true",
             OPENCODE_DISABLE_EMBEDDED_WEB_UI: "true",
@@ -41,7 +41,7 @@ describe("RuntimeFlags", () => {
       )
 
       expect(flags.pure).toBe(true)
-      expect(flags.dangerouslySkipPermissions).toBe(true)
+      expect(flags.yolo).toBe(true)
       expect(flags.autoShare).toBe(true)
       expect(flags.disableDefaultPlugins).toBe(true)
       expect(flags.disableEmbeddedWebUi).toBe(true)
@@ -78,6 +78,14 @@ describe("RuntimeFlags", () => {
       )
 
       expect(flags.experimentalLspTy).toBe(true)
+    }),
+  )
+
+  it.effect("supports the legacy dangerous permission environment variable", () =>
+    Effect.gen(function* () {
+      const flags = yield* readFlags.pipe(Effect.provide(fromConfig({ OPENCODE_DANGEROUSLY_SKIP_PERMISSIONS: "true" })))
+
+      expect(flags.yolo).toBe(true)
     }),
   )
 

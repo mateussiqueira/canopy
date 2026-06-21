@@ -25,7 +25,7 @@ const makeEnv = (flags: Partial<RuntimeFlags.Info> = {}) => {
   )
 }
 const it = testEffect(makeEnv())
-const dangerousIt = testEffect(makeEnv({ dangerouslySkipPermissions: true }))
+const yoloIt = testEffect(makeEnv({ yolo: true }))
 
 const rejectAll = (message?: string) =>
   Effect.gen(function* () {
@@ -618,8 +618,8 @@ it.instance(
   { git: true },
 )
 
-dangerousIt.instance(
-  "ask - resolves ask rules when dangerous permission skipping is enabled",
+yoloIt.instance(
+  "ask - resolves ask rules when yolo mode is enabled",
   () =>
     ask({
       sessionID: SessionID.make("session_test"),
@@ -632,8 +632,8 @@ dangerousIt.instance(
   { git: true },
 )
 
-dangerousIt.instance(
-  "ask - preserves deny rules when dangerous permission skipping is enabled",
+yoloIt.instance(
+  "ask - preserves deny rules when yolo mode is enabled",
   () =>
     Effect.gen(function* () {
       const err = yield* fail(

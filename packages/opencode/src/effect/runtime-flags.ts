@@ -15,7 +15,10 @@ const enabledByExperimental = (name: string) =>
 
 export class Service extends ConfigService.Service<Service>()("@opencode/RuntimeFlags", {
   autoShare: bool("OPENCODE_AUTO_SHARE"),
-  dangerouslySkipPermissions: bool("OPENCODE_DANGEROUSLY_SKIP_PERMISSIONS"),
+  yolo: Config.all({
+    primary: bool("OPENCODE_YOLO"),
+    legacy: bool("OPENCODE_DANGEROUSLY_SKIP_PERMISSIONS"),
+  }).pipe(Config.map((flags) => flags.primary || flags.legacy)),
   pure: bool("OPENCODE_PURE"),
   disableDefaultPlugins: bool("OPENCODE_DISABLE_DEFAULT_PLUGINS"),
   disableEmbeddedWebUi: bool("OPENCODE_DISABLE_EMBEDDED_WEB_UI"),
