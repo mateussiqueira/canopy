@@ -2,6 +2,7 @@ import { useEvent } from "./event"
 import type {
   AgentV2Info,
   CommandV2Info,
+  IntegrationInfo,
   Event,
   LocationRef,
   ModelV2Info,
@@ -26,6 +27,7 @@ import { createSignal, onMount } from "solid-js"
 type LocationData = {
   agent?: AgentV2Info[]
   command?: CommandV2Info[]
+  integration?: IntegrationInfo[]
   model?: ModelV2Info[]
   provider?: ProviderV2Info[]
   reference?: ReferenceInfo[]
@@ -119,8 +121,14 @@ export const { use: useData, provider: DataProvider } = createSimpleContext({
       },
     }
 
-    event.subscribe((event) => {
+    event.subscribe((event, metadata) => {
       switch (event.type) {
+        case "catalog.updated":
+          void Promise.all([
+            result.location.model.refresh({ directory: metadata.directory, workspaceID: metadata.workspace }),
+            result.location.provider.refresh({ directory: metadata.directory, workspaceID: metadata.workspace }),
+          ])
+          break
         case "session.next.agent.switched":
           message.update(event.properties.sessionID, (draft) => {
             message.prepend(draft, {
@@ -421,6 +429,13 @@ export const { use: useData, provider: DataProvider } = createSimpleContext({
         case "reference.updated":
           void result.location.reference.refresh()
           break
+        case "integration.updated":
+          void Promise.all([
+            result.location.integration.refresh({ directory: metadata.directory, workspaceID: metadata.workspace }),
+            result.location.model.refresh({ directory: metadata.directory, workspaceID: metadata.workspace }),
+            result.location.provider.refresh({ directory: metadata.directory, workspaceID: metadata.workspace }),
+          ])
+          break
       }
     })
 
@@ -503,6 +518,19 @@ export const { use: useData, provider: DataProvider } = createSimpleContext({
             setStore("location", key, "command", result.data.data)
           },
         },
+        integration: {
+          list(location?: LocationRef) {
+            return store.location[locationKey(location ?? defaultLocation())]?.integration
+          },
+          async refresh(ref?: LocationRef) {
+            const result = await sdk.client.v2.integration.list(
+              { location: locationQuery(ref) },
+              { throwOnError: true },
+            )
+            const key = locationKey(result.data.location)
+            setStore("location", key, "integration", result.data.data)
+          },
+        },
         model: {
           list(location?: LocationRef) {
             return store.location[locationKey(location ?? defaultLocation())]?.model
@@ -550,16 +578,16 @@ export const { use: useData, provider: DataProvider } = createSimpleContext({
       void Promise.allSettled([
         result.location.refresh(),
         result.location.agent.refresh(),
+        result.location.integration.refresh(),
         result.location.model.refresh(),
         result.location.provider.refresh(),
         result.location.reference.refresh(),
         result.location.command.refresh(),
         result.location.skill.refresh(),
-      ])
-        .then((settled) => {
-          for (const failure of settled.filter((item) => item.status === "rejected"))
-            console.error("Failed to refresh default location data", failure.reason)
-        })
+      ]).then((settled) => {
+        for (const failure of settled.filter((item) => item.status === "rejected"))
+          console.error("Failed to refresh default location data", failure.reason)
+      })
     })
 
     return result
