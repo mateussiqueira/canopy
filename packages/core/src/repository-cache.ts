@@ -1,5 +1,6 @@
 import path from "path"
 import { Context, Effect, Layer, Schema } from "effect"
+import { LayerNode } from "./effect/layer-node"
 import { FSUtil } from "./fs-util"
 import { Git } from "./git"
 import { Global } from "./global"
@@ -258,6 +259,7 @@ export const defaultLayer: Layer.Layer<Service> = layer.pipe(
   Layer.provide(Git.defaultLayer),
   Layer.provide(Global.defaultLayer),
 )
+export const node = LayerNode.make(layer, [FSUtil.node, Git.node, EffectFlock.node, Global.node])
 
 function statusForRepository(input: { reuse: boolean; refresh?: boolean; branchMatches?: boolean }) {
   if (!input.reuse) return "cloned" as const
