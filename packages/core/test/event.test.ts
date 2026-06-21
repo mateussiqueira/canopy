@@ -3,6 +3,7 @@ import { Cause, DateTime, Deferred, Effect, Exit, Fiber, Layer, Schema, Stream }
 import { EventV2 } from "@opencode-ai/core/event"
 import { Database } from "@opencode-ai/core/database/database"
 import { EventSequenceTable, EventTable } from "@opencode-ai/core/event/sql"
+import { LayerNode } from "@opencode-ai/core/effect/layer-node"
 import { Location } from "@opencode-ai/core/location"
 import { AbsolutePath } from "@opencode-ai/core/schema"
 import { WorkspaceV2 } from "@opencode-ai/core/workspace"
@@ -17,9 +18,10 @@ const locationLayer = Layer.succeed(
     location({ directory: AbsolutePath.make("project"), workspaceID: WorkspaceV2.ID.make("wrk_test") }),
   ),
 )
-const eventLayer = Layer.mergeAll(EventV2.defaultLayer, Database.defaultLayer)
-const it = testEffect(eventLayer.pipe(Layer.provideMerge(locationLayer)))
-const itWithoutLocation = testEffect(eventLayer)
+const locationNode = LayerNode.make(locationLayer, [])
+const eventNode = LayerNode.group([EventV2.node, Database.node])
+const it = testEffect(LayerNode.buildLayer(LayerNode.group([eventNode, locationNode])))
+const itWithoutLocation = testEffect(LayerNode.buildLayer(eventNode))
 
 const Message = EventV2.define({
   type: "test.message",
@@ -466,12 +468,15 @@ describe("EventV2", () => {
       const continueRead = yield* Deferred.make<void>()
       let pause = true
       const database = Database.layerFromPath(":memory:")
-      const eventLayer = EventV2.layerWith({
-        beforeAggregateRead: () =>
-          pause
-            ? Deferred.succeed(readStarted, undefined).pipe(Effect.andThen(Deferred.await(continueRead)))
-            : Effect.void,
-      }).pipe(Layer.provide(database))
+      const customEventNode = LayerNode.make(
+        EventV2.layerWith({
+          beforeAggregateRead: () =>
+            pause
+              ? Deferred.succeed(readStarted, undefined).pipe(Effect.andThen(Deferred.await(continueRead)))
+              : Effect.void,
+        }),
+        [Database.node],
+      )
 
       yield* Effect.gen(function* () {
         const events = yield* EventV2.Service
@@ -488,7 +493,16 @@ describe("EventV2", () => {
         expect(Array.from(yield* Fiber.join(fiber)).map((event) => [event.cursor, event.event.data])).toEqual([
           [EventV2.Cursor.make(0), { id: aggregateID, text: "during handoff" }],
         ])
-      }).pipe(Effect.provide(Layer.mergeAll(database, eventLayer)))
+      }).pipe(
+        Effect.provide(
+          LayerNode.buildLayer(EventV2.node, {
+            replacements: [
+              LayerNode.replaceWithNode(EventV2.node, customEventNode),
+              LayerNode.replace(Database.node, database),
+            ],
+          }),
+        ),
+      )
     }),
   )
 
