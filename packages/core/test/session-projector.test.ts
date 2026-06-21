@@ -1,7 +1,8 @@
 import { describe, expect } from "bun:test"
-import { DateTime, Effect, Layer, Schema } from "effect"
+import { DateTime, Effect, Schema } from "effect"
 import { asc, eq } from "drizzle-orm"
 import { Database } from "@opencode-ai/core/database/database"
+import { LayerNode } from "@opencode-ai/core/effect/layer-node"
 import { EventV2 } from "@opencode-ai/core/event"
 import { EventTable } from "@opencode-ai/core/event/sql"
 import { ModelV2 } from "@opencode-ai/core/model"
@@ -15,16 +16,15 @@ import { SessionMessage } from "@opencode-ai/core/session/message"
 import { Prompt } from "@opencode-ai/core/session/prompt"
 import { SessionMessageUpdater } from "@opencode-ai/core/session/message-updater"
 import { SessionProjector } from "@opencode-ai/core/session/projector"
-import { SessionExecution } from "@opencode-ai/core/session/execution"
 import { SessionInput } from "@opencode-ai/core/session/input"
-import { SessionStore } from "@opencode-ai/core/session/store"
 import { SessionInputTable, SessionMessageTable, SessionTable } from "@opencode-ai/core/session/sql"
 import { testEffect } from "./lib/effect"
 
-const database = Database.layerFromPath(":memory:")
-const events = EventV2.layer.pipe(Layer.provide(database))
-const projector = SessionProjector.layer.pipe(Layer.provide(events), Layer.provide(database))
-const it = testEffect(Layer.mergeAll(database, events, projector))
+const it = testEffect(
+  LayerNode.buildLayer(LayerNode.group([SessionV2.node, Database.node, EventV2.node, SessionProjector.node]), {
+    replacements: [LayerNode.replace(Database.node, Database.layerFromPath(":memory:"))],
+  }),
+)
 const sessionID = SessionV2.ID.make("ses_projector_test")
 const created = DateTime.makeUnsafe(0)
 const model = { id: ModelV2.ID.make("model"), providerID: ProviderV2.ID.make("provider") }
@@ -110,17 +110,7 @@ describe("SessionProjector", () => {
       expect(
         (yield* sessions.context(sessionID)).map((message) => (message.type === "user" ? message.text : message.type)),
       ).toEqual(["first", "second"])
-    }).pipe(
-      Effect.provide(
-        SessionV2.layer.pipe(
-          Layer.provide(events),
-          Layer.provide(database),
-          Layer.provide(Project.defaultLayer),
-          Layer.provide(SessionStore.layer.pipe(Layer.provide(database))),
-          Layer.provide(SessionExecution.noopLayer),
-        ),
-      ),
-    ),
+    }),
   )
 
   it.effect("marks an admitted lifecycle row promoted with the PromptPromoted event sequence", () =>
