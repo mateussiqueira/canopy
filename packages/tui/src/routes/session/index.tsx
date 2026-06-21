@@ -2164,7 +2164,7 @@ function Read(props: ToolProps) {
         spinner={isRunning()}
         part={props.part}
       >
-        Read {pathFormatter.format(stringValue(props.input.filePath))} {input(props.input, ["filePath"])}
+        Read {pathFormatter.format(stringValue(props.input.filePath))}
       </InlineTool>
       <For each={loaded()}>
         {(filepath) => (
