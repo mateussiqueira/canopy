@@ -104,7 +104,7 @@ export const TuiThreadCommand = cmd({
         type: "string",
         describe: "agent to use",
       })
-      .option("yolo", {
+      .option("auto", {
         alias: ["dangerously-skip-permissions"],
         type: "boolean",
         describe: "auto-approve permissions that are not explicitly denied (dangerous!)",
@@ -213,7 +213,7 @@ export const TuiThreadCommand = cmd({
               model: args.model,
               prompt,
               fork: args.fork,
-              yolo: args.yolo,
+              auto: args.auto,
             },
           }),
         )
