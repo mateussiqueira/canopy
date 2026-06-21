@@ -4,6 +4,7 @@ import { describe, expect } from "bun:test"
 import { Effect, Equal, Hash, Layer, Schema } from "effect"
 import { Tool } from "@opencode-ai/core/public"
 import { Catalog } from "@opencode-ai/core/catalog"
+import { LayerNode } from "@opencode-ai/core/effect/layer-node"
 import { LocationServiceMap } from "@opencode-ai/core/location-layer"
 import { Location } from "@opencode-ai/core/location"
 import { PluginBoot } from "@opencode-ai/core/plugin/boot"
@@ -24,26 +25,20 @@ import { Reference } from "../src/reference"
 import { ToolRegistry } from "../src/tool/registry"
 import { ApplicationTools } from "../src/tool/application-tools"
 
-const applicationTools = ApplicationTools.layer
+const locationServices = LayerNode.make(LocationServiceMap.layer, [
+  ApplicationTools.node,
+  Project.node,
+  EventV2.node,
+  Credential.node,
+  Npm.node,
+  ModelsDev.node,
+  FSUtil.node,
+  Global.node,
+])
 const it = testEffect(
-  Layer.merge(
-    Layer.mergeAll(applicationTools, Database.defaultLayer, EventV2.defaultLayer),
-    LocationServiceMap.layer.pipe(
-      Layer.provide(applicationTools),
-      Layer.provide(
-        Layer.mergeAll(
-          Project.defaultLayer,
-          EventV2.defaultLayer,
-          Credential.defaultLayer,
-          Credential.layer.pipe(Layer.provide(Database.layerFromPath(":memory:").pipe(Layer.fresh))),
-          Npm.defaultLayer,
-          ModelsDev.defaultLayer,
-          FSUtil.defaultLayer,
-          Global.defaultLayer,
-        ),
-      ),
-    ),
-  ),
+  LayerNode.buildLayer(LayerNode.group([ApplicationTools.node, Database.node, EventV2.node, locationServices]), {
+    replacements: [LayerNode.replace(Database.node, Database.layerFromPath(":memory:").pipe(Layer.fresh))],
+  }),
 )
 
 describe("LocationServiceMap", () => {

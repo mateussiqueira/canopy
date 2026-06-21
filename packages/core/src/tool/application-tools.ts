@@ -4,6 +4,7 @@ import { Context, Effect, Layer, Scope } from "effect"
 import { enableMapSet } from "immer"
 import { State } from "../state"
 import { Tool } from "./tool"
+import { LayerNode } from "../effect/layer-node"
 
 type Data = {
   readonly entries: Map<string, Entry>
@@ -56,3 +57,5 @@ export const layer = Layer.effect(
     })
   }),
 )
+
+export const node = LayerNode.make(layer, [])
