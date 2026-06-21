@@ -21,3 +21,8 @@ export class Match extends Schema.Class<Match>("FileSystem.Match")({
   text: Schema.String,
   submatches: Schema.Array(Submatch),
 }) {}
+
+export class PathError extends Schema.TaggedErrorClass<PathError>()("FileSystem.PathError", {
+  path: Schema.String,
+  reason: Schema.Literals(["lexical_escape", "symlink_escape", "not_file", "not_directory"]),
+}) {}

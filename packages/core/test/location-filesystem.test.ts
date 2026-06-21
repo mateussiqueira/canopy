@@ -1,7 +1,7 @@
 import fs from "fs/promises"
 import path from "path"
 import { describe, expect } from "bun:test"
-import { Effect, Exit, Layer } from "effect"
+import { Cause, Effect, Exit, Layer } from "effect"
 import { FileSystem } from "@opencode-ai/core/filesystem"
 import { FSUtil } from "@opencode-ai/core/fs-util"
 import { Location } from "@opencode-ai/core/location"
@@ -31,6 +31,13 @@ const withTmp = <A, E, R>(f: (directory: string) => Effect.Effect<A, E, R>) =>
   ).pipe(Effect.flatMap((tmp) => f(tmp.path)))
 
 describe("FileSystem", () => {
+  const expectFail = (exit: Exit.Exit<unknown, unknown>) => {
+    expect(Exit.isFailure(exit)).toBe(true)
+    if (Exit.isSuccess(exit)) return
+    expect(Cause.hasFails(exit.cause)).toBe(true)
+    expect(Cause.hasDies(exit.cause)).toBe(false)
+  }
+
   it.live("reads text and binary files", () =>
     withTmp((directory) =>
       Effect.gen(function* () {
@@ -60,13 +67,39 @@ describe("FileSystem", () => {
     ),
   )
 
-  it.live("rejects lexical escapes", () =>
+  it.live("fails for missing paths", () =>
     withTmp((directory) =>
       Effect.gen(function* () {
-        const result = yield* (yield* FileSystem.Service)
-          .read({ path: RelativePath.make("../outside.txt") })
+        const exit = yield* (yield* FileSystem.Service)
+          .read({ path: RelativePath.make("missing.txt") })
           .pipe(Effect.exit)
-        expect(Exit.isFailure(result)).toBe(true)
+        expectFail(exit)
+      }).pipe(provide(directory)),
+    ),
+  )
+
+  it.live("fails for wrong path kinds", () =>
+    withTmp((directory) =>
+      Effect.gen(function* () {
+        yield* Effect.promise(() => fs.mkdir(path.join(directory, "src")))
+        yield* Effect.promise(() => fs.writeFile(path.join(directory, "README.md"), "# Test"))
+        const service = yield* FileSystem.Service
+        expectFail(yield* service.read({ path: RelativePath.make("src") }).pipe(Effect.exit))
+        expectFail(yield* service.list({ path: RelativePath.make("README.md") }).pipe(Effect.exit))
+      }).pipe(provide(directory)),
+    ),
+  )
+
+  it.live("fails for lexical and symlink escapes", () =>
+    withTmp((directory) =>
+      Effect.gen(function* () {
+        const outside = path.join(directory, "..", "outside.txt")
+        yield* Effect.promise(() => fs.writeFile(outside, "outside"))
+        yield* Effect.promise(() => fs.symlink(outside, path.join(directory, "linked.txt")))
+        const service = yield* FileSystem.Service
+        expectFail(yield* service.read({ path: RelativePath.make("../outside.txt") }).pipe(Effect.exit))
+        expectFail(yield* service.read({ path: RelativePath.make("linked.txt") }).pipe(Effect.exit))
+        yield* Effect.promise(() => fs.rm(outside))
       }).pipe(provide(directory)),
     ),
   )

@@ -7,8 +7,8 @@ import { FSUtil } from "./fs-util"
 import { Location } from "./location"
 import { PositiveInt, RelativePath } from "./schema"
 import { FileSystemSearch } from "./filesystem/search"
-import { Entry, Match } from "./filesystem/schema"
-export { Entry, Match, Submatch } from "./filesystem/schema"
+import { Entry, Match, PathError } from "./filesystem/schema"
+export { Entry, Match, PathError, Submatch } from "./filesystem/schema"
 
 export const ReadInput = Schema.Struct({
   path: RelativePath,
@@ -58,8 +58,10 @@ export const Event = {
 }
 
 export interface Interface {
-  readonly read: (input: ReadInput) => Effect.Effect<{ readonly content: Uint8Array; readonly mime: string }>
-  readonly list: (input?: ListInput) => Effect.Effect<Entry[]>
+  readonly read: (
+    input: ReadInput,
+  ) => Effect.Effect<{ readonly content: Uint8Array; readonly mime: string }, PathError | FSUtil.Error>
+  readonly list: (input?: ListInput) => Effect.Effect<Entry[], PathError | FSUtil.Error>
   readonly find: (input: FindInput) => Effect.Effect<Entry[]>
   readonly glob: (input: GlobInput) => Effect.Effect<readonly Entry[]>
   readonly grep: (input: GrepInput) => Effect.Effect<readonly Match[]>
@@ -77,9 +79,9 @@ const baseLayer = Layer.effect(
     const resolve = Effect.fnUntraced(function* (input?: RelativePath) {
       const absolute = path.resolve(location.directory, input ?? ".")
       if (!FSUtil.contains(location.directory, absolute))
-        return yield* Effect.die(new Error("Path escapes the location"))
-      const real = yield* fs.realPath(absolute).pipe(Effect.orDie)
-      if (!FSUtil.contains(root, real)) return yield* Effect.die(new Error("Path escapes the location"))
+        return yield* new PathError({ path: input ?? ".", reason: "lexical_escape" })
+      const real = yield* fs.realPath(absolute)
+      if (!FSUtil.contains(root, real)) return yield* new PathError({ path: input ?? ".", reason: "symlink_escape" })
       return { absolute, real, directory: location.directory, root }
     })
     return Service.of({
@@ -88,19 +90,18 @@ const baseLayer = Layer.effect(
       grep: search.grep,
       read: Effect.fn("FileSystem.read")(function* (input) {
         const target = yield* resolve(input.path)
-        const info = yield* fs.stat(target.real).pipe(Effect.orDie)
-        if (info.type !== "File") return yield* Effect.die(new Error("Path is not a file"))
+        const info = yield* fs.stat(target.real)
+        if (info.type !== "File") return yield* new PathError({ path: input.path, reason: "not_file" })
         return {
-          content: yield* fs.readFile(target.real).pipe(Effect.orDie),
+          content: yield* fs.readFile(target.real),
           mime: FSUtil.mimeType(target.real),
         }
       }),
       list: Effect.fn("FileSystem.list")(function* (input = {}) {
         const target = yield* resolve(input.path)
-        const info = yield* fs.stat(target.real).pipe(Effect.orDie)
-        if (info.type !== "Directory") return yield* Effect.die(new Error("Path is not a directory"))
+        const info = yield* fs.stat(target.real)
+        if (info.type !== "Directory") return yield* new PathError({ path: input.path ?? ".", reason: "not_directory" })
         return yield* fs.readDirectoryEntries(target.real).pipe(
-          Effect.orDie,
           Effect.map((items) =>
             items
               .flatMap((item) => {
