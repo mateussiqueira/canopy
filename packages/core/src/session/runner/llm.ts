@@ -8,7 +8,7 @@ import {
   isContextOverflowFailure,
   type ProviderErrorEvent,
 } from "@opencode-ai/llm"
-import { Cause, DateTime, Effect, FiberSet, Layer, Option, Schema, Semaphore, Stream } from "effect"
+import { Cause, Data, DateTime, Effect, FiberSet, Layer, Option, Schema, Semaphore, Stream } from "effect"
 import { AgentV2 } from "../../agent"
 import { Config } from "../../config"
 import { Database } from "../../database/database"
@@ -140,34 +140,20 @@ export const layer = Layer.effect(
     const isQuestionRejected = (cause: Cause.Cause<unknown>) =>
       cause.reasons.some((reason) => Cause.isDieReason(reason) && reason.defect instanceof QuestionV2.RejectedError)
 
-    type RebuildResult =
+    type TurnResult = Data.TaggedEnum<{
       // Request preparation observed a concurrent Session change and must restart from durable state.
-      { readonly _tag: "Rebuild"; readonly nextPromotion: SessionInput.Delivery | undefined }
-    type TurnResult =
-      | RebuildResult
+      Rebuild: { readonly nextPromotion: SessionInput.Delivery | undefined }
       // Overflow compaction completed; rebuild once through the path without overflow recovery.
-      | { readonly _tag: "OverflowCompacted" }
-      | { readonly _tag: "Complete"; readonly needsContinuation: boolean }
+      OverflowCompacted: {}
+      Complete: { readonly needsContinuation: boolean }
+    }>
+    const TurnResult = Data.taggedEnum<TurnResult>()
 
-    const rebuild = (nextPromotion: SessionInput.Delivery | undefined): RebuildResult => ({
-      _tag: "Rebuild",
-      nextPromotion,
-    })
-    const overflowCompacted = (): TurnResult => ({ _tag: "OverflowCompacted" })
-    const complete = (needsContinuation: boolean): TurnResult => ({ _tag: "Complete", needsContinuation })
-
-    type ContextResult<A> = { readonly _tag: "Ready"; readonly value: A } | RebuildResult
-
-    const rebuildOnAgentMismatch = <A, E>(
-      effect: Effect.Effect<A, E>,
-      nextPromotion: SessionInput.Delivery | undefined,
-    ): Effect.Effect<ContextResult<A>, E> =>
+    const optionOnAgentMismatch = <A, E>(effect: Effect.Effect<A, E>): Effect.Effect<Option.Option<A>, E> =>
       effect.pipe(
-        Effect.map((value): ContextResult<A> => ({ _tag: "Ready", value })),
+        Effect.map(Option.some),
         Effect.catchDefect((defect) =>
-          defect instanceof SessionContextEpoch.AgentMismatch
-            ? Effect.succeed(rebuild(nextPromotion))
-            : Effect.die(defect),
+          defect instanceof SessionContextEpoch.AgentMismatch ? Effect.succeed(Option.none()) : Effect.die(defect),
         ),
       )
 
@@ -194,11 +180,10 @@ export const layer = Layer.effect(
       if (session.location.directory !== location.directory || session.location.workspaceID !== location.workspaceID)
         return yield* Effect.interrupt
       const agent = yield* agents.select(session.agent)
-      const initialization = yield* rebuildOnAgentMismatch(
+      const initialization = yield* optionOnAgentMismatch(
         SessionContextEpoch.initialize(db, loadSystemContext(agent), session.id, session.location, agent.id),
-        promotion,
       )
-      if (initialization._tag !== "Ready") return initialization
+      if (Option.isNone(initialization)) return TurnResult.Rebuild({ nextPromotion: promotion })
       const initialized = initialization.value
       const toolFibers = yield* FiberSet.make<void, ToolOutputStore.Error>()
       let needsContinuation = false
@@ -212,16 +197,15 @@ export const layer = Layer.effect(
       }
       const preparation =
         initialized === undefined
-          ? yield* rebuildOnAgentMismatch(
+          ? yield* optionOnAgentMismatch(
               SessionContextEpoch.prepare(db, events, loadSystemContext(agent), session.id, session.location, agent.id),
-              undefined,
             )
-          : ({ _tag: "Ready", value: initialized } as const)
-      if (preparation._tag !== "Ready") return preparation
+          : Option.some(initialized)
+      if (Option.isNone(preparation)) return TurnResult.Rebuild({ nextPromotion: undefined })
       const system = preparation.value
       const current = yield* getSession(sessionID)
       if ((yield* agents.select(current.agent)).id !== agent.id || !sameModel(current.model, session.model))
-        return rebuild(undefined)
+        return TurnResult.Rebuild({ nextPromotion: undefined })
       const model = yield* models.resolve(session)
       const entries = yield* SessionHistory.entriesForRunner(db, session.id, system.baselineSeq)
       const context = entries.map((entry) => entry.message)
@@ -239,7 +223,7 @@ export const layer = Layer.effect(
         toolChoice: isLastStep ? "none" : undefined,
       })
       if (yield* compaction.compactIfNeeded({ sessionID: session.id, entries, model, request }))
-        return rebuild(undefined)
+        return TurnResult.Rebuild({ nextPromotion: undefined })
       const publisher = createLLMEventPublisher(events, {
         sessionID: session.id,
         agent: agent.id,
@@ -253,7 +237,8 @@ export const layer = Layer.effect(
       const publish = (event: LLMEvent, outputPaths: ReadonlyArray<string> = []) =>
         withPublication(publisher.publish(event, outputPaths))
       let overflowFailure: ProviderErrorEvent | undefined
-      if (!(yield* SessionContextEpoch.current(db, session.id, agent.id, system.revision))) return rebuild(undefined)
+      if (!(yield* SessionContextEpoch.current(db, session.id, agent.id, system.revision)))
+        return TurnResult.Rebuild({ nextPromotion: undefined })
       const providerStream = llm.stream(request).pipe(
         Stream.runForEach((event) =>
           Effect.gen(function* () {
@@ -310,7 +295,7 @@ export const layer = Layer.effect(
             isContextOverflowFailure(overflowFailure ?? failure) &&
             (yield* restore(recoverOverflow({ sessionID: session.id, entries, model, request })))
           )
-            return overflowCompacted()
+            return TurnResult.OverflowCompacted()
           if (overflowFailure) yield* publish(overflowFailure)
           const llmFailure = failure instanceof LLMError ? failure : undefined
           if (llmFailure && !publisher.hasProviderError()) {
@@ -344,7 +329,7 @@ export const layer = Layer.effect(
             yield* withPublication(publisher.failUnsettledTools("Provider did not return a tool result", true))
           if (stream._tag === "Failure") return yield* Effect.failCause(stream.cause)
           if (settled._tag === "Failure") return yield* Effect.failCause(settled.cause)
-          return complete(!publisher.hasProviderError() && needsContinuation)
+          return TurnResult.Complete({ needsContinuation: !publisher.hasProviderError() && needsContinuation })
         }),
       )
     }, Effect.scoped)
