@@ -88,6 +88,7 @@ type TypedToolConfig = {
   readonly execute?: ToolExecute<ToolSchema<any>, ToolSchema<any>>
   readonly toModelOutput?: ToolToModelOutput<ToolSchema<any>, ToolSchema<any>>
   readonly toStructuredOutput?: (output: unknown) => unknown
+  readonly strict?: boolean
 }
 
 type DynamicToolConfig = {
@@ -97,6 +98,7 @@ type DynamicToolConfig = {
   readonly execute?: (params: unknown, context?: ToolExecuteContext) => Effect.Effect<unknown, ToolFailure>
   readonly toModelOutput?: (input: ToolModelOutputInput<unknown, unknown>) => ReadonlyArray<ToolContent>
   readonly toStructuredOutput?: (output: unknown) => unknown
+  readonly strict?: boolean
 }
 
 /**
@@ -181,6 +183,7 @@ export function make(config: TypedToolConfig | DynamicToolConfig): AnyTool {
         description: config.description,
         inputSchema: config.jsonSchema,
         outputSchema: config.outputSchema,
+        strict: config.strict,
       }),
     }
   }
@@ -201,6 +204,7 @@ export function make(config: TypedToolConfig | DynamicToolConfig): AnyTool {
       description: config.description,
       inputSchema: toJsonSchema(config.parameters),
       outputSchema: toJsonSchema(config.success),
+      strict: config.strict,
     }),
   }
 }
@@ -226,6 +230,7 @@ export const toDefinitions = (tools: Tools): ReadonlyArray<ToolDefinitionClass> 
         description: item._definition.description,
         inputSchema: item._definition.inputSchema,
         outputSchema: item._definition.outputSchema,
+        strict: item._definition.strict,
       }),
   )
 
