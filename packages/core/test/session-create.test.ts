@@ -11,7 +11,7 @@ import { ModelV2 } from "@opencode-ai/core/model"
 import { ProjectV2 } from "@opencode-ai/core/project"
 import { ProjectTable } from "@opencode-ai/core/project/sql"
 import { ProviderV2 } from "@opencode-ai/core/provider"
-import { AbsolutePath } from "@opencode-ai/core/schema"
+import { AbsolutePath, RelativePath } from "@opencode-ai/core/schema"
 import { SessionV2 } from "@opencode-ai/core/session"
 import { SessionV1 } from "@opencode-ai/core/v1/session"
 import { Prompt } from "@opencode-ai/core/session/prompt"
@@ -423,6 +423,31 @@ describe("SessionV2.create", () => {
             Effect.map((error) => error._tag),
           ),
       ).toBe("Session.NotFoundError")
+    }),
+  )
+})
+
+describe("SessionV2.list", () => {
+  it.effect("limits project sessions to the requested subpath", () =>
+    Effect.gen(function* () {
+      const session = yield* SessionV2.Service
+      const { db } = yield* Database.Service
+      const core = yield* session.create({ location })
+      const nested = yield* session.create({ location })
+      const web = yield* session.create({ location })
+
+      yield* Effect.all([
+        db.update(SessionTable).set({ path: "packages/core" }).where(eq(SessionTable.id, core.id)).run(),
+        db.update(SessionTable).set({ path: "packages/core/test" }).where(eq(SessionTable.id, nested.id)).run(),
+        db.update(SessionTable).set({ path: "packages/web" }).where(eq(SessionTable.id, web.id)).run(),
+      ]).pipe(Effect.orDie)
+
+      const listed = yield* session.list({
+        project: ProjectV2.ID.global,
+        subpath: RelativePath.make("packages/core"),
+      })
+
+      expect(new Set(listed.map((item) => item.id))).toEqual(new Set([core.id, nested.id]))
     }),
   )
 })
