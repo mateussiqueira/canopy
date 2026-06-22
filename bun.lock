@@ -476,6 +476,18 @@
         "effect": "4.0.0-beta.83",
       },
     },
+    "packages/httpapi-codegen": {
+      "name": "@opencode-ai/httpapi-codegen",
+      "dependencies": {
+        "effect": "catalog:",
+        "prettier": "3.6.2",
+      },
+      "devDependencies": {
+        "@tsconfig/bun": "catalog:",
+        "@types/bun": "catalog:",
+        "@typescript/native-preview": "catalog:",
+      },
+    },
     "packages/llm": {
       "name": "@opencode-ai/llm",
       "version": "1.17.9",
@@ -1799,6 +1811,8 @@
     "@opencode-ai/function": ["@opencode-ai/function@workspace:packages/function"],
 
     "@opencode-ai/http-recorder": ["@opencode-ai/http-recorder@workspace:packages/http-recorder"],
+
+    "@opencode-ai/httpapi-codegen": ["@opencode-ai/httpapi-codegen@workspace:packages/httpapi-codegen"],
 
     "@opencode-ai/llm": ["@opencode-ai/llm@workspace:packages/llm"],
 
