@@ -33,6 +33,7 @@ const Handlers = Runtime.handlers(Commands, {
 })
 
 Runtime.run(Commands, Handlers, { version: "local" }).pipe(
+  Effect.annotateLogs({ role: "cli" }),
   Effect.provide(Daemon.defaultLayer),
   Effect.provide(LoggingLayer),
   Effect.provide(NodeServices.layer),

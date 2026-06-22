@@ -33,7 +33,7 @@ export default Runtime.handler(
         const url = HttpServer.formatAddress(address)
         console.log(input.stdio ? JSON.stringify({ url }) : `server listening on ${url}`)
         return yield* Effect.never
-      }),
+      }).pipe(Effect.annotateLogs({ role: "server" })),
     )
   }),
 )
