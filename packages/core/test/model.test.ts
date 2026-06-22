@@ -21,3 +21,11 @@ describe("ModelV2.Ref", () => {
     })
   })
 })
+
+describe("ModelV2.Info", () => {
+  test("creates an empty model without modalities", () => {
+    const model = ModelV2.Info.empty(ProviderV2.ID.make("custom"), ModelV2.ID.make("model"))
+
+    expect(model.capabilities).toEqual({ tools: false, input: [], output: [] })
+  })
+})

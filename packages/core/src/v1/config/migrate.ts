@@ -215,8 +215,23 @@ function migrateModel(info: typeof ConfigProviderV1.Model.Type, packageName?: st
       : []),
   ]
   const capabilities =
-    info.tool_call !== undefined || info.modalities?.input !== undefined || info.modalities?.output !== undefined
-      ? { tools: info.tool_call ?? false, input: info.modalities?.input ?? [], output: info.modalities?.output ?? [] }
+    info.attachment !== undefined ||
+    info.tool_call !== undefined ||
+    info.modalities?.input !== undefined ||
+    info.modalities?.output !== undefined
+      ? {
+          ...(info.tool_call === undefined ? {} : { tools: info.tool_call }),
+          ...(info.modalities?.input !== undefined
+            ? { input: info.modalities.input }
+            : info.attachment !== undefined
+              ? { input: info.attachment ? ["text", "image"] : ["text"] }
+              : {}),
+          ...(info.modalities?.output !== undefined
+            ? { output: info.modalities.output }
+            : info.attachment !== undefined
+              ? { output: ["text"] }
+              : {}),
+        }
       : undefined
   return {
     family: info.family,

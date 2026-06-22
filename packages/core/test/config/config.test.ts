@@ -116,6 +116,34 @@ describe("Config", () => {
     }),
   )
 
+  it.effect("migrates v1 custom model capability overrides without replacing unspecified fields", () =>
+    Effect.sync(() => {
+      const migrated = ConfigMigrateV1.migrate({
+        provider: {
+          custom: {
+            models: {
+              default: { tool_call: true },
+              text: { attachment: false },
+              explicit: { modalities: { input: ["audio"], output: ["audio"] } },
+            },
+          },
+        },
+      })
+
+      expect(migrated.providers?.custom?.models?.default?.capabilities).toEqual({
+        tools: true,
+      })
+      expect(migrated.providers?.custom?.models?.text?.capabilities).toEqual({
+        input: ["text"],
+        output: ["text"],
+      })
+      expect(migrated.providers?.custom?.models?.explicit?.capabilities).toEqual({
+        input: ["audio"],
+        output: ["audio"],
+      })
+    }),
+  )
+
   it.effect("migrates v1 command configuration", () =>
     Effect.sync(() => {
       expect(

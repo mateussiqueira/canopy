@@ -3,6 +3,7 @@ import { Effect, Schema } from "effect"
 import { Catalog } from "@opencode-ai/core/catalog"
 import { Config } from "@opencode-ai/core/config"
 import { ConfigProviderPlugin } from "@opencode-ai/core/config/plugin/provider"
+import { ConfigMigrateV1 } from "@opencode-ai/core/v1/config/migrate"
 import { Integration } from "@opencode-ai/core/integration"
 import { ModelV2 } from "@opencode-ai/core/model"
 import { PluginV2 } from "@opencode-ai/core/plugin"
@@ -244,7 +245,9 @@ describe("ConfigProviderPlugin.Plugin", () => {
 
         const provider = required(yield* catalog.provider.get(providerID))
         const model = required(yield* catalog.model.get(providerID, modelID))
-        expect((yield* catalog.model.default())?.id).toBe(ModelV2.ID.make("default"))
+        const defaultModel = required(yield* catalog.model.default())
+        expect(defaultModel.id).toBe(ModelV2.ID.make("default"))
+        expect(defaultModel.capabilities).toEqual({ tools: false, input: ["text", "image"], output: ["text"] })
         expect(provider.name).toBe("Renamed")
         expect((yield* integrations.get(Integration.ID.make("custom")))?.methods).toContainEqual({
           type: "env",
@@ -270,5 +273,68 @@ describe("ConfigProviderPlugin.Plugin", () => {
         expect(model.variants[1]?.headers).toEqual({ slow: "slow" })
       }),
     ),
+  )
+
+  it.effect("lowers a migrated attachment override into modalities", () =>
+    Effect.gen(function* () {
+      const catalog = yield* Catalog.Service
+      const providerID = ProviderV2.ID.make("custom")
+      const modelID = ModelV2.ID.make("chat")
+      yield* catalog.transform((catalog) =>
+        catalog.model.update(providerID, modelID, (model) => {
+          model.capabilities = { tools: true, input: ["text", "image", "audio"], output: ["text", "audio"] }
+        }),
+      )
+      const config = Config.Service.of({
+        entries: () =>
+          Effect.succeed([
+            new Config.Document({
+              type: "document",
+              info: decode(
+                ConfigMigrateV1.migrate({
+                  provider: { custom: { models: { chat: { attachment: false } } } },
+                }),
+              ),
+            }),
+          ]),
+      })
+
+      yield* addPlugin(config)
+
+      expect(required(yield* catalog.model.get(providerID, modelID)).capabilities).toEqual({
+        tools: true,
+        input: ["text"],
+        output: ["text"],
+      })
+    }),
+  )
+
+  it.effect("defaults a migrated custom model with attachment disabled to text only", () =>
+    Effect.gen(function* () {
+      const catalog = yield* Catalog.Service
+      const providerID = ProviderV2.ID.make("custom")
+      const modelID = ModelV2.ID.make("chat")
+      const config = Config.Service.of({
+        entries: () =>
+          Effect.succeed([
+            new Config.Document({
+              type: "document",
+              info: decode(
+                ConfigMigrateV1.migrate({
+                  provider: { custom: { models: { chat: { attachment: false } } } },
+                }),
+              ),
+            }),
+          ]),
+      })
+
+      yield* addPlugin(config)
+
+      expect(required(yield* catalog.model.get(providerID, modelID)).capabilities).toEqual({
+        tools: false,
+        input: ["text"],
+        output: ["text"],
+      })
+    }),
   )
 })

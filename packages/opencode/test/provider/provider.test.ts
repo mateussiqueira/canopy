@@ -545,6 +545,46 @@ it.instance(
 )
 
 it.instance(
+  "inherited modalities take precedence over attachment false",
+  Effect.gen(function* () {
+    yield* set("ANTHROPIC_API_KEY", "test-api-key")
+    const providers = yield* list
+    const model = providers[ProviderV2.ID.anthropic].models["claude-sonnet-4-20250514"]
+    expect(model.capabilities.attachment).toBe(false)
+    expect(model.capabilities.input.text).toBe(true)
+    expect(model.capabilities.input.image).toBe(true)
+    expect(model.capabilities.output.text).toBe(true)
+  }),
+  {
+    config: {
+      provider: { anthropic: { models: { "claude-sonnet-4-20250514": { attachment: false } } } },
+    },
+  },
+)
+
+it.instance(
+  "inherited modalities take precedence over attachment true",
+  Effect.gen(function* () {
+    const providers = yield* list
+    const model = providers[ProviderV2.ID.make("perplexity")].models.sonar
+    expect(model.capabilities.attachment).toBe(true)
+    expect(model.capabilities.input.text).toBe(true)
+    expect(model.capabilities.input.image).toBe(false)
+    expect(model.capabilities.output.text).toBe(true)
+  }),
+  {
+    config: {
+      provider: {
+        perplexity: {
+          env: [],
+          models: { sonar: { attachment: true } },
+        },
+      },
+    },
+  },
+)
+
+it.instance(
   "disabled_providers prevents loading even with env var",
   Effect.gen(function* () {
     yield* set("OPENAI_API_KEY", "test-openai-key")
@@ -589,11 +629,13 @@ it.instance(
 )
 
 it.instance(
-  "model modalities default correctly",
+  "custom model media capabilities default correctly",
   Effect.gen(function* () {
     const providers = yield* list
     const model = providers[ProviderV2.ID.make("test-provider")].models["test-model"]
+    expect(model.capabilities.attachment).toBe(true)
     expect(model.capabilities.input.text).toBe(true)
+    expect(model.capabilities.input.image).toBe(true)
     expect(model.capabilities.output.text).toBe(true)
   }),
   {
@@ -605,6 +647,65 @@ it.instance(
           env: [],
           models: { "test-model": { name: "Test Model", tool_call: true, limit: { context: 8000, output: 2000 } } },
           options: { apiKey: "test" },
+        },
+      },
+    },
+  },
+)
+
+it.instance(
+  "custom model media capabilities can be disabled explicitly",
+  Effect.gen(function* () {
+    const providers = yield* list
+    const model = providers[ProviderV2.ID.make("test-provider")].models["test-model"]
+    expect(model.capabilities.attachment).toBe(false)
+    expect(model.capabilities.input.text).toBe(true)
+    expect(model.capabilities.input.image).toBe(false)
+  }),
+  {
+    config: {
+      provider: {
+        "test-provider": {
+          name: "Test",
+          npm: "@ai-sdk/openai-compatible",
+          env: [],
+          models: {
+            "test-model": {
+              name: "Test Model",
+              attachment: false,
+            },
+          },
+        },
+      },
+    },
+  },
+)
+
+it.instance(
+  "custom model explicit modalities override media defaults",
+  Effect.gen(function* () {
+    const providers = yield* list
+    const provider = providers[ProviderV2.ID.make("test-provider")]
+    const audio = provider.models.audio
+    expect(audio.capabilities.input.text).toBe(false)
+    expect(audio.capabilities.input.audio).toBe(true)
+    expect(audio.capabilities.input.image).toBe(false)
+    expect(audio.capabilities.output.audio).toBe(true)
+    const empty = provider.models.empty
+    expect(Object.values(empty.capabilities.input).some(Boolean)).toBe(false)
+    expect(Object.values(empty.capabilities.output).some(Boolean)).toBe(false)
+  }),
+  {
+    config: {
+      provider: {
+        "test-provider": {
+          name: "Test",
+          npm: "@ai-sdk/openai-compatible",
+          env: [],
+          models: {
+            audio: { modalities: { input: ["audio"], output: ["audio"] } },
+            empty: { modalities: { input: [], output: [] } },
+          },
         },
       },
     },

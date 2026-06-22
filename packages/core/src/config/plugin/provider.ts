@@ -63,16 +63,22 @@ export const Plugin = define({
             const providerPackage = providerApi?.type === "aisdk" ? providerApi.package : undefined
 
             for (const [id, config] of Object.entries(item.models ?? {})) {
+              const existing = catalog.model.get(providerID, id)
               catalog.model.update(providerID, id, (model) => {
                 if (config.family !== undefined) model.family = config.family
                 if (config.name !== undefined) model.name = config.name
                 if (config.api !== undefined) model.api = { ...model.api, ...config.api }
                 const packageName = model.api.type === "aisdk" ? model.api.package : providerPackage
+                // TODO: Move these defaults to a dedicated configured-model constructor when one exists.
+                if (existing === undefined) {
+                  model.capabilities.input = ["text", "image"]
+                  model.capabilities.output = ["text"]
+                }
                 if (config.capabilities !== undefined) {
                   model.capabilities = {
-                    tools: config.capabilities.tools,
-                    input: [...config.capabilities.input],
-                    output: [...config.capabilities.output],
+                    tools: config.capabilities.tools ?? model.capabilities.tools,
+                    input: [...(config.capabilities.input ?? model.capabilities.input)],
+                    output: [...(config.capabilities.output ?? model.capabilities.output)],
                   }
                 }
                 if (config.request !== undefined) {
