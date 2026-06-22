@@ -25,11 +25,14 @@ import { Layer } from "effect"
 import { HttpClient } from "effect/unstable/http"
 import { Socket } from "effect/unstable/socket"
 
-const options: HttpRecorder.RecorderOptions = { redact: { jsonFields: ["access_token"] } }
+const options: HttpRecorder.RecorderOptions = { match: () => true, redact: { jsonFields: ["access_token"] } }
+const socketOptions: HttpRecorder.SocketRecorderOptions = { redact: { jsonFields: ["access_token"] } }
 HttpRecorder.http("consumer", options) satisfies Layer.Layer<HttpClient.HttpClient>
-HttpRecorder.socket("consumer/socket", options).pipe(
+HttpRecorder.socket("consumer/socket", socketOptions).pipe(
   Layer.provide(NodeSocket.layerWebSocket("wss://example.test")),
 ) satisfies Layer.Layer<Socket.Socket>
+// @ts-expect-error HTTP request matching does not apply to WebSocket frames.
+HttpRecorder.socket("consumer/socket", { match: () => true })
 `,
     )
     await writeFile(
@@ -41,7 +44,7 @@ HttpRecorder.socket("consumer/socket", options).pipe(
           moduleResolution: "NodeNext",
           strict: true,
           noEmit: true,
-          // Required by effect@4.0.0-beta.74: its schema.d.ts references an undeclared SchemaErrorTypeId.
+          // Required by effect@4.0.0-beta.83: its declarations currently contain unresolved internal symbols.
           skipLibCheck: true,
           lib: ["ES2022", "DOM", "ESNext.Disposable"],
         },

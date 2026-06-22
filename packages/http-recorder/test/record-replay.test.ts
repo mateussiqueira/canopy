@@ -1,7 +1,7 @@
 import { NodeFileSystem } from "@effect/platform-node"
 import { describe, expect, test } from "bun:test"
-import { Cause, Deferred, Effect, Exit, Layer, Scope, Stream } from "effect"
-import { Headers, HttpBody, HttpClient, HttpClientRequest } from "effect/unstable/http"
+import { Cause, Deferred, Effect, Exit, Layer } from "effect"
+import { HttpBody, HttpClient, HttpClientRequest } from "effect/unstable/http"
 import { Socket } from "effect/unstable/socket"
 import * as fs from "node:fs"
 import * as os from "node:os"
@@ -41,20 +41,6 @@ const runWith = <A, E>(
   options: HttpRecorder.RecorderOptions,
   effect: Effect.Effect<A, E, HttpClient.HttpClient>,
 ) => Effect.runPromise(effect.pipe(Effect.provide(HttpRecorder.http(name, options))))
-
-const runRecorder = <A, E>(effect: Effect.Effect<A, E, HttpRecorderInternal.Cassette.Service | Scope.Scope>) =>
-  Effect.runPromise(
-    Effect.scoped(
-      effect.pipe(
-        Effect.provide(
-          HttpRecorderInternal.Cassette.fileSystem({
-            directory: fs.mkdtempSync(path.join(os.tmpdir(), "http-recorder-")),
-          }),
-        ),
-        Effect.provide(NodeFileSystem.layer),
-      ),
-    ),
-  )
 
 const failureText = (exit: Exit.Exit<unknown, unknown>) => {
   if (Exit.isSuccess(exit)) return ""
@@ -278,12 +264,15 @@ describe("http-recorder", () => {
       Effect.gen(function* () {
         const socket = yield* Socket.Socket
         const write = yield* socket.writer
-        yield* socket.runRaw((message) => {
-          if (typeof message !== "string") return
-          received.push(message)
-          if (JSON.parse(message).type === "session.created")
-            return write('{"prompt":"hello","type":"response.create"}')
-        })
+        yield* socket.runRaw((message) =>
+          Effect.gen(function* () {
+            if (typeof message !== "string") return
+            received.push(message)
+            const event: unknown = JSON.parse(message)
+            if (typeof event !== "object" || event === null || !("type" in event)) return
+            if (event.type === "session.created") yield* write('{"prompt":"hello","type":"response.create"}')
+          }),
+        )
       }).pipe(
         Effect.scoped,
         Effect.provide(
@@ -309,15 +298,26 @@ describe("http-recorder", () => {
     expect(received).toEqual(['{"type":"session.created"}', '{"type":"response.completed"}'])
   })
 
-  test("the public socket decorator replays a provided Effect socket", async () => {
+  test("the public socket decorator replays a causal provider conversation", async () => {
     const directory = fs.mkdtempSync(path.join(os.tmpdir(), "http-recorder-websocket-"))
     await seedCassetteDirectory(directory, "websocket/public-layer", [
       {
         transport: "websocket",
         open: { url: "", headers: {} },
         events: [
-          { direction: "client", kind: "text", body: "hello" },
-          { direction: "server", kind: "text", body: "hello" },
+          { direction: "server", kind: "text", body: '{"type":"session.created"}' },
+          {
+            direction: "client",
+            kind: "text",
+            body: '{"type":"response.create","prompt":"first"}',
+          },
+          { direction: "server", kind: "text", body: '{"type":"response.completed","id":"first"}' },
+          {
+            direction: "client",
+            kind: "text",
+            body: '{"type":"response.create","prompt":"second"}',
+          },
+          { direction: "server", kind: "text", body: '{"type":"response.completed","id":"second"}' },
         ],
       },
     ])
@@ -327,13 +327,21 @@ describe("http-recorder", () => {
       Effect.gen(function* () {
         const socket = yield* Socket.Socket
         const write = yield* socket.writer
-        yield* socket.runString(
-          (message) =>
-            Effect.gen(function* () {
-              received.push(message)
-              yield* write(new Socket.CloseEvent(1000))
-            }),
-          { onOpen: write("hello") },
+        yield* socket.runString((message) =>
+          Effect.gen(function* () {
+            received.push(message)
+            const event: unknown = JSON.parse(message)
+            if (typeof event !== "object" || event === null) return
+            if ("type" in event && event.type === "session.created") {
+              yield* write('{"prompt":"first","type":"response.create"}')
+              return
+            }
+            if ("id" in event && event.id === "first") {
+              yield* write('{"prompt":"second","type":"response.create"}')
+              return
+            }
+            yield* write(new Socket.CloseEvent(1000, "done"))
+          }),
         )
       }).pipe(
         Effect.scoped,
@@ -353,7 +361,11 @@ describe("http-recorder", () => {
       ),
     )
 
-    expect(received).toEqual(["hello"])
+    expect(received).toEqual([
+      '{"type":"session.created"}',
+      '{"type":"response.completed","id":"first"}',
+      '{"type":"response.completed","id":"second"}',
+    ])
   })
 
   test("WebSocket replay runs message handlers concurrently", async () => {

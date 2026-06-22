@@ -7,7 +7,7 @@ import { makeReplayState, resolveAutoMode } from "./recorder.js"
 import { make, type Redactor } from "./redactor.js"
 import { webSocketInteractions } from "./schema.js"
 import type {
-  RecorderOptions,
+  SocketRecorderOptions,
   WebSocketEvent,
   WebSocketInteraction,
   WebSocketRecorderOptions,
@@ -302,10 +302,17 @@ const recordingLayer = (
  * Wraps a provided `Socket.Socket` with cassette recording and replay.
  *
  * Supply the ordinary URL-bound Effect socket layer beneath this decorator.
- * The cassette name identifies the connection; recorder configuration does not
- * duplicate the transport URL.
+ * The cassette name identifies the connection during replay; recorder
+ * configuration does not duplicate or validate the transport URL.
+ *
+ * A recording is committed only after the socket run completes successfully.
+ * Replay releases server frames in order and waits at each recorded client
+ * frame until the application writes a matching frame.
  */
-export const socket = (name: string, options: RecorderOptions = {}): Layer.Layer<Socket.Socket, never, Socket.Socket> =>
+export const socket = (
+  name: string,
+  options: SocketRecorderOptions = {},
+): Layer.Layer<Socket.Socket, never, Socket.Socket> =>
   provideCassette(recordingLayer(name, { url: "" }, { ...options, compareClientMessagesAsJson: true }), options)
 
 /** @internal */

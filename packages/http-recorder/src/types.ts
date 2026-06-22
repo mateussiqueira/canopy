@@ -85,6 +85,9 @@ export interface RecorderOptions {
   readonly match?: RequestMatcher
 }
 
+/** Recorder configuration for a provided Effect WebSocket service. */
+export type SocketRecorderOptions = Omit<RecorderOptions, "match">
+
 /** @internal */
 export interface WebSocketRequest {
   /** WebSocket URL. */
@@ -94,15 +97,7 @@ export interface WebSocketRequest {
 }
 
 /** @internal */
-export interface WebSocketRecorderOptions {
-  /** Cassette directory. Defaults to `<cwd>/test/fixtures/recordings`. */
-  readonly directory?: string
-  /** Additional metadata stored in the cassette. */
-  readonly metadata?: CassetteMetadata
-  /** Additive handshake and text-frame redaction policy. */
-  readonly redact?: RedactOptions
+export interface WebSocketRecorderOptions extends SocketRecorderOptions {
   /** Compare text client frames as canonical JSON instead of exact strings. */
   readonly compareClientMessagesAsJson?: boolean
-  /** WebSocket subprotocols used by `layerWebSocket`. */
-  readonly protocols?: string | Array<string>
 }

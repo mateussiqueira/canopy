@@ -9,13 +9,13 @@ Use it for provider integrations, retries, polling, multi-step flows, and any te
 ## Install
 
 ```sh
-bun add effect@4.0.0-beta.74
+bun add effect@4.0.0-beta.83 @effect/platform-node@4.0.0-beta.83
 bun add -d @opencode-ai/http-recorder@beta @effect/vitest vitest
 ```
 
 The package supports Node.js 22+ and Bun. It is not intended for browsers, workers, or Deno.
 
-Effect `4.0.0-beta.74` has a known declaration error (`SchemaErrorTypeId` is missing). Until that upstream declaration is fixed, TypeScript consumers need:
+Effect `4.0.0-beta.83` currently contains unresolved symbols in its published declarations. Until those upstream declarations are fixed, TypeScript consumers need:
 
 ```json
 {
@@ -89,41 +89,58 @@ That is the complete public API. `http` provides a fetch-backed recorded `HttpCl
 
 ## WebSockets
 
-WebSocket cassettes preserve one ordered transcript of client and server text or binary frames. Replay follows that chronology: server frames are released until the next recorded client frame, then replay waits for the application to send the matching frame before continuing.
+Effect models a WebSocket as a `Socket.Socket` service. A program obtains a scoped `writer` for outgoing frames and runs one receive loop for the lifetime of a connection. The application supplies the live URL-bound socket; the recorder decorates that service without owning its URL, protocols, authentication, timeout, or close policy.
+
+The cassette name is the connection identity during replay. Replay does not validate the live URL or handshake configuration.
 
 ```ts
-import { assert, it } from "@effect/vitest"
+import { it } from "@effect/vitest"
 import { NodeSocket } from "@effect/platform-node"
 import { Effect, Layer } from "effect"
 import { Socket } from "effect/unstable/socket"
 import { HttpRecorder } from "@opencode-ai/http-recorder"
 
-const echo = Effect.gen(function* () {
+const conversation = Effect.gen(function* () {
   const socket = yield* Socket.Socket
   const write = yield* socket.writer
 
-  yield* socket.runString(
-    (message) =>
-      Effect.gen(function* () {
-        assert.strictEqual(message, "hello")
-        yield* write(new Socket.CloseEvent(1000))
-      }),
-    { onOpen: write("hello") },
+  yield* socket.runString((message) =>
+    Effect.gen(function* () {
+      const event: unknown = JSON.parse(message)
+
+      if (typeof event !== "object" || event === null || !("type" in event)) return
+      if (event.type === "session.created") {
+        yield* write(JSON.stringify({ type: "response.create", prompt: "hello" }))
+      }
+      if (event.type === "response.completed") {
+        yield* write(new Socket.CloseEvent(1000, "done"))
+      }
+    }),
   )
 })
 
-const recordedSocket = HttpRecorder.socket("echo/hello").pipe(
+const recordedSocket = HttpRecorder.socket("provider/conversation").pipe(
   Layer.provide(
-    NodeSocket.layerWebSocket("wss://ws.postman-echo.com/raw", {
+    NodeSocket.layerWebSocket("wss://provider.example/realtime", {
       closeCodeIsError: (code) => code !== 1000,
     }),
   ),
 )
 
-it.effect("exchanges WebSocket frames", () => echo.pipe(Effect.provide(recordedSocket)))
+it.effect("completes a provider conversation", () => conversation.pipe(Effect.scoped, Effect.provide(recordedSocket)))
 ```
 
-The application owns the WebSocket URL and protocols through normal Effect layer wiring. The recorder wraps that socket without duplicating its URL in recorder configuration. Provide separate socket layers for separate endpoints or concurrent connections.
+`socket.runString` owns the receive loop and finishes when the connection closes or fails. Its optional `onOpen` effect is the safe place to send protocols whose client speaks first. The writer is scoped because sending is valid only while a connection run is active.
+
+WebSocket cassettes preserve one ordered transcript of client and server text or binary frames. Replay releases recorded server frames until it reaches a client frame, waits for the application to write the matching frame, then continues. This preserves causal ordering without reproducing network timing.
+
+Client text frames containing JSON compare canonically, so object-key order does not matter. Changed fields, extra fields, non-JSON text, and binary frames must match exactly after redaction. There is intentionally no custom WebSocket matcher in this beta.
+
+Incoming frame handlers start in recorded order and may run concurrently, matching Effect's socket abstraction. Replay waits for all handlers before the socket run completes, but handler completion order is not guaranteed. Use Effect synchronization such as `Queue`, `Ref`, or `Deferred` instead of unsynchronized mutable state.
+
+A cassette is written only after the live socket opened and its run completed successfully. Failed, interrupted, unopened, or invalid runs do not produce a recording. During replay, closing before every recorded frame is consumed fails the test.
+
+The application owns the WebSocket URL and protocols through normal Effect layer wiring. Provide separate recorder and live socket layers for separate endpoints or concurrent connections. One recorder layer supports sequential reconnects, but rejects concurrent runs.
 
 Text frames use the same JSON-field and body redaction as HTTP bodies. Binary frames are stored losslessly as base64. Client and server frame kinds must match during replay.
 
@@ -195,6 +212,8 @@ interface RecorderOptions {
   readonly redact?: RedactOptions
   readonly match?: RequestMatcher
 }
+
+type SocketRecorderOptions = Omit<RecorderOptions, "match">
 ```
 
 `directory` defaults to `<cwd>/test/fixtures/recordings`.
@@ -207,7 +226,7 @@ Cassettes are readable JSON files intended to be committed with your tests. HTTP
 
 - Responses are buffered while recording and replaying, so this beta is not suitable for tests that assert streaming timing, cancellation, or backpressure.
 - WebSocket replay preserves frame chronology and content, not real network timing or backpressure.
-- WebSocket V1 cassettes do not reproduce terminal close codes, close reasons, or transport failures. Failed and interrupted live runs are not recorded.
+- WebSocket V1 cassettes do not reproduce terminal close codes, close reasons, handshake configuration, or transport failures. Failed and interrupted live runs are not recorded.
 - WebSocket transcripts are retained in memory until the connection finishes; avoid using this beta for unbounded sessions.
 - The package currently requires the exact Effect beta listed above.
 - Cassette format version `1` has no migration tooling yet.

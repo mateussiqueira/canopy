@@ -2,6 +2,7 @@
 
 import { Script } from "@opencode-ai/script"
 import { $ } from "bun"
+import path from "node:path"
 import { fileURLToPath } from "url"
 
 console.log("=== publishing ===\n")
@@ -14,7 +15,14 @@ const pkgjsons = await Array.fromAsync(
   new Bun.Glob("**/package.json").scan({
     absolute: true,
   }),
-).then((arr) => arr.filter((x) => !x.includes("node_modules") && !x.includes("dist")))
+).then((arr) =>
+  arr.filter(
+    (x) =>
+      !x.includes("node_modules") &&
+      !x.includes("dist") &&
+      path.relative(dir, x) !== path.join("packages", "http-recorder", "package.json"),
+  ),
+)
 
 async function prepareReleaseFiles() {
   for (const file of pkgjsons) {

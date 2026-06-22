@@ -15,4 +15,6 @@ export namespace HttpRecorder {
   export type RequestMatcher = import("./types.js").RequestMatcher
   /** The normalized HTTP request representation used for matching. */
   export type RequestSnapshot = import("./types.js").RequestSnapshot
+  /** Recorder configuration for a provided Effect WebSocket service. */
+  export type SocketRecorderOptions = import("./types.js").SocketRecorderOptions
 }
