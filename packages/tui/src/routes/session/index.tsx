@@ -36,6 +36,9 @@ import type {
   UserMessage,
   TextPart,
   ReasoningPart,
+  SessionMessage as SessionMessageV2,
+  SessionMessageAssistant as SessionMessageAssistantV2,
+  SessionMessageUser as SessionMessageUserV2,
   SessionStatus,
 } from "@opencode-ai/sdk/v2"
 import { useLocal } from "../../context/local"
@@ -195,6 +198,7 @@ export function Session() {
   const { theme } = useTheme()
   const promptRef = usePromptRef()
   const session = createMemo(() => data.session.get(route.sessionID))
+  const sessionMessages = createMemo(() => (data.session.message.list(route.sessionID) ?? []).toReversed())
 
   createEffect(() => {
     const title = Locale.truncate(session()?.title ?? "", 50)
@@ -1186,98 +1190,13 @@ export function Session() {
                 scrollAcceleration={scrollAcceleration()}
               >
                 <box height={1} />
-                <For each={messages()}>
+                <For each={sessionMessages()}>
                   {(message, index) => (
-                    <Switch>
-                      <Match when={message.id === revert()?.messageID}>
-                        {(function () {
-                          const redoShortcut = useCommandShortcut("session.redo")
-                          const [hover, setHover] = createSignal(false)
-                          const dialog = useDialog()
-
-                          const handleUnrevert = async () => {
-                            const confirmed = await DialogConfirm.show(
-                              dialog,
-                              "Confirm Redo",
-                              "Are you sure you want to restore the reverted messages?",
-                            )
-                            if (confirmed) {
-                              keymap.dispatchCommand("session.redo")
-                            }
-                          }
-
-                          return (
-                            <box
-                              onMouseOver={() => setHover(true)}
-                              onMouseOut={() => setHover(false)}
-                              onMouseUp={handleUnrevert}
-                              marginTop={1}
-                              flexShrink={0}
-                              border={["left"]}
-                              customBorderChars={SplitBorder.customBorderChars}
-                              borderColor={theme.backgroundPanel}
-                            >
-                              <box
-                                paddingTop={1}
-                                paddingBottom={1}
-                                paddingLeft={2}
-                                backgroundColor={hover() ? theme.backgroundElement : theme.backgroundPanel}
-                              >
-                                <text fg={theme.textMuted}>{revert()!.reverted.length} message reverted</text>
-                                <text fg={theme.textMuted}>
-                                  <span style={{ fg: theme.text }}>{redoShortcut()}</span> or /redo to restore
-                                </text>
-                                <Show when={revert()!.diffFiles?.length}>
-                                  <box marginTop={1}>
-                                    <For each={revert()!.diffFiles}>
-                                      {(file) => (
-                                        <text fg={theme.text}>
-                                          {file.filename}
-                                          <Show when={file.additions > 0}>
-                                            <span style={{ fg: theme.diffAdded }}> +{file.additions}</span>
-                                          </Show>
-                                          <Show when={file.deletions > 0}>
-                                            <span style={{ fg: theme.diffRemoved }}> -{file.deletions}</span>
-                                          </Show>
-                                        </text>
-                                      )}
-                                    </For>
-                                  </box>
-                                </Show>
-                              </box>
-                            </box>
-                          )
-                        })()}
-                      </Match>
-                      <Match when={revert()?.messageID && message.id >= revert()!.messageID}>
-                        <></>
-                      </Match>
-                      <Match when={message.role === "user"}>
-                        <UserMessage
-                          index={index()}
-                          onMouseUp={() => {
-                            if (renderer.getSelection()?.getSelectedText()) return
-                            dialog.replace(() => (
-                              <DialogMessage
-                                messageID={message.id}
-                                sessionID={route.sessionID}
-                                setPrompt={(promptInfo) => prompt?.set(promptInfo)}
-                              />
-                            ))
-                          }}
-                          message={message as UserMessage}
-                          parts={sync.data.part[message.id] ?? []}
-                          pending={pending()}
-                        />
-                      </Match>
-                      <Match when={message.role === "assistant"}>
-                        <AssistantMessage
-                          last={lastAssistant()?.id === message.id}
-                          message={message as AssistantMessage}
-                          parts={sync.data.part[message.id] ?? []}
-                        />
-                      </Match>
-                    </Switch>
+                    <SessionMessageV2View
+                      message={message}
+                      first={index() === 0}
+                      last={index() === sessionMessages().length - 1}
+                    />
                   )}
                 </For>
               </scrollbox>
@@ -1346,6 +1265,158 @@ export function Session() {
         </box>
       </context.Provider>
     </PathFormatterProvider>
+  )
+}
+
+function SessionMessageV2View(props: { message: SessionMessageV2; first: boolean; last: boolean }) {
+  return (
+    <Switch>
+      <Match when={props.message.type === "user"}>
+        <SessionUserMessageV2 message={props.message as SessionMessageUserV2} first={props.first} />
+      </Match>
+      <Match when={props.message.type === "assistant"}>
+        <SessionAssistantMessageV2 message={props.message as SessionMessageAssistantV2} last={props.last} />
+      </Match>
+      <Match when={props.message.type === "shell"}>
+        <box paddingLeft={3} marginTop={1}>
+          <text>{props.message.type === "shell" ? `$ ${props.message.command}\n${props.message.output}` : ""}</text>
+        </box>
+      </Match>
+      <Match when={props.message.type === "agent-switched" || props.message.type === "model-switched"}>
+        <SessionSwitchMessageV2 message={props.message} />
+      </Match>
+      <Match when={props.message.type === "system" || props.message.type === "synthetic"}>
+        <SessionNoticeMessageV2 message={props.message} />
+      </Match>
+      <Match when={props.message.type === "compaction"}>
+        <box marginTop={1} border={["top"]} title=" Compaction " titleAlignment="center" />
+      </Match>
+    </Switch>
+  )
+}
+
+function SessionUserMessageV2(props: { message: SessionMessageUserV2; first: boolean }) {
+  const { theme } = useTheme()
+  return (
+    <box
+      id={props.message.id}
+      border={["left"]}
+      borderColor={theme.primary}
+      customBorderChars={SplitBorder.customBorderChars}
+      marginTop={props.first ? 0 : 1}
+      paddingTop={1}
+      paddingBottom={1}
+      paddingLeft={2}
+      backgroundColor={theme.backgroundPanel}
+    >
+      <text fg={theme.text}>{props.message.text}</text>
+      <Show when={props.message.files?.length}>
+        <box flexDirection="row" paddingTop={1} gap={1} flexWrap="wrap">
+          <For each={props.message.files}>
+            {(file) => (
+              <text fg={theme.textMuted}>
+                {file.name ?? file.uri} <span style={{ fg: theme.textMuted }}>({file.mime})</span>
+              </text>
+            )}
+          </For>
+        </box>
+      </Show>
+    </box>
+  )
+}
+
+function SessionAssistantMessageV2(props: { message: SessionMessageAssistantV2; last: boolean }) {
+  const { theme, syntax } = useTheme()
+  const local = useLocal()
+  return (
+    <>
+      <For each={props.message.content}>
+        {(content) => (
+          <Switch>
+            <Match when={content.type === "text" && content.text.trim()}>
+              <box paddingLeft={3} marginTop={1} flexShrink={0}>
+                <markdown
+                  syntaxStyle={syntax()}
+                  streaming={true}
+                  internalBlockMode="top-level"
+                  content={content.type === "text" ? content.text.trim() : ""}
+                  tableOptions={{ style: "grid" }}
+                  fg={theme.markdownText}
+                  bg={theme.background}
+                />
+              </box>
+            </Match>
+            <Match when={content.type === "reasoning" && content.text.trim()}>
+              <box paddingLeft={3} marginTop={1}>
+                <text fg={theme.textMuted}>{content.type === "reasoning" ? content.text.trim() : ""}</text>
+              </box>
+            </Match>
+            <Match when={content.type === "tool"}>
+              <SessionToolMessageV2
+                content={content as Extract<SessionMessageAssistantV2["content"][number], { type: "tool" }>}
+              />
+            </Match>
+          </Switch>
+        )}
+      </For>
+      <Show when={props.message.error}>
+        <box border={["left"]} borderColor={theme.error} paddingLeft={2} marginTop={1}>
+          <text fg={theme.error}>{props.message.error?.message}</text>
+        </box>
+      </Show>
+      <Show when={props.last || props.message.time.completed}>
+        <box paddingLeft={3} marginTop={1}>
+          <text fg={theme.textMuted}>
+            <span style={{ fg: local.agent.color(props.message.agent) }}>▣ </span>
+            {Locale.titlecase(props.message.agent)} · {props.message.model.providerID}/{props.message.model.id}
+          </text>
+        </box>
+      </Show>
+    </>
+  )
+}
+
+function SessionToolMessageV2(props: {
+  content: Extract<SessionMessageAssistantV2["content"][number], { type: "tool" }>
+}) {
+  const { theme } = useTheme()
+  const output = createMemo(() =>
+    props.content.state.status === "error"
+      ? props.content.state.error.message
+      : props.content.state.status === "pending"
+        ? ""
+        : props.content.state.content
+            .flatMap((item) => (item.type === "text" ? [item.text] : [item.name ?? item.uri]))
+            .join("\n"),
+  )
+  return (
+    <box paddingLeft={3} marginTop={1}>
+      <text fg={theme.textMuted}>
+        {props.content.state.status === "pending" || props.content.state.status === "running" ? "∙" : "✓"}{" "}
+        {props.content.name}
+      </text>
+      <Show when={output()}>{(value) => <text fg={theme.textMuted}>{value()}</text>}</Show>
+    </box>
+  )
+}
+
+function SessionSwitchMessageV2(props: { message: SessionMessageV2 }) {
+  const { theme } = useTheme()
+  const text = () => {
+    if (props.message.type === "agent-switched") return `Switched agent to ${props.message.agent}`
+    if (props.message.type === "model-switched")
+      return `Switched model to ${props.message.model.providerID}/${props.message.model.id}`
+    return ""
+  }
+  return <text fg={theme.textMuted}>{text()}</text>
+}
+
+function SessionNoticeMessageV2(props: { message: SessionMessageV2 }) {
+  const { theme } = useTheme()
+  return (
+    <text fg={theme.textMuted}>
+      {props.message.type === "system" || props.message.type === "synthetic" ? props.message.text : ""}
+    </text>
   )
 }
 
