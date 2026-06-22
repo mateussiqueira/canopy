@@ -1,9 +1,13 @@
 import { z } from "zod"
-import { eq } from "drizzle-orm"
+import { and, eq, inArray, sql } from "drizzle-orm"
 import { fn } from "./util/fn"
 import { Database } from "./drizzle"
 import { Identifier } from "./identifier"
 import { AccountTable } from "./schema/account.sql"
+import { AuthTable } from "./schema/auth.sql"
+import { UserTable } from "./schema/user.sql"
+import { KeyTable } from "./schema/key.sql"
+import { CouponTable } from "./schema/billing.sql"
 
 export namespace Account {
   export const create = fn(
@@ -19,6 +23,37 @@ export namespace Account {
         return id
       }),
   )
+
+  export const remove = fn(Identifier.schema("account"), async (accountID) => {
+    await Database.transaction(async (tx) => {
+      const account = await tx.select().from(AccountTable).where(eq(AccountTable.id, accountID)).then((rows) => rows[0])
+      if (!account) throw new Error(`Account not found: ${accountID}`)
+
+      const emails = await tx
+        .select({ email: AuthTable.subject })
+        .from(AuthTable)
+        .where(and(eq(AuthTable.accountID, accountID), eq(AuthTable.provider, "email")))
+      const users = await tx
+        .select({ id: UserTable.id })
+        .from(UserTable)
+        .where(eq(UserTable.accountID, accountID))
+      if (users.length > 0) {
+        await tx
+          .update(KeyTable)
+          .set({ timeDeleted: sql`now()` })
+          .where(inArray(KeyTable.userID, users.map((user) => user.id)))
+      }
+      await tx
+        .update(UserTable)
+        .set({ accountID: null, email: null, name: "", timeDeleted: sql`now()` })
+        .where(eq(UserTable.accountID, accountID))
+      if (emails.length > 0) {
+        await tx.delete(CouponTable).where(inArray(CouponTable.email, emails.map((row) => row.email)))
+      }
+      await tx.delete(AuthTable).where(eq(AuthTable.accountID, accountID))
+      await tx.update(AccountTable).set({ timeDeleted: sql`now()` }).where(eq(AccountTable.id, accountID))
+    })
+  })
 
   export const fromID = fn(z.string(), async (id) =>
     Database.use((tx) =>
