@@ -1,7 +1,7 @@
 export * as FileMutation from "./file-mutation"
 
 import { Context, Effect, Layer, Schema } from "effect"
-import { dirname } from "path"
+import { basename, dirname, extname, join } from "path"
 import { KeyedMutex } from "./effect/keyed-mutex"
 import { FSUtil } from "./fs-util"
 
@@ -155,9 +155,33 @@ export const layer = Layer.effect(
       ),
     )
 
+    const protectPatterns = [
+      /\.(bak|backup|sql|dump|pgdump|sqlite|db)$/i,
+      /\.(pem|key|crt|cert|keystore|jks|pfx|p12)$/i,
+      /\.env(\..+)?$/i,
+      /\.secret/i,
+      /credentials/i,
+      /\.(id_rsa|id_dsa|id_ecdsa|id_ed25519)$/i,
+      /^\.(trash|canopy-trash|backup)$/i,
+    ]
+
+    function isProtected(name: string) {
+      return protectPatterns.some((p) => p.test(name))
+    }
+
     const remove = Effect.fn("FileMutation.remove")((input: RemoveInput) =>
       withTargetLock(input.target)(
         Effect.gen(function* () {
+          const name = basename(input.target.canonical)
+          if (isProtected(name)) {
+            const trashDir = join(dirname(input.target.canonical), ".canopy-trash")
+            yield* fs.makeDirectory(trashDir).pipe(Effect.catchAll(() => Effect.void))
+            const trashPath = join(trashDir, `${name}.${Date.now()}`)
+            yield* fs.move(input.target.canonical, trashPath).pipe(
+              Effect.catchAll(() => fs.remove(input.target.canonical)),
+            )
+            return removeResult(input.target, true)
+          }
           const existed = yield* fs.remove(input.target.canonical).pipe(
             Effect.as(true),
             Effect.catchReason("PlatformError", "NotFound", () => Effect.succeed(false)),
