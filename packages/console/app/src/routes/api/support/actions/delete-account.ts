@@ -16,7 +16,7 @@ export async function DELETE(event: APIEvent) {
     return Response.json({ error: "Invalid request", issues: body.error.issues }, { status: 400 })
   }
   return Account.remove(body.data.accountID)
-    .then(() => Response.json({}))
+    .then(() => Response.json({ success: true, message: "Account deleted" }))
     .catch((error) =>
       Response.json({ error: error instanceof Error ? error.message : String(error) }, { status: 400 }),
     )

@@ -151,7 +151,7 @@ app
       const body = z.object({ shareID: z.string().min(1) }).safeParse(await c.req.json().catch(() => undefined))
       if (!body.success) return c.json({ error: "Invalid request", issues: body.error.issues }, 400)
       return Share.removeAdmin({ id: body.data.shareID })
-        .then(() => c.json({}))
+        .then(() => c.json({ success: true, message: "Share removed" }))
         .catch((error) => c.json({ error: error instanceof Error ? error.message : String(error) }, 400))
     },
   )
