@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" fill="none">
+  <defs>
+    <linearGradient id="canopyGrad" x1="0" y1="1" x2="0" y2="0">
+      <stop offset="0%" stop-color="#0a1628"/>
+      <stop offset="100%" stop-color="#1a3a5c"/>
+    </linearGradient>
+    <linearGradient id="leafGrad1" x1="0" y1="1" x2="0.5" y2="0">
+      <stop offset="0%" stop-color="#22c55e"/>
+      <stop offset="100%" stop-color="#4ade80"/>
+    </linearGradient>
+    <linearGradient id="leafGrad2" x1="0" y1="1" x2="0.5" y2="0">
+      <stop offset="0%" stop-color="#16a34a"/>
+      <stop offset="100%" stop-color="#22c55e"/>
+    </linearGradient>
+    <linearGradient id="leafGrad3" x1="0" y1="1" x2="0.5" y2="0">
+      <stop offset="0%" stop-color="#15803d"/>
+      <stop offset="100%" stop-color="#16a34a"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Background circle -->
+  <circle cx="256" cy="256" r="248" fill="url(#canopyGrad)" stroke="#22c55e" stroke-width="4"/>
+
+  <!-- Code bracket left -->
+  <path d="M160 180 L120 256 L160 332" stroke="#4ade80" stroke-width="10" stroke-linecap="round" stroke-linejoin="round" fill="none" opacity="0.5"/>
+
+  <!-- Code bracket right -->
+  <path d="M352 180 L392 256 L352 332" stroke="#4ade80" stroke-width="10" stroke-linecap="round" stroke-linejoin="round" fill="none" opacity="0.5"/>
+
+  <!-- Slash -->
+  <line x1="280" y1="160" x2="232" y2="352" stroke="#4ade80" stroke-width="8" stroke-linecap="round" opacity="0.6"/>
+
+  <!-- Canopy tree top layers -->
+  <ellipse cx="256" cy="200" rx="90" ry="50" fill="url(#leafGrad1)" opacity="0.9"/>
+  <ellipse cx="220" cy="240" rx="70" ry="45" fill="url(#leafGrad2)" opacity="0.85"/>
+  <ellipse cx="290" cy="240" rx="70" ry="45" fill="url(#leafGrad2)" opacity="0.85"/>
+  <ellipse cx="256" cy="270" rx="55" ry="35" fill="url(#leafGrad3)" opacity="0.8"/>
+
+  <!-- Trunk -->
+  <rect x="244" y="290" width="24" height="60" rx="4" fill="#78350f" opacity="0.7"/>
+
+  <!-- Sparkles / AI nodes -->
+  <circle cx="200" cy="170" r="4" fill="#a7f3d0" opacity="0.9"/>
+  <circle cx="310" cy="190" r="3" fill="#a7f3d0" opacity="0.7"/>
+  <circle cx="240" cy="155" r="3" fill="#a7f3d0" opacity="0.6"/>
+  <circle cx="280" cy="175" r="5" fill="#a7f3d0" opacity="0.8"/>
+  <circle cx="330" cy="230" r="3" fill="#a7f3d0" opacity="0.5"/>
+  <circle cx="185" cy="220" r="3" fill="#a7f3d0" opacity="0.5"/>
+</svg>
