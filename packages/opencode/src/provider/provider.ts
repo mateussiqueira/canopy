@@ -453,7 +453,7 @@ function custom(dep: CustomDep): Record<string, CustomLoader> {
       }),
     openrouter: () =>
       Effect.succeed({
-        autoload: false,
+        autoload: true,
         options: {
           headers: {
             "HTTP-Referer": "https://canopy.dev/",
