@@ -638,10 +638,10 @@ function scrollBashStart(p: ToolProps<typeof BashTool>): string {
 }
 
 function scrollBashProgress(p: ToolProps<typeof BashTool>): string {
-  const out = stripAnsi(p.frame.raw)
+  const out = String(stripAnsi(p.frame.raw) ?? "")
   const cmd = (p.input.command ?? "").trim()
   const fmt = (text: string) => {
-    const body = text.replace(/^\n+/, "").replace(/\n+$/, "")
+    const body = String(text ?? "").replace(/^\n+/, "").replace(/\n+$/, "")
     return body ? `\n${body}` : ""
   }
 
@@ -1405,7 +1405,7 @@ function structuredBody(commit: StreamCommit, raw: string): RunEntryBody | undef
 }
 
 function shellOutput(command: string, raw: string): string | undefined {
-  const body = stripAnsi(raw).replace(/^\n+/, "").replace(/\n+$/, "")
+  const body = String(stripAnsi(raw) ?? "").replace(/^\n+/, "").replace(/\n+$/, "")
   if (!body) {
     return undefined
   }

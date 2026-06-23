@@ -857,7 +857,7 @@ export function variants(model: Provider.Model): Record<string, Record<string, a
         return Object.fromEntries(["none", "high"].map((effort) => [effort, { reasoningEffort: effort }]))
       }
       const efforts = [...WIDELY_SUPPORTED_EFFORTS]
-      if (model.api.id.toLowerCase().includes("deepseek-v4")) {
+      if (model.api.id.toLowerCase().includes("deepseek-v4") && !model.api.id.toLowerCase().includes("deepseek-v4-pro")) {
         efforts.push("max")
       }
       return Object.fromEntries(efforts.map((effort) => [effort, { reasoningEffort: effort }]))
@@ -1111,7 +1111,8 @@ export function options(input: {
 
   if (
     ["zai", "zhipuai"].some((id) => input.model.providerID.includes(id)) &&
-    input.model.api.npm === "@ai-sdk/openai-compatible"
+    input.model.api.npm === "@ai-sdk/openai-compatible" &&
+    input.model.capabilities.reasoning
   ) {
     result["thinking"] = {
       type: "enabled",
@@ -1119,7 +1120,7 @@ export function options(input: {
     }
   }
 
-  if (input.model.providerID === "openai" || input.providerOptions?.setCacheKey) {
+  if (input.model.providerID === "openai" || input.model.providerID === "deepseek" || input.providerOptions?.setCacheKey) {
     result["promptCacheKey"] = input.sessionID
   }
 
