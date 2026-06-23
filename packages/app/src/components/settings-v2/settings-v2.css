@@ -168,7 +168,8 @@
 }
 
 @media (max-width: 639px) {
-  .settings-v2[data-orientation="vertical"] [data-slot="tabs-v2-list"] {
+  .settings-v2[data-component="tabs-v2"][data-variant="settings"][data-orientation="vertical"]
+    [data-slot="tabs-v2-list"] {
     width: 144px;
     min-width: 144px;
     padding-inline: 8px;
