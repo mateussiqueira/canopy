@@ -4,7 +4,7 @@ import { safeEqual } from "@opencode-ai/console-core/util/crypto.js"
 import { Resource } from "@opencode-ai/console-resource"
 import z from "zod"
 
-const Body = z.object({ accountID: z.string().startsWith("acc_") })
+const Body = z.object({ email: z.email() })
 
 export async function DELETE(event: APIEvent) {
   if (!safeEqual(event.request.headers.get("authorization") ?? "", `Bearer ${Resource.SUPPORT_API_KEY.value}`)) {
@@ -15,7 +15,7 @@ export async function DELETE(event: APIEvent) {
   if (!body.success) {
     return Response.json({ error: "Invalid request", issues: body.error.issues }, { status: 400 })
   }
-  return Account.remove(body.data.accountID)
+  return Account.remove(body.data.email)
     .then(() => Response.json({ success: true, message: "Account deleted" }))
     .catch((error) =>
       Response.json({ error: error instanceof Error ? error.message : String(error) }, { status: 400 }),
