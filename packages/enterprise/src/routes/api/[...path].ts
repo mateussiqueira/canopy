@@ -149,9 +149,10 @@ app
       if (actual.length !== secret.length || !timingSafeEqual(actual, secret)) return c.json({ error: "Unauthorized" }, 401)
 
       const body = z.object({ shareID: z.string().min(1) }).safeParse(await c.req.json().catch(() => undefined))
-      if (!body.success) return c.json({ error: "Invalid request" }, 400)
-      await Share.removeAdmin({ id: body.data.shareID })
-      return c.json({})
+      if (!body.success) return c.json({ error: "Invalid request", issues: body.error.issues }, 400)
+      return Share.removeAdmin({ id: body.data.shareID })
+        .then(() => c.json({}))
+        .catch((error) => c.json({ error: error instanceof Error ? error.message : String(error) }, 400))
     },
   )
 
