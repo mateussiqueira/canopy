@@ -54,6 +54,7 @@ export function hints(template: string) {
 export const Default = {
   INIT: "init",
   REVIEW: "review",
+  SKILLS: "skills",
 } as const
 
 export interface Interface {
@@ -93,6 +94,21 @@ export const layer = Layer.effect(
         },
         subtask: true,
         hints: hints(PROMPT_REVIEW),
+      }
+
+      commands[Default.SKILLS] = {
+        name: Default.SKILLS,
+        description: "list all available skills",
+        source: "command",
+        get template() {
+          return bridge.promise(
+            Effect.gen(function* () {
+              const items = yield* skill.all()
+              return Skill.fmt(items, { verbose: false })
+            }),
+          )
+        },
+        hints: [],
       }
 
       for (const [name, command] of Object.entries(cfg.command ?? {})) {
