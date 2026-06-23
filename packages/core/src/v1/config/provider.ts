@@ -71,6 +71,9 @@ export const Model = Schema.Struct({
       ),
     ).annotate({ description: "Variant-specific configuration" }),
   ),
+  fallback_models: Schema.optional(
+    Schema.Array(Schema.String),
+  ).annotate({ description: "Ordered list of model IDs to fall back to when this model fails" }),
 })
 
 export const Info = Schema.Struct({

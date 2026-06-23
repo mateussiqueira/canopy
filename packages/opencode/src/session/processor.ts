@@ -57,6 +57,7 @@ type Input = {
   assistantMessage: SessionV1.Assistant
   sessionID: SessionID
   model: Provider.Model
+  fallbackModels?: Provider.Model[]
 }
 
 export interface Interface {
@@ -965,72 +966,103 @@ export const layer = Layer.effect(
         ctx.needsCompaction = false
         ctx.shouldBreak = (yield* config.get()).experimental?.continue_loop_on_deny !== true
 
-        return yield* Effect.gen(function* () {
-          yield* Effect.gen(function* () {
-            ctx.currentText = undefined
-            ctx.currentTextID = undefined
-            ctx.reasoningMap = {}
-            yield* status.set(ctx.sessionID, { type: "busy" })
-            const stream = llm.stream(streamInput)
+        const models = [input.model, ...(input.fallbackModels ?? [])]
+        let lastHaltError: unknown
 
-            yield* stream.pipe(
-              Stream.tap((event) => handleEvent(event)),
-              Stream.takeUntil(() => ctx.needsCompaction),
-              Stream.runDrain,
-            )
-          }).pipe(
-            Effect.onInterrupt(() =>
-              Effect.gen(function* () {
-                aborted = true
-                if (!ctx.assistantMessage.error) {
-                  yield* halt(new DOMException("Aborted", "AbortError"))
-                }
-              }),
-            ),
-            Effect.catchCauseIf(
-              (cause) => !Cause.hasInterruptsOnly(cause),
-              (cause) => Effect.fail(Cause.squash(cause)),
-            ),
-            Effect.retry(
-              SessionRetry.policy({
-                provider: input.model.providerID,
-                parse,
-                set: (info) => {
-                  // TODO(v2): Temporary dual-write while migrating session messages to v2 events.
-                  const event = mirrorAssistant
-                    ? events.publish(SessionEvent.Retried, {
-                        sessionID: ctx.sessionID,
-                        attempt: info.attempt,
-                        error: {
+        for (let i = 0; i < models.length; i++) {
+          const model = models[i]
+          const isFallback = i > 0
+          if (isFallback) {
+            yield* Effect.logInfo("process.fallback", {
+              "session.id": input.sessionID,
+              model: model.id,
+              provider: model.providerID,
+              fallbackIndex: i,
+            })
+            ctx.model = model
+            ctx.assistantMessage.providerID = model.providerID
+            ctx.assistantMessage.modelID = model.id
+            ctx.assistantMessage.error = undefined
+            ctx.blocked = false
+            ctx.needsCompaction = false
+            aborted = false
+          }
+
+          const outcome = yield* Effect.gen(function* () {
+            yield* Effect.gen(function* () {
+              ctx.currentText = undefined
+              ctx.currentTextID = undefined
+              ctx.reasoningMap = {}
+              yield* status.set(ctx.sessionID, { type: "busy" })
+              const s = llm.stream({ ...streamInput, model })
+              yield* s.pipe(
+                Stream.tap((event) => handleEvent(event)),
+                Stream.takeUntil(() => ctx.needsCompaction),
+                Stream.runDrain,
+              )
+            }).pipe(
+              Effect.onInterrupt(() =>
+                Effect.gen(function* () {
+                  aborted = true
+                  if (!ctx.assistantMessage.error) {
+                    yield* halt(new DOMException("Aborted", "AbortError"))
+                  }
+                }),
+              ),
+              Effect.catchCauseIf(
+                (cause) => !Cause.hasInterruptsOnly(cause),
+                (cause) => Effect.fail(Cause.squash(cause)),
+              ),
+              Effect.retry(
+                SessionRetry.policy({
+                  provider: model.providerID,
+                  parse,
+                  set: (info) => {
+                    const event = mirrorAssistant
+                      ? events.publish(SessionEvent.Retried, {
+                          sessionID: ctx.sessionID,
+                          attempt: info.attempt,
+                          error: {
+                            message: info.message,
+                            isRetryable: true,
+                          },
+                          timestamp: DateTime.makeUnsafe(Date.now()),
+                        })
+                      : Effect.void
+                    return flushV2Fragments().pipe(
+                      Effect.andThen(event),
+                      Effect.andThen(
+                        status.set(ctx.sessionID, {
+                          type: "retry",
+                          attempt: info.attempt,
                           message: info.message,
-                          isRetryable: true,
-                        },
-                        timestamp: DateTime.makeUnsafe(Date.now()),
-                      })
-                    : Effect.void
-                  return flushV2Fragments().pipe(
-                    Effect.andThen(event),
-                    Effect.andThen(
-                      status.set(ctx.sessionID, {
-                        type: "retry",
-                        attempt: info.attempt,
-                        message: info.message,
-                        action: info.action,
-                        next: info.next,
-                      }),
-                    ),
-                  )
-                },
+                          action: info.action,
+                          next: info.next,
+                        }),
+                      ),
+                    )
+                  },
+                }),
+              ),
+              Effect.catch((error) => {
+                lastHaltError ??= error
+                return Effect.fail(error)
               }),
-            ),
-            Effect.catch(halt),
-            Effect.ensuring(cleanup()),
+              Effect.ensuring(cleanup()),
+            )
+
+            if (ctx.needsCompaction) return "compact" as const
+            if (ctx.blocked || ctx.assistantMessage.error) return "stop" as const
+            return "continue" as const
+          }).pipe(
+            Effect.catch(() => Effect.succeed("fallback" as const)),
           )
 
-          if (ctx.needsCompaction) return "compact"
-          if (ctx.blocked || ctx.assistantMessage.error) return "stop"
-          return "continue"
-        })
+          if (outcome !== "fallback") return outcome
+        }
+
+        if (lastHaltError) yield* halt(lastHaltError)
+        return "stop"
       })
 
       return {

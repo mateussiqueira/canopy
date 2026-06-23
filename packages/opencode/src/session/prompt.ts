@@ -1242,6 +1242,31 @@ export const layer = Layer.effect(
             }).pipe(Effect.ignore, Effect.forkIn(scope))
 
           const model = yield* getModel(lastUser.model.providerID, lastUser.model.modelID, sessionID)
+
+          const resolveFallbackModels = Effect.fnUntraced(function* () {
+            const cfg = yield* config.get()
+            const ids = cfg.fallback_models
+            if (!ids?.length) return [] as Provider.Model[]
+            const results: Provider.Model[] = []
+            for (const id of ids) {
+              const slashIdx = id.indexOf("/")
+              if (slashIdx < 0) {
+                yield* Effect.logWarning("invalid fallback model format", { id })
+                continue
+              }
+              const fbProvider = id.slice(0, slashIdx)
+              const fbModel = id.slice(slashIdx + 1)
+              const fb = yield* provider.getModel(
+                ProviderV2.ID.make(fbProvider),
+                ModelV2.ID.make(fbModel),
+              ).pipe(Effect.option)
+              if (Option.isSome(fb)) results.push(fb.value)
+            }
+            return results
+          })
+
+          const fallbackModels = yield* resolveFallbackModels()
+
           const task = tasks.pop()
 
           if (task?.type === "subtask") {
@@ -1318,6 +1343,7 @@ export const layer = Layer.effect(
               assistantMessage: msg,
               sessionID,
               model,
+              fallbackModels: fallbackModels.length > 0 ? fallbackModels : undefined,
             })
             .pipe(Effect.onInterrupt(() => finalizeInterruptedAssistant))
 
