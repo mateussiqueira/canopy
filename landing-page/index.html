@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Canopy — IA que programa com você</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --bg: #0a0a0b;
+  --surface: #111113;
+  --border: #1f1f23;
+  --text: #fafafa;
+  --text-secondary: #a1a1aa;
+  --green: #22c55e;
+  --green-dark: #16a34a;
+  --green-glow: rgba(34,197,94,0.15);
+}
+
+body {
+  font-family: 'Inter', -apple-system, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  -webkit-font-smoothing: antialiased;
+  line-height: 1.6;
+}
+
+/* Header */
+header {
+  position: fixed;
+  top: 0;
+  width: 100%;
+  z-index: 100;
+  background: rgba(10,10,11,0.9);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border);
+}
+nav {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 16px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 700;
+  font-size: 18px;
+  text-decoration: none;
+  color: var(--text);
+}
+.logo-icon {
+  width: 32px; height: 32px;
+  background: var(--green);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 14px;
+  color: #000;
+}
+.nav-links { display: flex; align-items: center; gap: 24px; }
+.nav-links a { color: var(--text-secondary); text-decoration: none; font-size: 14px; font-weight: 500; transition: color 0.15s; }
+.nav-links a:hover { color: var(--text); }
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  background: var(--green);
+  color: #000;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 14px;
+  text-decoration: none;
+  transition: all 0.15s;
+}
+.btn-primary:hover { background: var(--green-dark); transform: translateY(-1px); }
+.btn-outline {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  border: 1px solid var(--border);
+  color: var(--text);
+  border-radius: 8px;
+  font-weight: 500;
+  font-size: 14px;
+  text-decoration: none;
+  transition: all 0.15s;
+}
+.btn-outline:hover { background: var(--surface); }
+
+/* Hero */
+.hero {
+  padding: 160px 24px 80px;
+  max-width: 1200px;
+  margin: 0 auto;
+  text-align: center;
+}
+.hero h1 {
+  font-size: 56px;
+  font-weight: 800;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  margin-bottom: 24px;
+}
+.hero h1 span { background: linear-gradient(135deg, var(--green), #4ade80); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+.hero p {
+  font-size: 18px;
+  color: var(--text-secondary);
+  max-width: 640px;
+  margin: 0 auto 40px;
+}
+.hero-buttons { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+.hero-buttons .btn-primary { padding: 14px 28px; font-size: 16px; }
+
+/* Features */
+.features {
+  padding: 80px 24px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+.features h2 {
+  text-align: center;
+  font-size: 36px;
+  font-weight: 700;
+  margin-bottom: 16px;
+}
+.features > p { text-align: center; color: var(--text-secondary); margin-bottom: 64px; }
+.feature-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 16px;
+}
+.feature-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 24px;
+  transition: all 0.2s;
+}
+.feature-card:hover { border-color: var(--green); transform: translateY(-2px); }
+.feature-card .icon { width: 40px; height: 40px; background: var(--green-glow); border-radius: 10px; display: flex; align-items: center; justify-content: center; margin-bottom: 16px; font-size: 20px; }
+.feature-card h3 { font-size: 16px; font-weight: 600; margin-bottom: 8px; }
+.feature-card p { font-size: 14px; color: var(--text-secondary); line-height: 1.5; }
+
+/* Pricing */
+.pricing {
+  padding: 80px 24px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+.pricing h2 {
+  text-align: center;
+  font-size: 36px;
+  font-weight: 700;
+  margin-bottom: 16px;
+}
+.pricing > p { text-align: center; color: var(--text-secondary); margin-bottom: 48px; }
+.pricing-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 16px;
+  align-items: start;
+}
+.plan {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 32px;
+  position: relative;
+}
+.plan.featured {
+  border-color: var(--green);
+  background: linear-gradient(135deg, var(--surface), rgba(34,197,94,0.05));
+}
+.plan.featured::before {
+  content: 'Mais popular';
+  position: absolute;
+  top: -12px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--green);
+  color: #000;
+  padding: 4px 16px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+}
+.plan h3 { font-size: 20px; font-weight: 600; margin-bottom: 8px; }
+.plan .subtitle { font-size: 14px; color: var(--text-secondary); margin-bottom: 24px; }
+.plan .price { font-size: 48px; font-weight: 800; letter-spacing: -0.02em; }
+.plan .price span { font-size: 16px; color: var(--text-secondary); font-weight: 400; }
+.plan .period { font-size: 14px; color: var(--text-secondary); margin-bottom: 24px; }
+.plan ul { list-style: none; margin-bottom: 24px; }
+.plan ul li { padding: 8px 0; font-size: 14px; display: flex; align-items: center; gap: 8px; }
+.plan ul li::before { content: '✓'; color: var(--green); font-weight: 700; }
+.plan .btn-primary, .plan .btn-outline { width: 100%; justify-content: center; padding: 12px; }
+
+/* OpenRouter Section */
+.openrouter-section {
+  padding: 80px 24px;
+  max-width: 1200px;
+  margin: 0 auto;
+  text-align: center;
+}
+.openrouter-section h2 { font-size: 36px; font-weight: 700; margin-bottom: 16px; }
+.openrouter-section p { color: var(--text-secondary); max-width: 640px; margin: 0 auto 32px; }
+.model-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 12px;
+  max-width: 800px;
+  margin: 0 auto;
+}
+.model-badge {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 12px;
+  font-size: 13px;
+  font-weight: 500;
+  transition: all 0.15s;
+}
+.model-badge:hover { border-color: var(--green); }
+
+/* Footer */
+footer {
+  text-align: center;
+  padding: 48px 24px;
+  border-top: 1px solid var(--border);
+  color: var(--text-secondary);
+  font-size: 14px;
+}
+footer a { color: var(--text); text-decoration: none; }
+footer a:hover { color: var(--green); }
+
+/* Responsive */
+@media (max-width: 768px) {
+  .hero h1 { font-size: 36px; }
+  .pricing-grid { grid-template-columns: 1fr; }
+  .nav-links .btn-primary { display: none; }
+}
+</style>
+</head>
+<body>
+
+<header>
+<nav>
+  <a href="/" class="logo">
+    <div class="logo-icon">C</div>
+    Canopy
+  </a>
+  <div class="nav-links">
+    <a href="#features">Recursos</a>
+    <a href="#pricing">Preços</a>
+    <a href="#models">Modelos</a>
+    <a href="#" class="btn-primary">Instalar</a>
+  </div>
+</nav>
+</header>
+
+<section class="hero">
+  <h1>IA que programa com você.<br><span>Open source. 5x mais barato.</span></h1>
+  <p>O Canopy é um fork do opencode com suporte ao OpenRouter — use qualquer modelo de IA pelo menor custo. Claude, GPT, Gemini, DeepSeek, tudo em um lugar.</p>
+  <div class="hero-buttons">
+    <a href="#" class="btn-primary">Instalar Agora →</a>
+    <a href="https://github.com/mateussiqueira/canopy" class="btn-outline">Ver no GitHub</a>
+  </div>
+</section>
+
+<section class="features" id="features">
+  <h2>Recursos</h2>
+  <p>Tudo que o opencode oferece, com melhor custo e modelos ilimitados via OpenRouter.</p>
+  <div class="feature-grid">
+    <div class="feature-card">
+      <div class="icon">🔄</div>
+      <h3>OpenRouter nativo</h3>
+      <p>Acesse 300+ modelos de IA com um único provider. Claude, GPT, Gemini, DeepSeek, Mistral e mais.</p>
+    </div>
+    <div class="feature-card">
+      <div class="icon">💰</div>
+      <h3>5x mais barato</h3>
+      <p>Sem marcação de preço. Pagamos o custo real da API + 10%. Economize até 80% comparado ao opencode Pro.</p>
+    </div>
+    <div class="feature-card">
+      <div class="icon">🔓</div>
+      <h3>100% open source</h3>
+      <p>Código aberto sob MIT. Fork do opencode, mantido pela comunidade. Sem vendor lock-in.</p>
+    </div>
+    <div class="feature-card">
+      <div class="icon">🏗️</div>
+      <h3>Auto-deploy</h3>
+      <p>Integração com Nidus — nossa PaaS. Faça deploy dos seus projetos sem sair do terminal.</p>
+    </div>
+    <div class="feature-card">
+      <div class="icon">🔐</div>
+      <h3>Sua chave, seu controle</h3>
+      <p>Use sua própria chave do OpenRouter. Sem taxas escondidas. O que você paga é o que o modelo custa.</p>
+    </div>
+    <div class="feature-card">
+      <div class="icon">📦</div>
+      <h3>CLI + Desktop</h3>
+      <p>Terminal TUI, app desktop e integração com VS Code. Escolha como trabalhar.</p>
+    </div>
+  </div>
+</section>
+
+<section class="pricing" id="pricing">
+  <h2>Preços</h2>
+  <p>Simples e transparente. Pague apenas pelo que usar.</p>
+  <div class="pricing-grid">
+    <div class="plan">
+      <h3>Starter</h3>
+      <p class="subtitle">Para uso pessoal</p>
+      <div class="price">Grátis</div>
+      <p class="period">Sempre</p>
+      <ul>
+        <li>OpenRouter com sua chave</li>
+        <li>Todos os modelos disponíveis</li>
+        <li>CLI + TUI completos</li>
+        <li>Até 3 projetos no Nidus</li>
+        <li>Comunidade Discord</li>
+      </ul>
+      <a href="#" class="btn-outline">Começar</a>
+    </div>
+    <div class="plan featured">
+      <h3>Pro</h3>
+      <p class="subtitle">Para uso profissional</p>
+      <div class="price">$19<span>/mês</span></div>
+      <p class="period">ou $190/ano (economize 2 meses)</p>
+      <ul>
+        <li>Tudo do Starter</li>
+        <li>OpenRouter incluso (20k requests/mês)</li>
+        <li>Projetos ilimitados no Nidus</li>
+        <li>Deploy automático (Git)</li>
+        <li>Domínios customizados</li>
+        <li>Suporte prioritário</li>
+      </ul>
+      <a href="#" class="btn-primary">Assinar Pro</a>
+    </div>
+    <div class="plan">
+      <h3>Enterprise</h3>
+      <p class="subtitle">Para times e empresas</p>
+      <div class="price">$99<span>/mês</span></div>
+      <p class="period">por 5 usuários</p>
+      <ul>
+        <li>Tudo do Pro</li>
+        <li>OpenRouter ilimitado</li>
+        <li>SSO / SAML</li>
+        <li>Audit logs</li>
+        <li>On-premise disponível</li>
+        <li>SLA 99.9%</li>
+      </ul>
+      <a href="#" class="btn-outline">Falar com vendas</a>
+    </div>
+  </div>
+</section>
+
+<section class="openrouter-section" id="models">
+  <h2>Modelos disponíveis via OpenRouter</h2>
+  <p>Escolha entre centenas de modelos. Use o melhor para cada tarefa sem se prender a um provider.</p>
+  <div class="model-grid">
+    <div class="model-badge">Claude Sonnet 4</div>
+    <div class="model-badge">Claude Haiku 3.5</div>
+    <div class="model-badge">GPT-5</div>
+    <div class="model-badge">GPT-4o</div>
+    <div class="model-badge">Gemini 2.5 Pro</div>
+    <div class="model-badge">Gemini 2.5 Flash</div>
+    <div class="model-badge">DeepSeek V4</div>
+    <div class="model-badge">DeepSeek R1</div>
+    <div class="model-badge">Mistral Large</div>
+    <div class="model-badge">Llama 4</div>
+    <div class="model-badge">Qwen 3.7</div>
+    <div class="model-badge">Kimi K2.6</div>
+    <div class="model-badge">GLM-5.1</div>
+    <div class="model-badge">MiMo V2.5</div>
+    <div class="model-badge">MiniMax M3</div>
+    <div class="model-badge">+300 outros</div>
+  </div>
+</section>
+
+<footer>
+  <p>Canopy — fork brasileiro do opencode.</p>
+  <p><a href="https://github.com/mateussiqueira/canopy">GitHub</a> · <a href="#">Discord</a> · MIT License</p>
+</footer>
+
+</body>
+</html>
