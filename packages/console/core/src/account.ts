@@ -32,7 +32,7 @@ export namespace Account {
         .innerJoin(AccountTable, eq(AccountTable.id, AuthTable.accountID))
         .where(and(eq(AuthTable.provider, "email"), eq(AuthTable.subject, email)))
         .then((rows) => rows[0])
-      if (!account) throw new Error(`Account not found for email: ${email}`)
+      if (!account) throw new Error("Account not found")
 
       const emails = await tx
         .select({ email: AuthTable.subject })
