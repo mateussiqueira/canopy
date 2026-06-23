@@ -2433,7 +2433,7 @@ export default function LegacyLayout(props: ParentProps) {
                 }}
                 onClick={(e) => e.stopPropagation()}
               >
-                {sidebarContent(true)}
+                {sidebarContent(layout.mobileSidebar.fixed() ? undefined : true)}
               </nav>
             </div>
 

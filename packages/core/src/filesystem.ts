@@ -73,7 +73,13 @@ const baseLayer = Layer.effect(
     const fs = yield* FSUtil.Service
     const location = yield* Location.Service
     const search = yield* FileSystemSearch.Service
-    const root = yield* fs.realPath(location.directory).pipe(Effect.orDie)
+    const root = yield* fs.realPath(location.directory).pipe(
+      Effect.catchAll((error) =>
+        error.message?.includes("ENOENT")
+          ? Effect.die(new Error(`Directory not found: ${location.directory}`))
+          : Effect.die(error),
+      ),
+    )
     const resolve = Effect.fnUntraced(function* (input?: RelativePath) {
       const absolute = path.resolve(location.directory, input ?? ".")
       if (!FSUtil.contains(location.directory, absolute))

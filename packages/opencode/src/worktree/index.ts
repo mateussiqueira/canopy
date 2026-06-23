@@ -279,6 +279,11 @@ export const layer: Layer.Layer<
           }),
         ),
       )
+
+      // Reload store after startup scripts to pick up project agents
+      if (booted) {
+        yield* store.load({ directory: info.directory }).pipe(Effect.ignore)
+      }
       if (!booted) return
 
       GlobalBus.emit("event", {
