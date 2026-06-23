@@ -32,6 +32,7 @@ import { lt } from "drizzle-orm"
 import { or } from "drizzle-orm"
 import { MessageTable, PartTable, SessionTable } from "@opencode-ai/core/session/sql"
 import { ProviderError } from "@/provider/error"
+import { isContextOverflow } from "@opencode-ai/llm"
 import { iife } from "@/util/iife"
 import { errorMessage } from "@/util/error"
 import { isMedia } from "@/util/media"
@@ -711,6 +712,11 @@ export function fromError(
           responseBody: parsed.responseBody,
           metadata: parsed.metadata,
         },
+        { cause: e },
+      ).toObject()
+    case e instanceof Error && isContextOverflow(errorMessage(e)):
+      return new ContextOverflowError(
+        { message: errorMessage(e), responseBody: undefined },
         { cause: e },
       ).toObject()
     case e instanceof Error:
