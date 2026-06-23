@@ -1,8 +1,7 @@
 export * as SkillV2 from "./skill"
 
 import path from "path"
-import { Context, Effect, Layer, Schema } from "effect"
-import { castDraft } from "immer"
+import { Context, Effect, Layer, Schema, Types } from "effect"
 import { AgentV2 } from "./agent"
 import { ConfigMarkdown } from "./config/markdown"
 import { FSUtil } from "./fs-util"
@@ -54,6 +53,9 @@ export class Info extends Schema.Class<Info>("SkillV2.Info")({
   content: Schema.String,
 }) {}
 
+export const available = (skills: ReadonlyArray<Info>, agent: AgentV2.Info) =>
+  skills.filter((skill) => PermissionV2.evaluate("skill", skill.name, agent.permissions).effect !== "deny")
+
 const Frontmatter = Schema.Struct({
   name: Schema.String.pipe(Schema.optional),
   description: Schema.String.pipe(Schema.optional),
@@ -62,19 +64,17 @@ const Frontmatter = Schema.Struct({
 const decodeFrontmatter = Schema.decodeUnknownOption(Frontmatter)
 
 export type Data = {
-  sources: Source[]
+  sources: Types.DeepMutable<Source>[]
 }
 
-export type Editor = {
+export type Draft = {
   source: (source: Source) => void
   list: () => readonly Source[]
 }
 
-export interface Interface {
-  readonly transform: State.Interface<Data, Editor>["transform"]
+export interface Interface extends State.Transformable<Draft> {
   readonly sources: () => Effect.Effect<Source[]>
   readonly list: () => Effect.Effect<Info[]>
-  readonly forAgent: (agent: AgentV2.ID) => Effect.Effect<Info[]>
 }
 
 export class Service extends Context.Service<Service, Interface>()("@opencode/v2/Skill") {}
@@ -82,16 +82,15 @@ export class Service extends Context.Service<Service, Interface>()("@opencode/v2
 export const layer = Layer.effect(
   Service,
   Effect.gen(function* () {
-    const agent = yield* AgentV2.Service
     const discovery = yield* SkillDiscovery.Service
     const fs = yield* FSUtil.Service
 
-    const state = State.create<Data, Editor>({
+    const state = State.create<Data, Draft>({
       initial: () => ({ sources: [] }),
-      editor: (draft) => ({
+      draft: (draft) => ({
         source: (source) => {
           if (draft.sources.some((item) => Source.equals(item, source))) return
-          draft.sources.push(castDraft(source))
+          draft.sources.push(source as Types.DeepMutable<Source>)
         },
         list: () => draft.sources as Source[],
       }),
@@ -149,22 +148,13 @@ export const layer = Layer.effect(
 
     return Service.of({
       transform: state.transform,
+      reload: state.reload,
       sources: Effect.fn("SkillV2.sources")(function* () {
         return state.get().sources
       }),
       list,
-      forAgent: Effect.fn("SkillV2.forAgent")(function* (id) {
-        const current = yield* agent.get(id)
-        if (!current) return []
-        return (yield* list()).filter(
-          (skill) => PermissionV2.evaluate("skill", skill.name, current.permissions).effect !== "deny",
-        )
-      }),
     })
   }),
 )
 
-export const locationLayer = layer.pipe(
-  Layer.provide(SkillDiscovery.defaultLayer),
-  Layer.provideMerge(AgentV2.locationLayer),
-)
+export const locationLayer = layer.pipe(Layer.provide(SkillDiscovery.defaultLayer))

@@ -1,9 +1,8 @@
 import { Schema } from "effect"
-import { ProviderMetadata } from "@opencode-ai/llm"
+import { ProviderMetadata, ToolContent } from "@opencode-ai/llm"
 import { EventV2 } from "../event"
 import { ModelV2 } from "../model"
 import { NonNegativeInt } from "../schema"
-import { ToolOutput } from "../tool-output"
 import { V2Schema } from "../v2-schema"
 import { FileAttachment, Prompt } from "./prompt"
 import { SessionSchema } from "./schema"
@@ -26,15 +25,21 @@ const Base = {
   timestamp: V2Schema.DateTimeUtcFromMillis,
   sessionID: SessionSchema.ID,
 }
+const PromptFields = {
+  ...Base,
+  messageID: SessionMessageID.ID,
+  prompt: Prompt,
+  delivery: Schema.Literals(["steer", "queue"]),
+}
 
 const options = {
-  sync: {
+  durable: {
     aggregate: "sessionID",
     version: 1,
   },
 } as const
 const stepSettlementOptions = {
-  sync: {
+  durable: {
     aggregate: "sessionID",
     version: 2,
   },
@@ -84,40 +89,16 @@ export type Moved = typeof Moved.Type
 export const Prompted = EventV2.define({
   type: "session.next.prompted",
   ...options,
-  schema: {
-    ...Base,
-    messageID: SessionMessageID.ID,
-    prompt: Prompt,
-    delivery: Schema.Literals(["steer", "queue"]),
-  },
+  schema: PromptFields,
 })
 export type Prompted = typeof Prompted.Type
 
-export namespace PromptLifecycle {
-  export const Admitted = EventV2.define({
-    type: "session.next.prompt.admitted",
-    ...options,
-    schema: {
-      ...Base,
-      messageID: SessionMessageID.ID,
-      prompt: Prompt,
-      delivery: Schema.Literals(["steer", "queue"]),
-    },
-  })
-  export type Admitted = typeof Admitted.Type
-
-  export const Promoted = EventV2.define({
-    type: "session.next.prompt.promoted",
-    ...options,
-    schema: {
-      ...Base,
-      messageID: SessionMessageID.ID,
-      prompt: Prompt,
-      timeCreated: V2Schema.DateTimeUtcFromMillis,
-    },
-  })
-  export type Promoted = typeof Promoted.Type
-}
+export const PromptAdmitted = EventV2.define({
+  type: "session.next.prompt.admitted",
+  ...options,
+  schema: PromptFields,
+})
+export type PromptAdmitted = typeof PromptAdmitted.Type
 
 export const ContextUpdated = EventV2.define({
   type: "session.next.context.updated",
@@ -353,8 +334,8 @@ export namespace Tool {
     ...options,
     schema: {
       ...ToolBase,
-      structured: ToolOutput.Structured,
-      content: Schema.Array(ToolOutput.Content),
+      structured: Schema.Record(Schema.String, Schema.Any),
+      content: Schema.Array(ToolContent),
     },
   })
   export type Progress = typeof Progress.Type
@@ -364,8 +345,9 @@ export namespace Tool {
     ...options,
     schema: {
       ...ToolBase,
-      structured: ToolOutput.Structured,
-      content: Schema.Array(ToolOutput.Content),
+      structured: Schema.Record(Schema.String, Schema.Any),
+      content: Schema.Array(ToolContent),
+      outputPaths: Schema.Array(Schema.String).pipe(Schema.optional),
       result: Schema.Unknown.pipe(Schema.optional),
       provider: Schema.Struct({
         executed: Schema.Boolean,
@@ -428,9 +410,9 @@ export namespace Compaction {
 
   export const Delta = EventV2.define({
     type: "session.next.compaction.delta",
-    ...options,
     schema: {
       ...Base,
+      messageID: SessionMessageID.ID,
       text: Schema.String,
     },
   })
@@ -441,8 +423,10 @@ export namespace Compaction {
     ...options,
     schema: {
       ...Base,
+      messageID: SessionMessageID.ID,
+      reason: Started.data.fields.reason,
       text: Schema.String,
-      include: Schema.String.pipe(Schema.optional),
+      recent: Schema.String,
     },
   })
   export type Ended = typeof Ended.Type
@@ -453,8 +437,7 @@ const DurableDefinitions = [
   ModelSwitched,
   Moved,
   Prompted,
-  PromptLifecycle.Admitted,
-  PromptLifecycle.Promoted,
+  PromptAdmitted,
   ContextUpdated,
   Synthetic,
   Shell.Started,
@@ -474,10 +457,9 @@ const DurableDefinitions = [
   Reasoning.Ended,
   Retried,
   Compaction.Started,
-  Compaction.Delta,
   Compaction.Ended,
 ] as const
-const EphemeralDefinitions = [Text.Delta, Tool.Input.Delta, Reasoning.Delta] as const
+const EphemeralDefinitions = [Text.Delta, Tool.Input.Delta, Reasoning.Delta, Compaction.Delta] as const
 
 export const Durable = Schema.Union(DurableDefinitions, { mode: "oneOf" }).pipe(Schema.toTaggedUnion("type"))
 export type DurableEvent = typeof Durable.Type

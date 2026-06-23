@@ -15,7 +15,7 @@ import { Tool } from "./tool"
 
 export interface Interface {
   readonly sessions: Session.Interface
-  readonly tools: Tool.Service
+  readonly tools: Tool.Interface
 }
 
 /** Intentional public native API for Effect applications embedding OpenCode. */
@@ -24,15 +24,13 @@ export class Service extends Context.Service<Service, Interface>()("@opencode/pu
 const SessionsLayer = SessionV2.layer.pipe(
   Layer.provide(SessionProjector.layer),
   Layer.provide(SessionExecutionLocal.layer),
-  Layer.provide(LocationServiceMap.layer),
   Layer.provide(SessionStore.layer),
   Layer.provide(EventV2.layer),
   Layer.provide(Database.defaultLayer),
   Layer.provide(ProjectV2.defaultLayer),
+  Layer.provide(LocationServiceMap.layer.pipe(Layer.provide(ApplicationTools.layer))),
   Layer.orDie,
 )
-const ApplicationToolsLayer = ApplicationTools.layer
-
 // TODO: Accept explicit storage so tests and embeddings can select disposable or application-owned persistence.
 export const layer = Layer.effect(
   Service,
@@ -40,7 +38,7 @@ export const layer = Layer.effect(
     const sessions = yield* SessionV2.Service
     const tools = yield* ApplicationTools.Service
     return Service.of({
-      tools: { attach: tools.attach },
+      tools: { register: tools.register },
       sessions: {
         create: (input) =>
           sessions.create({
@@ -51,6 +49,8 @@ export const layer = Layer.effect(
           }),
         get: sessions.get,
         list: sessions.list,
+        switchModel: sessions.switchModel,
+        interrupt: sessions.interrupt,
         prompt: (input) =>
           sessions.prompt({
             id: input.id,
@@ -71,6 +71,6 @@ export const layer = Layer.effect(
       },
     })
   }),
-).pipe(Layer.provide(Layer.merge(ApplicationToolsLayer, SessionsLayer)))
+).pipe(Layer.provide(Layer.merge(ApplicationTools.layer, SessionsLayer)))
 
 // TODO: Add OpenCode.create(...) as the Promise facade over the same native API semantics.

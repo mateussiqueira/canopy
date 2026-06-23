@@ -1,7 +1,6 @@
 export * as Session from "./session"
 
 import { Effect, Stream } from "effect"
-import { EventV2 } from "../event"
 import { SessionV2 } from "../session"
 import { MessageDecodeError } from "../session/error"
 import { SessionEvent } from "../session/event"
@@ -33,9 +32,7 @@ export type Delivery = SessionInput.Delivery
 export const ListInput = SessionV2.ListInput
 export type ListInput = SessionV2.ListInput
 
-export const EventCursor = EventV2.Cursor
-export type EventCursor = EventV2.Cursor
-export type Event = EventV2.CursorEvent<SessionEvent.DurableEvent>
+export type Event = SessionEvent.DurableEvent
 
 export const NotFoundError = SessionV2.NotFoundError
 export type NotFoundError = SessionV2.NotFoundError
@@ -59,6 +56,11 @@ export interface PromptInput {
   readonly delivery?: Delivery
 }
 
+export interface SwitchModelInput {
+  readonly sessionID: ID
+  readonly model: Model.Ref
+}
+
 export interface MessagesInput {
   readonly sessionID: ID
   readonly limit?: number
@@ -76,7 +78,7 @@ export interface MessageInput {
 
 export interface EventsInput {
   readonly sessionID: ID
-  readonly after?: EventCursor
+  readonly after?: number
 }
 
 export interface Interface {
@@ -84,6 +86,9 @@ export interface Interface {
   readonly get: (sessionID: ID) => Effect.Effect<Info, NotFoundError>
   readonly list: (input?: ListInput) => Effect.Effect<Info[]>
   readonly prompt: (input: PromptInput) => Effect.Effect<Admission, NotFoundError | PromptConflictError>
+  readonly switchModel: (input: SwitchModelInput) => Effect.Effect<void, NotFoundError>
+  /** Interrupt the active V2 execution chain for one Session on this process. Interrupting an idle or missing Session is a no-op. */
+  readonly interrupt: (sessionID: ID) => Effect.Effect<void>
   readonly messages: (input: MessagesInput) => Effect.Effect<Message[], NotFoundError | MessageDecodeError>
   readonly message: (input: MessageInput) => Effect.Effect<Message | undefined>
   readonly context: (sessionID: ID) => Effect.Effect<Message[], NotFoundError | MessageDecodeError>
