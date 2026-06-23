@@ -1,16 +1,267 @@
 import { describe, expect, test } from "bun:test"
+import { mkdtemp, rm } from "node:fs/promises"
+import { tmpdir } from "node:os"
+import { join } from "node:path"
 import { Effect, FileSystem, Schema, SchemaAST, SchemaGetter } from "effect"
 import { HttpApi, HttpApiEndpoint, HttpApiGroup, HttpApiMiddleware, HttpApiSchema } from "effect/unstable/httpapi"
 import { format } from "prettier"
-import { compile, generate, GenerationError } from "../src"
+import { compile as compileContract, emitEffect, emitPromise, generate, GenerationError } from "../src"
 import { it } from "./effect"
-import { Api as FixtureApi } from "./fixture"
+import { Api as FixtureApi, Missing } from "./fixture"
 
 function api(endpoint: HttpApiEndpoint.Any) {
   return HttpApi.make("test").add(HttpApiGroup.make("session").add(endpoint))
 }
 
+function compile<Id extends string, Groups extends HttpApiGroup.Any>(source: HttpApi.HttpApi<Id, Groups>) {
+  return emitEffect(compileContract(source))
+}
+
 describe("HttpApiCodegen.generate", () => {
+  test("compiles one contract for Promise and Effect emitters", () => {
+    const contract = compileContract(
+      api(
+        HttpApiEndpoint.get("get", "/session/:sessionID", {
+          params: { sessionID: Schema.String },
+          success: Schema.Struct({ data: Schema.String }),
+        }),
+      ),
+    )
+
+    const promise = emitPromise(contract)
+    const effect = emitEffect(contract)
+
+    expect(promise.operations).toEqual(effect.operations)
+    expect(promise.files.map((file) => file.path)).toEqual(["types.ts", "client-error.ts", "client.ts", "index.ts"])
+    const promiseClient = promise.files.find((file) => file.path === "client.ts")?.content
+    expect(promiseClient).toContain('"get": (input: SessionGetInput, requestOptions?: RequestOptions)')
+    expect(promiseClient).toContain("`/session/${encodeURIComponent(input.sessionID)}`")
+    expect(effect.files.find((file) => file.path === "session.ts")?.content).toContain(
+      'params: { "sessionID": input["sessionID"] }',
+    )
+  })
+
+  test("emits an optional Promise input when every field is optional", () => {
+    const output = emitPromise(
+      compileContract(
+        api(
+          HttpApiEndpoint.get("list", "/session", {
+            query: { limit: Schema.optional(Schema.Number) },
+            success: Schema.Array(Schema.String),
+          }),
+        ),
+      ),
+    )
+
+    expect(output.files.find((file) => file.path === "client.ts")?.content).toContain(
+      '"list": (input?: SessionListInput, requestOptions?: RequestOptions)',
+    )
+  })
+
+  test("rejects Promise transports that are not implemented", () => {
+    expect(() =>
+      emitPromise(
+        compileContract(
+          api(
+            HttpApiEndpoint.get("text", "/text", {
+              success: Schema.String.pipe(HttpApiSchema.asText()),
+            }),
+          ),
+        ),
+      ),
+    ).toThrow("Unsupported Promise success encoding: session.text")
+
+    expect(() =>
+      emitPromise(
+        compileContract(
+          api(
+            HttpApiEndpoint.get("events", "/events", {
+              success: HttpApiSchema.StreamSse({ data: Schema.String, error: Missing }),
+            }),
+          ),
+        ),
+      ),
+    ).toThrow("Unsupported Promise stream: session.events")
+  })
+
+  test("executes an emitted Promise GET through fetch", async () => {
+    const output = emitPromise(
+      compileContract(
+        api(
+          HttpApiEndpoint.get("get", "/session/:sessionID", {
+            params: { sessionID: Schema.String },
+            success: Schema.Struct({ data: Schema.String }),
+          }),
+        ),
+      ),
+    )
+    const directory = await mkdtemp(join(tmpdir(), "opencode-httpapi-codegen-"))
+
+    try {
+      await Promise.all(output.files.map((file) => Bun.write(join(directory, file.path), file.content)))
+      const generated = await import(`${join(directory, "index.ts")}?t=${crypto.randomUUID()}`)
+      let request: Request | undefined
+      const client = generated.OpenCode.make({
+        baseUrl: "https://example.com",
+        fetch: async (input: RequestInfo | URL) => {
+          request = input instanceof Request ? input : new Request(input)
+          return Response.json({ data: "hello" })
+        },
+      })
+
+      expect(await client.session.get({ sessionID: "a/b" })).toBe("hello")
+      expect(request?.method).toBe("GET")
+      expect(request?.url).toBe("https://example.com/session/a%2Fb")
+    } finally {
+      await rm(directory, { recursive: true, force: true })
+    }
+  })
+
+  test("maps an emitted no-content response to undefined", async () => {
+    const output = emitPromise(
+      compileContract(
+        api(
+          HttpApiEndpoint.post("interrupt", "/session/:sessionID/interrupt", {
+            params: { sessionID: Schema.String },
+            success: HttpApiSchema.NoContent,
+          }),
+        ),
+      ),
+    )
+    const directory = await mkdtemp(join(tmpdir(), "opencode-httpapi-codegen-"))
+
+    try {
+      await Promise.all(output.files.map((file) => Bun.write(join(directory, file.path), file.content)))
+      const generated = await import(`${join(directory, "index.ts")}?t=${crypto.randomUUID()}`)
+      const client = generated.OpenCode.make({
+        baseUrl: "https://example.com",
+        fetch: async () => new Response(null, { status: 204 }),
+      })
+
+      expect(await client.session.interrupt({ sessionID: "session" })).toBeUndefined()
+    } finally {
+      await rm(directory, { recursive: true, force: true })
+    }
+  })
+
+  test("serializes flattened query, header, and JSON payload inputs", async () => {
+    const output = emitPromise(
+      compileContract(
+        api(
+          HttpApiEndpoint.post("prompt", "/session/:sessionID", {
+            params: { sessionID: Schema.String },
+            query: { resume: Schema.optional(Schema.Boolean) },
+            headers: { traceID: Schema.String },
+            payload: Schema.Struct({ prompt: Schema.String }),
+            success: Schema.Struct({ data: Schema.String }),
+          }),
+        ),
+      ),
+    )
+    const directory = await mkdtemp(join(tmpdir(), "opencode-httpapi-codegen-"))
+
+    try {
+      await Promise.all(output.files.map((file) => Bun.write(join(directory, file.path), file.content)))
+      const generated = await import(`${join(directory, "index.ts")}?t=${crypto.randomUUID()}`)
+      let request: Request | undefined
+      const client = generated.OpenCode.make({
+        baseUrl: "https://example.com",
+        fetch: async (input: RequestInfo | URL, init?: RequestInit) => {
+          request = input instanceof Request ? input : new Request(input, init)
+          return Response.json({ data: "admitted" })
+        },
+      })
+
+      expect(
+        await client.session.prompt({ sessionID: "session", resume: true, traceID: "trace", prompt: "hello" }),
+      ).toBe("admitted")
+      expect(request?.url).toBe("https://example.com/session/session?resume=true")
+      expect(request?.headers.get("traceID")).toBe("trace")
+      expect(await request?.json()).toEqual({ prompt: "hello" })
+    } finally {
+      await rm(directory, { recursive: true, force: true })
+    }
+  })
+
+  test("rejects with declared tagged errors and exports a type guard", async () => {
+    const output = emitPromise(
+      compileContract(
+        api(
+          HttpApiEndpoint.get("get", "/session/:sessionID", {
+            params: { sessionID: Schema.String },
+            success: Schema.Struct({ data: Schema.String }),
+            error: Missing.pipe(HttpApiSchema.status(404)),
+          }),
+        ),
+      ),
+    )
+    const directory = await mkdtemp(join(tmpdir(), "opencode-httpapi-codegen-"))
+
+    try {
+      await Promise.all(output.files.map((file) => Bun.write(join(directory, file.path), file.content)))
+      const generated = await import(`${join(directory, "index.ts")}?t=${crypto.randomUUID()}`)
+      const client = generated.OpenCode.make({
+        baseUrl: "https://example.com",
+        fetch: async () => Response.json({ _tag: "Missing", message: "gone" }, { status: 404 }),
+      })
+
+      const error = await client.session.get({ sessionID: "missing" }).catch((cause: unknown) => cause)
+      expect(error).toEqual({ _tag: "Missing", message: "gone" })
+      expect(generated.isMissing(error)).toBeTrue()
+    } finally {
+      await rm(directory, { recursive: true, force: true })
+    }
+  })
+
+  test("iterates an emitted SSE stream lazily without reconnecting", async () => {
+    const output = emitPromise(
+      compileContract(
+        api(
+          HttpApiEndpoint.get("subscribe", "/event", {
+            query: { after: Schema.optional(Schema.Number) },
+            success: HttpApiSchema.StreamSse({ data: Schema.Struct({ type: Schema.String }) }),
+          }),
+        ),
+      ),
+    )
+    const directory = await mkdtemp(join(tmpdir(), "opencode-httpapi-codegen-"))
+
+    try {
+      await Promise.all(output.files.map((file) => Bun.write(join(directory, file.path), file.content)))
+      const generated = await import(`${join(directory, "index.ts")}?t=${crypto.randomUUID()}`)
+      let requests = 0
+      let url: string | undefined
+      const client = generated.OpenCode.make({
+        baseUrl: "https://example.com",
+        fetch: async (input: RequestInfo | URL) => {
+          requests++
+          url = typeof input === "string" ? input : input instanceof URL ? input.href : input.url
+          const encoder = new TextEncoder()
+          return new Response(
+            new ReadableStream({
+              start(controller) {
+                controller.enqueue(encoder.encode('data: {"type":"ready"}\r'))
+                controller.enqueue(encoder.encode("\n\r\n"))
+                controller.close()
+              },
+            }),
+            { headers: { "content-type": "text/event-stream" } },
+          )
+        },
+      })
+      const events = client.session.subscribe({ after: 2 })
+
+      expect(requests).toBe(0)
+      const received = []
+      for await (const event of events) received.push(event)
+      expect(received).toEqual([{ type: "ready" }])
+      expect(requests).toBe(1)
+      expect(url).toBe("https://example.com/event?after=2")
+    } finally {
+      await rm(directory, { recursive: true, force: true })
+    }
+  })
+
   test("preserves public group and endpoint identifiers exactly", () => {
     const output = compile(
       HttpApi.make("test").add(

@@ -1,2 +1,2 @@
 export { ClientError } from "./client-error"
-export { make } from "./client"
+export * as OpenCode from "./client"
