@@ -19,7 +19,7 @@ export async function POST(event: APIEvent) {
     return Response.json({ error: "Invalid request", issues: body.error.issues }, { status: 400 })
   }
   return Referral.create(body.data)
-    .then((result) => Response.json(result))
+    .then((result) => Response.json({ success: true, message: "Referral created", result }))
     .catch((error) =>
       Response.json({ error: error instanceof Error ? error.message : String(error) }, { status: 400 }),
     )
