@@ -1,4 +1,4 @@
-# Contribuindo com o Canopy
+# Contributing to Canopy
 
 ## Setup
 
@@ -9,46 +9,46 @@ bun install
 bun run dev
 ```
 
-## Estrutura do monorepo
+## Monorepo structure
 
-- `packages/core/` — Lógica principal
-- `packages/llm/` — Client LLM
+- `packages/core/` — Core logic
+- `packages/llm/` — LLM client
 - `packages/opencode/` — CLI/TUI
 - `packages/app/` — Web UI
-- `packages/ui/` — Componentes React
+- `packages/ui/` — React components
 
-## Desenvolvimento
+## Development
 
 ```bash
 bun run dev          # dev mode
-bun run build        # build completo
-bun run test         # unitários
-bun run test:e2e     # e2e
-bun run typecheck    # verifica tipos
-bun run lint         # lint
+bun run build        # full build
+bun run test         # unit tests
+bun run test:e2e     # e2e tests
+bun run typecheck    # type checking
+bun run lint         # linting
 ```
 
 ## Commits
 
 ```
-feat: feature nova
-fix: correção de bug
-refactor: refatoração
-perf: melhoria de performance
-docs: documentação
-test: testes
+feat: new feature
+fix: bug fix
+refactor: refactoring
+perf: performance improvement
+docs: documentation
+test: tests
 ```
 
 ## PR Rules
 
-1. Branch da `main`
-2. Testes passando
+1. Branch from `main`
+2. Tests passing
 3. Typecheck ok
-4. Descrição clara
+4. Clear description
 
-## Código
+## Code
 
-- Effect pra async/concorrência
-- Schema pra validação
-- Sem `any` quando possível
-- Funções puras quando dá
+- Effect for async/concurrency
+- Schema for validation
+- No `any` when possible
+- Pure functions when feasible
