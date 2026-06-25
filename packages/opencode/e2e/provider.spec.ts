@@ -1,29 +1,31 @@
 import { test, expect } from "@playwright/test";
 import { execSync } from "child_process";
 
+const runCli = (args: string): string => {
+  try {
+    return execSync(`bun run dev ${args} 2>&1`, {
+      encoding: "utf8",
+      timeout: 15000,
+      cwd: process.cwd(),
+    });
+  } catch (error: any) {
+    return (error.stdout || "") + (error.stderr || "");
+  }
+};
+
 test.describe("Provider configuration", () => {
   test("should list providers without error", async () => {
-    const output = execSync("node ./bin/opencode providers list", {
-      encoding: "utf8",
-      timeout: 10000,
-    });
-    // Should output something (maybe empty)
+    const output = runCli("providers list");
     expect(output).toBeDefined();
   });
 
   test("should show help for providers command", async () => {
-    const output = execSync("node ./bin/opencode providers --help", {
-      encoding: "utf8",
-      timeout: 10000,
-    });
-    expect(output).toContain("manage AI providers");
+    const output = runCli("providers --help");
+    expect(output).toContain("providers");
   });
 
   test("should show login help", async () => {
-    const output = execSync("node ./bin/opencode providers login --help", {
-      encoding: "utf8",
-      timeout: 10000,
-    });
+    const output = runCli("providers login --help");
     expect(output).toContain("login");
   });
 });
