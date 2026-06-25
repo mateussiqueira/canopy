@@ -4,59 +4,66 @@
     <img src="public/logo.svg" alt="Canopy logo" width="120">
   </picture>
 </p>
-<p align="center"><strong>Canopy</strong> — The open source AI coding agent.</p>
+<p align="center"><strong>Canopy</strong> — Fork do OpenCode com melhorias em estabilidade e DX.</p>
 <p align="center">
   <a href="https://github.com/mateussiqueira/canopy"><img alt="GitHub" src="https://img.shields.io/github/stars/mateussiqueira/canopy?style=flat-square" /></a>
   <a href="https://github.com/mateussiqueira/canopy/blob/dev/LICENSE"><img alt="License" src="https://img.shields.io/github/license/mateussiqueira/canopy?style=flat-square" /></a>
 </p>
 
-<p align="center">
-  <a href="README.md">English</a> |
-  <a href="README.br.md">Português (Brasil)</a>
-</p>
-
 ---
 
-Canopy is a fork of [OpenCode](https://github.com/anomalyco/opencode) with focused improvements on reliability, data safety, and developer experience.
+Fork do [OpenCode](https://github.com/anomalyco/opencode) focado em:
 
-### Key Improvements Over Upstream
+- **Overflow recovery** — Sessões longas não matam o contexto
+- **Memória** — RSS menor em sessões com muitas tool calls
+- **Segurança** — Proteção contra delete acidental de arquivos
+- **Extended thinking** — Suporte a Bedrock Converse
 
-- **🛡️ Context overflow recovery** — Errors misclassified as "network lost" now trigger compaction instead of killing the session
-- **🧠 Memory-efficient** — Reduced RSS growth during long tool-calling sessions
-- **🔒 Data-safe agent** — Protection against accidental deletion of backups and critical files
-- **⚡ Extended thinking** — Bedrock Converse protocol support for Claude extended thinking
-- **🖥️ Desktop side sessions** — Side conversation support in the desktop app (not just TUI)
-
-### Installation
+## Instalação
 
 ```bash
-# YOLO
+# Via script
 curl -fsSL https://canopy.dev/install | bash
 
-# From source
+# Do zero
 git clone https://github.com/mateussiqueira/canopy.git
 cd canopy
- bun install
- bun run build
+bun install
+bun run build
 ```
 
-### Usage
+## Uso
 
 ```bash
-# Start coding
-canopy
-
-# Open in a specific directory
-canopy /path/to/project
+canopy                    # inicia no diretório atual
+canopy /path/to/project   # abre projeto específico
 ```
 
-### Development
+## Desenvolvimento
 
 ```bash
 bun install
 bun run dev
 ```
 
-### License
+## Testes
+
+```bash
+bun run test              # unitários
+bun run test:e2e          # e2e com Playwright
+```
+
+## Estrutura
+
+```
+packages/
+├── core/         # Lógica principal (agent, session, tools)
+├── llm/          # Client LLM (providers, streaming)
+├── opencode/     # CLI/TUI
+├── app/          # Web UI
+└── ui/           # Componentes
+```
+
+## License
 
 [MIT](LICENSE)
