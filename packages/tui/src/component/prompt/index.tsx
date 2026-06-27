@@ -38,6 +38,7 @@ import { DialogStash } from "../dialog-stash"
 import { type AutocompleteRef, Autocomplete } from "./autocomplete"
 import { useRenderer, useTerminalDimensions, type JSX } from "@opentui/solid"
 import type { AssistantMessage, FilePart, UserMessage } from "@opencode-ai/sdk/v2"
+import { resolveMLXAuto } from "../../util/mlx-auto"
 import { Locale } from "../../util/locale"
 import { errorMessage } from "../../util/error"
 import { formatDuration } from "../../util/format"
@@ -959,10 +960,15 @@ export function Prompt(props: PromptProps) {
       void exit()
       return true
     }
-    const selectedModel = local.model.current()
+    let selectedModel = local.model.current()
     if (!selectedModel) {
       void promptModelWarning()
       return false
+    }
+
+    if (selectedModel.modelID === "auto") {
+      const resolved = resolveMLXAuto(trimmed, store.prompt.parts)
+      selectedModel = resolved
     }
 
     const workspaceSession = props.sessionID ? sync.session.get(props.sessionID) : undefined

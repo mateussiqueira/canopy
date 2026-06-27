@@ -58,14 +58,16 @@ export function DialogModel(props: { providerID?: string }) {
       "Recent",
     )
 
+    const isMLXProvider = (id: string) => id === "mlx-local" || id.startsWith("mlx-")
+
     const providerOptions = pipe(
       sync.data.provider,
       sortBy(
         (provider) => provider.id !== "opencode",
         (provider) => provider.name,
       ),
-      flatMap((provider) =>
-        pipe(
+      flatMap((provider) => {
+        const models = pipe(
           provider.models,
           entries(),
           filter(([_, info]) => info.status !== "deprecated"),
@@ -100,9 +102,25 @@ export function DialogModel(props: { providerID?: string }) {
               return false
             return true
           }),
-          (options) => sortModelOptions(options, props.providerID !== undefined),
-        ),
-      ),
+        )
+
+        const autoOption = isMLXProvider(provider.id)
+          ? [{
+              value: { providerID: provider.id, modelID: "auto" } as const,
+              title: "Auto (MLX)",
+              releaseDate: "",
+              description: "Routes to the best MLX model for each task",
+              category: connected() ? provider.name : undefined,
+              disabled: false,
+              footer: "Auto",
+              onSelect() {
+                onSelect(provider.id, "auto")
+              },
+            }]
+          : []
+
+        return [...autoOption, ...sortModelOptions(models, props.providerID !== undefined)]
+      }),
     )
 
     const popularProviders = !connected()
