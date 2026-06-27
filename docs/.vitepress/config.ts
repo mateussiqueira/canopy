@@ -14,6 +14,7 @@ export default defineConfig({
             { text: 'Início', link: '/' },
             { text: 'Guias', link: '/guides/' },
             { text: 'MLX', link: '/guides/mlx' },
+            { text: 'Benchmark', link: '/guides/benchmark' },
           ],
         sidebar: {
           '/': [
@@ -31,6 +32,7 @@ export default defineConfig({
                 { text: 'Providers', link: '/guides/providers' },
                 { text: 'Plugins', link: '/guides/plugins' },
                 { text: 'MLX Local', link: '/guides/mlx' },
+                { text: 'Benchmark', link: '/guides/benchmark' },
               ]
             }
           ]
@@ -45,6 +47,7 @@ export default defineConfig({
             { text: 'Home', link: '/en/' },
             { text: 'Guides', link: '/en/guides/' },
             { text: 'MLX', link: '/en/guides/mlx' },
+            { text: 'Benchmark', link: '/en/guides/benchmark' },
           ],
           sidebar: {
             '/en/': [
@@ -62,6 +65,7 @@ export default defineConfig({
                   { text: 'Providers', link: '/en/guides/providers' },
                   { text: 'Plugins', link: '/en/guides/plugins' },
                   { text: 'MLX Local Models', link: '/en/guides/mlx' },
+                  { text: 'Benchmark', link: '/en/guides/benchmark' },
                 ]
               }
             ]
