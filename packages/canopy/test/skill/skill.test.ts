@@ -499,7 +499,7 @@ name: opencode-skill
 description: A skill in the .canopy/skill directory.
 ---
 
-# OpenCode Skill
+# Canopy Skill
 `,
               ),
             ]),
@@ -546,7 +546,7 @@ name: opencode-skill
 description: A skill in the .canopy/skill directory.
 ---
 
-# OpenCode Skill
+# Canopy Skill
 `,
               ),
               Bun.write(
@@ -556,7 +556,7 @@ name: opencode-skill
 description: A skill in the .canopy/skills directory.
 ---
 
-# OpenCode Skill
+# Canopy Skill
 `,
               ),
             ]),

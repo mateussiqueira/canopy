@@ -49,12 +49,12 @@ const rangeLabels: Record<UsageRange, string> = {
   "1M": "1 Month",
   "2M": "2 Months",
 }
-const statsHomeTitle = "AI Model Usage Rankings | OpenCode Data"
+const statsHomeTitle = "AI Model Usage Rankings | Canopy Data"
 const statsHomeDescription =
-  "Explore OpenCode Go usage across AI models, including token volume, rankings, market share, token pricing, session cost, cache ratio, and geo breakdowns."
+  "Explore Canopy Go usage across AI models, including token volume, rankings, market share, token pricing, session cost, cache ratio, and geo breakdowns."
 const statsHomeFallbackUrl = "https://opencode.ai/data/"
 const statsUnfurlPath = "banner.jpg"
-const statsUnfurlAlt = "OpenCode Data wordmark on a dark patterned background"
+const statsUnfurlAlt = "Canopy Data wordmark on a dark patterned background"
 const usageColors = [
   "#ed6aff",
   "#a684ff",
@@ -145,7 +145,7 @@ export default function StatsHome() {
       <Meta name="description" content={statsHomeDescription} />
       <Link rel="canonical" href={statsHomeUrl} />
       <Meta property="og:type" content="website" />
-      <Meta property="og:site_name" content="OpenCode" />
+      <Meta property="og:site_name" content="Canopy" />
       <Meta property="og:title" content={statsHomeTitle} />
       <Meta property="og:description" content={statsHomeDescription} />
       <Meta property="og:url" content={statsHomeUrl} />
@@ -403,7 +403,7 @@ function TopModelsSection(props: { data: StatsHomeData["usage"]; leaderboard: St
   return (
     <section id="top-models" data-section="top-models">
       <h2 data-slot="top-models-title">
-        <strong>Top models.</strong> <span>Usage of models across OpenCode Go.</span>
+        <strong>Top models.</strong> <span>Usage of models across Canopy Go.</span>
       </h2>
       <Show
         when={data().some((item) => usageTotal(item) > 0)}
@@ -792,7 +792,7 @@ function UniqueUsersSection(props: { data: StatsHomeData["users"] }) {
   return (
     <section id="unique-users" data-section="unique-users">
       <SectionBridge label="TOP MODELS" href="#top-models" />
-      <SectionTitle title="Unique Users" description="Daily unique OpenCode Go users by model." />
+      <SectionTitle title="Unique Users" description="Daily unique Canopy Go users by model." />
       <Show
         when={data().some((item) => usageTotal(item) > 0)}
         fallback={

@@ -1,10 +1,10 @@
 import { base64Encode } from "@canopystack/core/util/encode"
 import type { Page } from "@playwright/test"
-import { mockOpenCodeServer } from "../../utils/mock-server"
+import { mockCanopyServer } from "../../utils/mock-server"
 import { expectAppVisible, expectSessionTitle } from "../../utils/waits"
 import { expect } from "../benchmark"
 
-const directory = "C:/OpenCode/TimelineStateRegression"
+const directory = "C:/Canopy/TimelineStateRegression"
 const projectID = "proj_timeline_state_regression"
 const sessionID = "ses_timeline_state_regression"
 const userMessageID = "msg_user_regression"
@@ -96,7 +96,7 @@ const assistantMessage = {
 export async function setupTimelineBenchmark(page: Page, options: { historyTurns: number; eventBatch: number }) {
   const events: EventPayload[] = []
   let eventBatch = options.eventBatch
-  await mockOpenCodeServer(page, {
+  await mockCanopyServer(page, {
     directory,
     project: project(),
     provider: provider(),
@@ -478,7 +478,7 @@ function provider() {
     all: [
       {
         id: "opencode",
-        name: "OpenCode",
+        name: "Canopy",
         models: { "claude-opus-4-6": { id: "claude-opus-4-6", name: "Claude Opus 4.6", limit: { context: 200_000 } } },
       },
     ],

@@ -1,14 +1,14 @@
 import { describe, expect } from "bun:test"
 import { Effect, Schema } from "effect"
-import { AbsolutePath, Location, Model, OpenCode, Session, Tool } from "@canopystack/core/public"
+import { AbsolutePath, Location, Model, Canopy, Session, Tool } from "@canopystack/core/public"
 import { testEffect } from "./lib/effect"
 
-const it = testEffect(OpenCode.layer)
+const it = testEffect(Canopy.layer)
 
-describe("public native OpenCode API", () => {
+describe("public native Canopy API", () => {
   it.effect("exposes only the intentional Session capabilities", () =>
     Effect.gen(function* () {
-      const opencode = yield* OpenCode.Service
+      const opencode = yield* Canopy.Service
 
       expect(Object.keys(opencode).sort()).toEqual(["sessions", "tools"])
 
@@ -40,7 +40,7 @@ describe("public native OpenCode API", () => {
 
   it.effect("records model selection without resolving the Location catalog", () =>
     Effect.gen(function* () {
-      const opencode = yield* OpenCode.Service
+      const opencode = yield* Canopy.Service
       const sessionID = Session.ID.make("ses_public_switch_deferred")
       const model = Schema.decodeUnknownSync(Model.Ref)({
         id: "missing",
@@ -60,7 +60,7 @@ describe("public native OpenCode API", () => {
 
   it.effect("preserves the typed not-found error for a missing Session", () =>
     Effect.gen(function* () {
-      const opencode = yield* OpenCode.Service
+      const opencode = yield* Canopy.Service
       const sessionID = Session.ID.make("ses_public_switch_missing")
       const error = yield* opencode.sessions
         .switchModel({

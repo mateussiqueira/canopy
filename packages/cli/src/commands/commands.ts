@@ -4,7 +4,7 @@ import { Spec } from "../framework/spec"
 declare const CANOPY_CLI_NAME: string | undefined
 
 export const Commands = Spec.make(typeof CANOPY_CLI_NAME === "string" ? CANOPY_CLI_NAME : "opencode", {
-  description: "OpenCode 2.0 preview command line interface",
+  description: "Canopy 2.0 preview command line interface",
   commands: [
     Spec.make("debug", {
       description: "Debugging and troubleshooting tools",

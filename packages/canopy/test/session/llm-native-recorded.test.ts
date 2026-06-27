@@ -161,7 +161,7 @@ const RECORDED_SCENARIOS = [
   },
   {
     id: "opencode-proxy",
-    name: "OpenCode proxy",
+    name: "Canopy proxy",
     providerID: ProviderV2.ID.canopy,
     modelID: "gpt-5.2-codex",
     cassette: "session/native-zen-tool-loop",
@@ -171,7 +171,7 @@ const RECORDED_SCENARIOS = [
     config: (model) =>
       providerConfig({
         providerID: ProviderV2.ID.canopy,
-        name: "OpenCode Zen",
+        name: "Canopy Zen",
         env: ["CANOPY_CONSOLE_TOKEN"],
         npm: "@ai-sdk/openai-compatible",
         api: zenURL(process.env.CANOPY_RECORD_ZEN_CONNECTION ?? "fixture"),

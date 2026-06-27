@@ -1,9 +1,9 @@
 // @ts-nocheck
 
-import { OpenCode } from "@canopystack/core"
+import { Canopy } from "@canopystack/core"
 import { ReadTool } from "@canopystack/core/tools"
 
-const opencode = OpenCode.make({})
+const opencode = Canopy.make({})
 
 opencode.tool.add(ReadTool)
 

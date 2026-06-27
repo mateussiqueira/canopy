@@ -1,4 +1,4 @@
-export * as OpenCode from "./opencode"
+export * as Canopy from "./opencode"
 
 import { Context, Effect, Layer } from "effect"
 import { Database } from "../database/database"
@@ -18,8 +18,8 @@ export interface Interface {
   readonly tools: Tool.Interface
 }
 
-/** Intentional public native API for Effect applications embedding OpenCode. */
-export class Service extends Context.Service<Service, Interface>()("@opencode/public/OpenCode") {}
+/** Intentional public native API for Effect applications embedding Canopy. */
+export class Service extends Context.Service<Service, Interface>()("@opencode/public/Canopy") {}
 
 const SessionsLayer = SessionV2.layer.pipe(
   Layer.provide(SessionProjector.layer),
@@ -73,4 +73,4 @@ export const layer = Layer.effect(
   }),
 ).pipe(Layer.provide(Layer.merge(ApplicationTools.layer, SessionsLayer)))
 
-// TODO: Add OpenCode.create(...) as the Promise facade over the same native API semantics.
+// TODO: Add Canopy.create(...) as the Promise facade over the same native API semantics.
