@@ -10,10 +10,11 @@ export default defineConfig({
       label: 'Português',
       lang: 'pt-BR',
       themeConfig: {
-        nav: [
-          { text: 'Início', link: '/' },
-          { text: 'Guias', link: '/guides/' },
-        ],
+          nav: [
+            { text: 'Início', link: '/' },
+            { text: 'Guias', link: '/guides/' },
+            { text: 'MLX', link: '/guides/mlx' },
+          ],
         sidebar: {
           '/': [
             {
@@ -29,6 +30,7 @@ export default defineConfig({
                 { text: 'Instalação', link: '/guides/installation' },
                 { text: 'Providers', link: '/guides/providers' },
                 { text: 'Plugins', link: '/guides/plugins' },
+                { text: 'MLX Local', link: '/guides/mlx' },
               ]
             }
           ]
@@ -39,28 +41,30 @@ export default defineConfig({
       label: 'English',
       lang: 'en-US',
       themeConfig: {
-        nav: [
-          { text: 'Home', link: '/en/' },
-          { text: 'Guides', link: '/en/guides/' },
-        ],
-        sidebar: {
-          '/en/': [
-            {
-              text: 'Introduction',
-              items: [
-                { text: 'What is it', link: '/en/' },
-                { text: 'Getting Started', link: '/en/guides/getting-started' },
-              ]
-            },
-            {
-              text: 'Guides',
-              items: [
-                { text: 'Installation', link: '/en/guides/installation' },
-                { text: 'Providers', link: '/en/guides/providers' },
-                { text: 'Plugins', link: '/en/guides/plugins' },
-              ]
-            }
-          ]
+          nav: [
+            { text: 'Home', link: '/en/' },
+            { text: 'Guides', link: '/en/guides/' },
+            { text: 'MLX', link: '/en/guides/mlx' },
+          ],
+          sidebar: {
+            '/en/': [
+              {
+                text: 'Introduction',
+                items: [
+                  { text: 'What is it', link: '/en/' },
+                  { text: 'Getting Started', link: '/en/guides/getting-started' },
+                ]
+              },
+              {
+                text: 'Guides',
+                items: [
+                  { text: 'Installation', link: '/en/guides/installation' },
+                  { text: 'Providers', link: '/en/guides/providers' },
+                  { text: 'Plugins', link: '/en/guides/plugins' },
+                  { text: 'MLX Local Models', link: '/en/guides/mlx' },
+                ]
+              }
+            ]
         }
       }
     }
