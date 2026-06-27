@@ -1,10 +1,19 @@
+function matchWord(text: string, keyword: string): boolean {
+  const escaped = keyword.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")
+  return new RegExp(`\\b${escaped}\\b`, "i").test(text)
+}
+
+function matchAny(text: string, keywords: string[]): boolean {
+  return keywords.some((kw) => matchWord(text, kw))
+}
+
 const CODE_KEYWORDS = [
   "refactor", "implement", "class", "function", "api", "docker",
   "bug", "fix", "test", "debug", "compile", "deploy", "migration",
   "schema", "query", "endpoint", "route", "middleware", "controller",
   "service", "repository", "interface", "type", "component",
   "algoritmo", "classe", "função", "implemente", "refatore",
-  "codigo", "código", "programa", "app", "aplicação",
+  "codigo", "código", "programa", "aplicação",
 ]
 
 const MATH_KEYWORDS = [
@@ -15,13 +24,11 @@ const MATH_KEYWORDS = [
 ]
 
 function hasCodeIntent(text: string): boolean {
-  const lower = text.toLowerCase()
-  return CODE_KEYWORDS.some((kw) => lower.includes(kw))
+  return matchAny(text, CODE_KEYWORDS)
 }
 
 function hasMathIntent(text: string): boolean {
-  const lower = text.toLowerCase()
-  return MATH_KEYWORDS.some((kw) => lower.includes(kw))
+  return matchAny(text, MATH_KEYWORDS)
 }
 
 function hasImageInput(parts: { type?: string }[]): boolean {
