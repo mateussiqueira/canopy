@@ -1,0 +1,47 @@
+{
+  "$schema": "https://canopy.dev/schema.json",
+  "name": "Canopy — IA que programa com você",
+  "version": "1.0.0",
+
+  "plans": {
+    "free": {
+      "name": "Starter",
+      "price": 0,
+      "description": "Para uso pessoal",
+      "features": [
+        "OpenRouter com sua chave",
+        "Todos os modelos disponíveis",
+        "CLI + TUI completos",
+        "Comunidade Discord"
+      ]
+    },
+    "pro": {
+      "name": "Pro",
+      "price": 19,
+      "description": "Para uso profissional",
+      "features": [
+        "OpenRouter incluso (20k requests/mês)",
+        "Projetos ilimitados no Nidus",
+        "Deploy automático (Git)",
+        "Domínios customizados",
+        "Suporte prioritário"
+      ]
+    },
+    "enterprise": {
+      "name": "Enterprise",
+      "price": 99,
+      "description": "Para times e empresas",
+      "features": [
+        "OpenRouter ilimitado",
+        "SSO / SAML",
+        "Audit logs",
+        "On-premise disponível",
+        "SLA 99.9%"
+      ]
+    }
+  },
+
+  "defaultProvider": "openrouter",
+  "modelsUrl": "https://openrouter.ai/api/v1/models",
+  "landingPage": "https://canopy.dev"
+}
