@@ -3,7 +3,7 @@ title: Tillatelser
 description: Kontroller hvilke handlinger som krever godkjenning for å kjøre.
 ---
 
-OpenCode bruker `permission`-konfigurasjonen for å bestemme om en gitt handling skal kjøres automatisk, spørre deg eller blokkeres.
+Canopy bruker `permission`-konfigurasjonen for å bestemme om en gitt handling skal kjøres automatisk, spørre deg eller blokkeres.
 
 Fra og med `v1.1.1` er den eldre `tools` boolske konfigurasjonen avviklet og har blitt slått sammen til `permission`. Den gamle `tools`-konfigurasjonen støttes fortsatt for bakoverkompatibilitet.
 
@@ -88,7 +88,7 @@ Du kan bruke `~` eller `$HOME` i starten av et mønster for å referere til hjem
 
 ### Eksterne kataloger
 
-Bruk `external_directory` for å tillate verktøyanrop som berører stier utenfor arbeidskatalogen der OpenCode ble startet. Dette gjelder alle verktøy som tar en bane som input (for eksempel `read`, `edit`, `glob`, `grep` og mange `bash`-kommandoer).
+Bruk `external_directory` for å tillate verktøyanrop som berører stier utenfor arbeidskatalogen der Canopy ble startet. Dette gjelder alle verktøy som tar en bane som input (for eksempel `read`, `edit`, `glob`, `grep` og mange `bash`-kommandoer).
 
 Hjemmeutvidelse (som `~/...`) påvirker bare hvordan et mønster skrives. Den gjør ikke en ekstern bane til en del av det gjeldende arbeidsområdet, så stier utenfor arbeidskatalogen må fortsatt tillates via `external_directory`.
 
@@ -127,7 +127,7 @@ Hold listen fokusert på klarerte baner, og lag ekstra tillat eller avslå regle
 
 ## Tilgjengelige tillatelser
 
-OpenCode-tillatelser tastes inn etter verktøynavn, pluss et par sikkerhetsvakter:
+Canopy-tillatelser tastes inn etter verktøynavn, pluss et par sikkerhetsvakter:
 
 - `read` — lesing av en fil (tilsvarer filbanen)
 - `edit` — alle filendringer (dekker `edit`, `write`, `patch`)
@@ -146,7 +146,7 @@ OpenCode-tillatelser tastes inn etter verktøynavn, pluss et par sikkerhetsvakte
 
 ## Standarder
 
-Hvis du ikke spesifiserer noe, starter OpenCode fra tillatte standardinnstillinger:
+Hvis du ikke spesifiserer noe, starter Canopy fra tillatte standardinnstillinger:
 
 - De fleste tillatelser er satt til `"allow"` som standard.
 - `doom_loop` og `external_directory` er standard til `"ask"`.
@@ -169,10 +169,10 @@ Hvis du ikke spesifiserer noe, starter OpenCode fra tillatte standardinnstilling
 
 ## Hva "ask" gjør
 
-Når OpenCode ber om godkjenning, gir brukergrensesnittet tre alternativer:
+Når Canopy ber om godkjenning, gir brukergrensesnittet tre alternativer:
 
 - `once` — godkjenne nettopp denne forespørselen
-- `always` — godkjenn fremtidige forespørsler som samsvarer med de foreslåtte mønstrene (for resten av den nåværende OpenCode-økten)
+- `always` — godkjenn fremtidige forespørsler som samsvarer med de foreslåtte mønstrene (for resten av den nåværende Canopy-økten)
 - `reject` — avslå forespørselen
 
 Settet med mønstre som `always` vil godkjenne, leveres av verktøyet (for eksempel, bash-godkjenninger hvitlister vanligvis et trygt kommandoprefiks som `git status*`).

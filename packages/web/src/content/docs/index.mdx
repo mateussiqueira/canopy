@@ -7,7 +7,7 @@ import { Tabs, TabItem } from "@astrojs/starlight/components"
 import config from "../../../config.mjs"
 export const console = config.console
 
-[**Canopy**](/) is an AI coding agent — a fork of [OpenCode](https://github.com/anomalyco/opencode) with focus on **token economy**, **model routing**, and **modular skills**.
+[**Canopy**](/) is an AI coding agent — a fork of [Canopy](https://github.com/anomalyco/opencode) with focus on **token economy**, **model routing**, and **modular skills**.
 
 Let's get started.
 
@@ -15,7 +15,7 @@ Let's get started.
 
 ## Why Canopy?
 
-Canopy keeps everything great about OpenCode and adds:
+Canopy keeps everything great about Canopy and adds:
 
 - **🧠 Model Routing** — Auto-selects the cheapest adequate model per task (DeepSeek/MiMo for scripts, Kimi for dev, Qwen for research, GLM for planning)
 - **💰 Token Economy** — Optimized prompts (-66%), compressed tool descriptions (-30%), aggressive compaction (-25% per turn)
@@ -132,7 +132,7 @@ Configure your default model in `opencode.json`:
 
 Canopy includes several optimizations to reduce token usage:
 
-- **System prompts**: 66% shorter than stock OpenCode — same instructions, fewer tokens
+- **System prompts**: 66% shorter than stock Canopy — same instructions, fewer tokens
 - **Tool descriptions**: task.txt -79%, todowrite.txt -82%, edit.txt -75%
 - **Context compaction**: Tool outputs truncated at 1,500 chars (was 2,000), less protected context
 - **Smart pruning**: read/grep/glob outputs protected from pruning; less recent context kept verbatim
