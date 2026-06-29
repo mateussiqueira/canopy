@@ -1,0 +1,40 @@
+---
+title: Model Routing
+description: Canopy auto-selects the best model for each task.
+---
+
+Canopy includes an intelligent model routing system that selects the most cost-effective model based on the task type.
+
+## How it works
+
+When you start a task, Canopy evaluates its nature and recommends the appropriate model:
+
+| Task Type | Recommended Model | Cost Profile |
+|-----------|-------------------|--------------|
+| Scripts, one-liners, regex, SQL | DeepSeek V4 Flash / MiMo V2.5 | 🟢 Cheapest |
+| General dev, refactoring, debugging | Kimi K2.6 | 🟡 Balanced |
+| Investigation, large context, research | Qwen 3.7 Plus | 🟠 Capable |
+| Architecture, planning, specs | GLM-5.1 | 🟣 Strategic |
+| Complex coding | Kimi K2.7 Code | 🔴 Specialized |
+
+## Configuration
+
+Set your default models in `opencode.json`:
+
+```json
+{
+  "model": "kimi/k2.6",
+  "small_model": "deepseek/v4-flash"
+}
+```
+
+## Benefits
+
+- **Cost savings** — Simple tasks don't pay for expensive reasoning models
+- **Speed** — Scripts run on fast, lightweight models
+- **Quality** — Complex tasks get the reasoning power they need
+- **Automatic** — No manual switching required
+
+## Model routing in system prompts
+
+Canopy's system prompts include instructions for the AI to self-select the appropriate model. When the AI detects a task that would be better served by a different model, it can suggest switching.

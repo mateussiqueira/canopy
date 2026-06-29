@@ -1,23 +1,33 @@
 ---
 title: Intro
-description: Get started with OpenCode.
+description: Get started with Canopy.
 ---
 
 import { Tabs, TabItem } from "@astrojs/starlight/components"
 import config from "../../../config.mjs"
 export const console = config.console
 
-[**OpenCode**](/) is an open source AI coding agent. It's available as a terminal-based interface, desktop app, or IDE extension.
-
-![OpenCode TUI with the opencode theme](../../assets/lander/screenshot.png)
+[**Canopy**](/) is an AI coding agent — a fork of [OpenCode](https://github.com/anomalyco/opencode) with focus on **token economy**, **model routing**, and **modular skills**.
 
 Let's get started.
 
 ---
 
+## Why Canopy?
+
+Canopy keeps everything great about OpenCode and adds:
+
+- **🧠 Model Routing** — Auto-selects the cheapest adequate model per task (DeepSeek/MiMo for scripts, Kimi for dev, Qwen for research, GLM for planning)
+- **💰 Token Economy** — Optimized prompts (-66%), compressed tool descriptions (-30%), aggressive compaction (-25% per turn)
+- **🎓 Built-in Skills** — Domain-specific packs like `job-search` with ATS templates, LinkedIn optimization, interview prep
+- **🔧 Dual env vars** — `CANOPY_*` and `OPENCODE_*` supported simultaneously for gradual migration
+- **🌿 Independent** — All anomalyco references removed, 32 packages renamed to `@canopystack/*`
+
+---
+
 #### Prerequisites
 
-To use OpenCode in your terminal, you'll need:
+To use Canopy in your terminal, you'll need:
 
 1. A modern terminal emulator like:
    - [WezTerm](https://wezterm.org), cross-platform
@@ -29,332 +39,194 @@ To use OpenCode in your terminal, you'll need:
 
 ---
 
-## Install
+### Install
 
-The easiest way to install OpenCode is through the install script.
+The easiest way to install Canopy is through the install script.
+
+<Tabs>
+<TabItem label="Script">
 
 ```bash
 curl -fsSL https://canopy.dev/install | bash
 ```
 
-You can also install it with the following commands:
+</TabItem>
+<TabItem label="npm">
 
-- **Using Node.js**
+```bash
+npm install -g @canopystack/canopy
+```
 
-        <Tabs>
+</TabItem>
+<TabItem label="Bun">
 
-      <TabItem label="npm">
-      ```bash
-      npm install -g opencode-ai
-      ```
+```bash
+bun install -g @canopystack/canopy
+```
 
-          </TabItem>
+</TabItem>
+<TabItem label="Homebrew">
 
-        <TabItem label="Bun">
-        ```bash
-        bun install -g opencode-ai
-        ```
+```bash
+brew install mateussiqueira/tap/canopy
+```
 
-          </TabItem>
+</TabItem>
+<TabItem label="Source">
 
-        <TabItem label="pnpm">
-        ```bash
-        pnpm install -g opencode-ai
-        ```
+```bash
+git clone https://github.com/mateussiqueira/canopy.git
+cd canopy
+bun install
+bun run --cwd packages/canopy --conditions=browser src/index.ts
+```
 
-          </TabItem>
+</TabItem>
+<TabItem label="Docker">
 
-        <TabItem label="Yarn">
-        ```bash
-        yarn global add opencode-ai
-        ```
+```bash
+docker run -it --rm ghcr.io/mateussiqueira/canopy
+```
 
-      </TabItem>
-
-  </Tabs>
-
-- **Using Homebrew on macOS and Linux**
-
-  ```bash
-  brew install mateussiqueira/tap/canopy
-  ```
-
-  > We recommend using the OpenCode tap for the most up to date releases. The official `brew install opencode` formula is maintained by the Homebrew team and is updated less frequently.
-
-- **Installing on Arch Linux**
-
-  ```bash
-  sudo pacman -S opencode           # Arch Linux (Stable)
-  paru -S opencode-bin              # Arch Linux (Latest from AUR)
-  ```
-
-#### Windows
-
-:::tip[Recommended: Use WSL]
-For the best experience on Windows, we recommend using [Windows Subsystem for Linux (WSL)](/docs/windows-wsl). It provides better performance and full compatibility with OpenCode's features.
-:::
-
-- **Using Chocolatey**
-
-  ```bash
-  choco install opencode
-  ```
-
-- **Using Scoop**
-
-  ```bash
-  scoop install opencode
-  ```
-
-- **Using NPM**
-
-  ```bash
-  npm install -g opencode-ai
-  ```
-
-- **Using Mise**
-
-  ```bash
-  mise use -g github:mateussiqueira/canopy
-  ```
-
-- **Using Docker**
-
-  ```bash
-  docker run -it --rm ghcr.io/mateussiqueira/canopy
-  ```
-
-Support for installing OpenCode on Windows using Bun is currently in progress.
-
-You can also grab the binary from the [Releases](https://github.com/mateussiqueira/canopy/releases).
+</TabItem>
+</Tabs>
 
 ---
 
-## Configure
+### Configure
 
-With OpenCode you can use any LLM provider by configuring their API keys.
+With Canopy you can use any LLM provider by configuring their API keys.
 
-If you are new to using LLM providers, we recommend using [OpenCode Zen](/docs/zen).
-It's a curated list of models that have been tested and verified by the OpenCode
-team.
+```bash
+canopy providers
+```
 
-1. Run the `/connect` command in the TUI, select opencode, and head to [canopy.dev/auth](https://canopy.dev/auth).
-
-   ```txt
-   /connect
-   ```
-
-2. Sign in, add your billing details, and copy your API key.
-
-3. Paste your API key.
-
-   ```txt
-   ┌ API key
-   │
-   │
-   └ enter
-   ```
-
-Alternatively, you can select one of the other providers. [Learn more](/docs/providers#directory).
+Canopy supports 75+ providers through [Models.dev](https://models.dev) and local models.
 
 ---
 
-## Initialize
+### Model Routing
 
-Now that you've configured a provider, you can navigate to a project that
-you want to work on.
+Canopy automatically routes each task to the most cost-effective model:
+
+| Task Type | Recommended Model | Why |
+|-----------|-------------------|-----|
+| Scripts, one-liners, SQL | DeepSeek V4 Flash / MiMo V2.5 | Cheapest, fast |
+| General development | Kimi K2.6 | Best quality-cost balance |
+| Investigation, research | Qwen 3.7 Plus | Handles large context |
+| Planning, architecture | GLM-5.1 | Strong reasoning |
+| Complex coding | Kimi K2.7 Code | Specialized for code |
+
+Configure your default model in `opencode.json`:
+
+```json
+{
+  "model": "kimi/k2.6",
+  "small_model": "deepseek/v4-flash"
+}
+```
+
+---
+
+### Token Economy
+
+Canopy includes several optimizations to reduce token usage:
+
+- **System prompts**: 66% shorter than stock OpenCode — same instructions, fewer tokens
+- **Tool descriptions**: task.txt -79%, todowrite.txt -82%, edit.txt -75%
+- **Context compaction**: Tool outputs truncated at 1,500 chars (was 2,000), less protected context
+- **Smart pruning**: read/grep/glob outputs protected from pruning; less recent context kept verbatim
+
+---
+
+### Skills
+
+Skills are domain-specific instruction packs. Canopy ships with a built-in `job-search` skill:
+
+```json
+{
+  "skills": {
+    "paths": [".opencode/skills"]
+  }
+}
+```
+
+**Available skills:**
+
+| Skill | Description |
+|-------|-------------|
+| `customize-opencode` | Guide for editing Canopy's own config |
+| `job-search` | Resume/CV optimization, LinkedIn, interviews, follow-ups |
+
+The `job-search` skill includes:
+- Resume bullet formula (Action verb + Task + Result + Tool)
+- ATS optimization (keywords, section headings, format)
+- LinkedIn headline and about section templates
+- Interview preparation (STAR stories, common questions)
+- Follow-up email templates
+- Pipeline tracking (applied → screening → offer)
+
+---
+
+### Initialize
+
+Navigate to a project you want to work on:
 
 ```bash
 cd /path/to/project
+canopy
 ```
 
-And run OpenCode.
+Then initialize Canopy for the project:
 
-```bash
-opencode
 ```
-
-Next, initialize OpenCode for the project by running the following command.
-
-```bash frame="none"
 /init
 ```
 
-This will get OpenCode to analyze your project and create an `AGENTS.md` file in
-the project root.
-
-:::tip
-You should commit your project's `AGENTS.md` file to Git.
-:::
-
-This helps OpenCode understand the project structure and the coding patterns
-used.
+This creates an `AGENTS.md` file with project context.
 
 ---
 
-## Usage
+### Usage
 
-You are now ready to use OpenCode to work on your project. Feel free to ask it
-anything!
-
-If you are new to using an AI coding agent, here are some examples that might
-help.
-
----
-
-### Ask questions
-
-You can ask OpenCode to explain the codebase to you.
-
-:::tip
-Use the `@` key to fuzzy search for files in the project.
-:::
-
-```txt frame="none" "@packages/functions/src/api/index.ts"
-How is authentication handled in @packages/functions/src/api/index.ts
+**Ask questions:**
+```
+How is authentication handled?
 ```
 
-This is helpful if there's a part of the codebase that you didn't work on.
-
----
-
-### Add features
-
-You can ask OpenCode to add new features to your project. Though we first recommend asking it to create a plan.
-
-1. **Create a plan**
-
-   OpenCode has a _Plan mode_ that disables its ability to make changes and
-   instead suggest _how_ it'll implement the feature.
-
-   Switch to it using the **Tab** key. You'll see an indicator for this in the lower right corner.
-
-   ```bash frame="none" title="Switch to Plan mode"
-   <TAB>
-   ```
-
-   Now let's describe what we want it to do.
-
-   ```txt frame="none"
-   When a user deletes a note, we'd like to flag it as deleted in the database.
-   Then create a screen that shows all the recently deleted notes.
-   From this screen, the user can undelete a note or permanently delete it.
-   ```
-
-   You want to give OpenCode enough details to understand what you want. It helps
-   to talk to it like you are talking to a junior developer on your team.
-
-   :::tip
-   Give OpenCode plenty of context and examples to help it understand what you
-   want.
-   :::
-
-2. **Iterate on the plan**
-
-   Once it gives you a plan, you can give it feedback or add more details.
-
-   ```txt frame="none"
-   We'd like to design this new screen using a design I've used before.
-   [Image #1] Take a look at this image and use it as a reference.
-   ```
-
-   :::tip
-   Drag and drop images into the terminal to add them to the prompt.
-   :::
-
-   OpenCode can scan any images you give it and add them to the prompt. You can
-   do this by dragging and dropping an image into the terminal.
-
-3. **Build the feature**
-
-   Once you feel comfortable with the plan, switch back to _Build mode_ by
-   hitting the **Tab** key again.
-
-   ```bash frame="none"
-   <TAB>
-   ```
-
-   And asking it to make the changes.
-
-   ```bash frame="none"
-   Sounds good! Go ahead and make the changes.
-   ```
-
----
-
-### Make changes
-
-For more straightforward changes, you can ask OpenCode to directly build it
-without having to review the plan first.
-
-```txt frame="none" "@packages/functions/src/settings.ts" "@packages/functions/src/notes.ts"
-We need to add authentication to the /settings route. Take a look at how this is
-handled in the /notes route in @packages/functions/src/notes.ts and implement
-the same logic in @packages/functions/src/settings.ts
+**Make changes:**
+```
+Add a dark mode toggle to the settings page
 ```
 
-You want to make sure you provide a good amount of detail so OpenCode makes the right
-changes.
+**Plan first:**
+Use `<TAB>` to switch to Plan mode, describe what you want, review the plan, then switch back to Build mode.
 
----
-
-### Undo changes
-
-Let's say you ask OpenCode to make some changes.
-
-```txt frame="none" "@packages/functions/src/api/index.ts"
-Can you refactor the function in @packages/functions/src/api/index.ts?
+**Undo:**
 ```
-
-But you realize that it is not what you wanted. You **can undo** the changes
-using the `/undo` command.
-
-```bash frame="none"
 /undo
 ```
 
-OpenCode will now revert the changes you made and show your original message
-again.
-
-```txt frame="none" "@packages/functions/src/api/index.ts"
-Can you refactor the function in @packages/functions/src/api/index.ts?
-```
-
-From here you can tweak the prompt and ask OpenCode to try again.
-
-:::tip
-You can run `/undo` multiple times to undo multiple changes.
-:::
-
-Or you **can redo** the changes using the `/redo` command.
-
-```bash frame="none"
-/redo
-```
-
 ---
 
-## Share
+### Share
 
-The conversations that you have with OpenCode can be [shared with your
-team](/docs/share).
-
-```bash frame="none"
+```
 /share
 ```
 
-This will create a link to the current conversation and copy it to your clipboard.
-
-:::note
-Conversations are not shared by default.
-:::
-
-Here's an [example conversation](https://canopy.dev/s/4XP1fce5) with OpenCode.
+Creates a shareable link to the current conversation.
 
 ---
 
-## Customize
+### Customize
 
-And that's it! You are now a pro at using OpenCode.
+Pick a theme, configure keybinds, set up formatters, or edit `opencode.json`:
 
-To make it your own, we recommend [picking a theme](/docs/themes), [customizing the keybinds](/docs/keybinds), [configuring code formatters](/docs/formatters), [creating custom commands](/docs/commands), or playing around with the [OpenCode config](/docs/config).
+```json
+{
+  "$schema": "https://canopy.dev/config.json",
+  "theme": "tokyonight",
+  "compaction": { "auto": true, "tail_turns": 3 }
+}
+```

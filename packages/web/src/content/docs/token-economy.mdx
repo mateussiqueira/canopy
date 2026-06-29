@@ -1,0 +1,50 @@
+---
+title: Token Economy
+description: Canopy optimizes every token for maximum efficiency.
+---
+
+Canopy includes several built-in optimizations to reduce token usage without sacrificing quality.
+
+## System prompts
+
+The three system prompts (`default.txt`, `anthropic.txt`, `gemini.txt`) were rewritten to be:
+
+- **66% shorter** — Same instructions, fewer tokens
+- **Zero dead references** — No outdated OpenCode features mentioned
+- **Canopy-specific** — Model routing instructions, skill references
+
+## Tool descriptions
+
+Tool descriptions are sent to the model every turn. Canopy shortened the most verbose ones:
+
+| Tool | Before | After | Savings |
+|------|--------|-------|---------|
+| `task.txt` | 2,305 bytes | 489 | **-79%** |
+| `todowrite.txt` | 2,012 bytes | 366 | **-82%** |
+| `edit.txt` | 1,369 bytes | 347 | **-75%** |
+
+**Total: ~30% reduction in tool description tokens per turn.**
+
+## Context compaction
+
+The compaction system aggressively manages context window usage:
+
+- **Tool output truncation**: 2,000 → 1,500 chars (-25%)
+- **Protected context**: 40,000 → 30,000 tokens
+- **Protected tools**: `read`, `grep`, `glob` outputs preserved during pruning
+- **Recent context**: 8,000 → 4,000 tokens kept verbatim
+
+## Configuration
+
+```json
+{
+  "compaction": {
+    "auto": true,
+    "tail_turns": 3
+  },
+  "tool_output": {
+    "max_lines": 200,
+    "max_bytes": 6000
+  }
+}
+```
