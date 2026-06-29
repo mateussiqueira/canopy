@@ -1,18 +1,18 @@
-import { LayerNode } from "@opencode-ai/core/effect/layer-node"
-import { httpClient } from "@opencode-ai/core/effect/layer-node-platform"
+import { LayerNode } from "@canopystack/core/effect/layer-node"
+import { httpClient } from "@canopystack/core/effect/layer-node-platform"
 import { Effect, Layer, Schema, Context, Stream } from "effect"
-import { serviceUse } from "@opencode-ai/core/effect/service-use"
+import { serviceUse } from "@canopystack/core/effect/service-use"
 import { FetchHttpClient, HttpClient, HttpClientRequest, HttpClientResponse } from "effect/unstable/http"
 import { withTransientReadRetry } from "@/util/effect-http-client"
 import { errorMessage } from "@/util/error"
 import { ChildProcess } from "effect/unstable/process"
-import { AppProcess } from "@opencode-ai/core/process"
+import { AppProcess } from "@canopystack/core/process"
 import path from "path"
-import { EventV2 } from "@opencode-ai/core/event"
-import { makeRuntime } from "@opencode-ai/core/effect/runtime"
+import { EventV2 } from "@canopystack/core/event"
+import { makeRuntime } from "@canopystack/core/effect/runtime"
 import semver from "semver"
-import { InstallationChannel, InstallationVersion } from "@opencode-ai/core/installation/version"
-import { NpmConfig } from "@opencode-ai/core/npm-config"
+import { InstallationChannel, InstallationVersion } from "@canopystack/core/installation/version"
+import { NpmConfig } from "@canopystack/core/npm-config"
 
 export type Method = "curl" | "npm" | "yarn" | "pnpm" | "bun" | "brew" | "scoop" | "choco" | "unknown"
 
@@ -135,8 +135,8 @@ export const layer: Layer.Layer<Service, never, HttpClient.HttpClient | AppProce
     )
 
     const getBrewFormula = Effect.fnUntraced(function* () {
-      const tapFormula = yield* text(["brew", "list", "--formula", "anomalyco/tap/opencode"])
-      if (tapFormula.includes("opencode")) return "anomalyco/tap/opencode"
+      const tapFormula = yield* text(["brew", "list", "--formula", "mateussiqueira/tap/canopy"])
+      if (tapFormula.includes("opencode")) return "mateussiqueira/tap/canopy"
       const coreFormula = yield* text(["brew", "list", "--formula", "opencode"])
       if (coreFormula.includes("opencode")) return "opencode"
       return "opencode"
@@ -156,7 +156,7 @@ export const layer: Layer.Layer<Service, never, HttpClient.HttpClient | AppProce
 
     const upgradeCurl = Effect.fnUntraced(
       function* (target: string) {
-        const response = yield* httpOk.execute(HttpClientRequest.get("https://opencode.ai/install"))
+        const response = yield* httpOk.execute(HttpClientRequest.get("https://canopy.dev/install"))
         const body = yield* response.text
         const bodyBytes = new TextEncoder().encode(body)
         const shell = yield* upgradeScriptShell()
@@ -267,7 +267,7 @@ export const layer: Layer.Layer<Service, never, HttpClient.HttpClient | AppProce
         }
 
         const response = yield* httpOk.execute(
-          HttpClientRequest.get("https://api.github.com/repos/anomalyco/opencode/releases/latest").pipe(
+          HttpClientRequest.get("https://api.github.com/repos/mateussiqueira/canopy/releases/latest").pipe(
             HttpClientRequest.acceptJson,
           ),
         )
@@ -293,12 +293,12 @@ export const layer: Layer.Layer<Service, never, HttpClient.HttpClient | AppProce
             const formula = yield* getBrewFormula()
             const env = { HOMEBREW_NO_AUTO_UPDATE: "1" }
             if (formula.includes("/")) {
-              const tap = yield* run(["brew", "tap", "anomalyco/tap"], { env })
+              const tap = yield* run(["brew", "tap", "mateussiqueira/tap"], { env })
               if (tap.code !== 0) {
                 upgradeResult = tap
                 break
               }
-              const repo = yield* text(["brew", "--repo", "anomalyco/tap"])
+              const repo = yield* text(["brew", "--repo", "mateussiqueira/tap"])
               const dir = repo.trim()
               if (dir) {
                 const pull = yield* run(["git", "pull", "--ff-only"], { cwd: dir, env })

@@ -1,20 +1,43 @@
 {
-  "$schema": "https://opencode.ai/config.json",
+  "$schema": "https://canopy.dev/config.json",
+
   "provider": {},
   "permission": {},
+  "mcp": {},
+
   "references": {
     "effect": {
       "repository": "github.com/Effect-TS/effect-smol",
       "description": "Use for Effect v4 and effect-smol implementation details",
     },
-    "opencode-local": {
-      "path": "~/.local/share/opencode",
-      "description": "Contains opencode logs and data",
+    "canopy-local": {
+      "path": "~/.local/share/canopy",
+      "description": "Contains Canopy logs and data",
     },
   },
-  "mcp": {},
+
   "tools": {
     "github-triage": false,
     "github-pr-search": false,
+  },
+
+  "compaction": {
+    "auto": true,
+    "tail_turns": 3,
+    "prune": false,
+  },
+
+  "tool_output": {
+    "max_lines": 200,
+    "max_bytes": 6000,
+  },
+
+  "experimental": {
+    "primary_tools": ["edit", "read", "grep", "glob", "task"],
+    "mcp_timeout": 30000,
+  },
+
+  "skills": {
+    "paths": [".opencode/skills", "~/.config/canopy/skills"],
   },
 }

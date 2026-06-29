@@ -1,4 +1,4 @@
-import type { SkillV2Info } from "@opencode-ai/sdk/v2/types"
+import type { SkillV2Info } from "@canopystack/sdk/v2/types"
 import type { Hooks } from "./registration.js"
 
 export type SkillSource =

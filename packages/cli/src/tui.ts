@@ -1,7 +1,7 @@
-import { run } from "@opencode-ai/tui"
-import { TuiConfig } from "@opencode-ai/tui/config"
+import { run } from "@canopystack/tui"
+import { TuiConfig } from "@canopystack/tui/config"
 import { Effect } from "effect"
-import { Global } from "@opencode-ai/core/global"
+import { Global } from "@canopystack/core/global"
 
 export function runTui(transport: { url: string; headers: RequestInit["headers"] }) {
   const config = TuiConfig.resolve({}, { terminalSuspend: false })

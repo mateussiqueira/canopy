@@ -1,9 +1,9 @@
 import { render, TimeToFirstDraw, useRenderer, useTerminalDimensions } from "@opentui/solid"
 import { createDefaultOpenTuiKeymap } from "@opentui/keymap/opentui"
 import { Deferred, Effect } from "effect"
-import { Global } from "@opencode-ai/core/global"
-import { Flag } from "@opencode-ai/core/flag/flag"
-import { InstallationVersion } from "@opencode-ai/core/installation/version"
+import { Global } from "@canopystack/core/global"
+import { Flag } from "@canopystack/core/flag/flag"
+import { InstallationVersion } from "@canopystack/core/installation/version"
 import { ClipboardProvider, useClipboard } from "./context/clipboard"
 import { ExitProvider, useExit } from "./context/exit"
 import { EpilogueProvider } from "./context/epilogue"
@@ -443,14 +443,14 @@ function App(props: { onSnapshot?: () => Promise<string[]>; pluginHost: TuiPlugi
     if (!terminalTitleEnabled() || Flag.OPENCODE_DISABLE_TERMINAL_TITLE) return
 
     if (route.data.type === "home") {
-      renderer.setTerminalTitle("OpenCode")
+      renderer.setTerminalTitle("Canopy")
       return
     }
 
     if (route.data.type === "session") {
       const session = sync.session.get(route.data.sessionID)
       if (!session || isDefaultTitle(session.title)) {
-        renderer.setTerminalTitle("OpenCode")
+        renderer.setTerminalTitle("Canopy")
         return
       }
 
@@ -799,7 +799,7 @@ function App(props: { onSnapshot?: () => Promise<string[]>; pluginHost: TuiPlugi
         name: "docs.open",
         title: "Open docs",
         run: () => {
-          open("https://opencode.ai/docs").catch(() => {})
+          open("https://canopy.dev/docs").catch(() => {})
           dialog.clear()
         },
         category: "System",

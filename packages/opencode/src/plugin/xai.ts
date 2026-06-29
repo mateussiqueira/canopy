@@ -1,7 +1,7 @@
-import type { Hooks, PluginInput } from "@opencode-ai/plugin"
+import type { Hooks, PluginInput } from "@canopystack/plugin"
 import { OAUTH_DUMMY_KEY } from "../auth"
 import { createServer } from "http"
-import { InstallationVersion } from "@opencode-ai/core/installation/version"
+import { InstallationVersion } from "@canopystack/core/installation/version"
 import { escapeHtml } from "@/util/html"
 
 // Public Grok-CLI OAuth client. xAI's auth server rejects loopback OAuth from

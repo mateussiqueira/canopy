@@ -1,5 +1,5 @@
-import type { Agent, Project, ProviderListResponse } from "@opencode-ai/sdk/v2/client"
-import { NormalizedProviderListResponse } from "@opencode-ai/ui/context"
+import type { Agent, Project, ProviderListResponse } from "@canopystack/sdk/v2/client"
+import { NormalizedProviderListResponse } from "@canopystack/ui/context"
 export { pathKey as directoryKey, type PathKey as DirectoryKey } from "@/utils/path-key"
 
 export const cmp = (a: string, b: string) => (a < b ? -1 : a > b ? 1 : 0)

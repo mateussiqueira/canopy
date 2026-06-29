@@ -1,6 +1,6 @@
-import { Location } from "@opencode-ai/core/location"
-import { Project } from "@opencode-ai/core/project"
-import { AbsolutePath } from "@opencode-ai/core/schema"
+import { Location } from "@canopystack/core/location"
+import { Project } from "@canopystack/core/project"
+import { AbsolutePath } from "@canopystack/core/schema"
 import { Effect, Layer } from "effect"
 import { tmpdir } from "./tmpdir"
 

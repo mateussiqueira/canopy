@@ -3,7 +3,7 @@ import type {
   IntegrationInfo,
   IntegrationKeyMethod,
   IntegrationOAuthMethod,
-} from "@opencode-ai/sdk/v2/types"
+} from "@canopystack/sdk/v2/types"
 import type { Hooks } from "./registration.js"
 
 export type IntegrationMethod = IntegrationOAuthMethod | IntegrationKeyMethod | IntegrationEnvMethod

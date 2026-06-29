@@ -1,0 +1,15 @@
+{
+  "providers": [
+    {
+      "id": "mlx-local",
+      "name": "MLX Local",
+      "type": "openai",
+      "apiKey": "not-needed",
+      "baseURL": "http://localhost:8080/v1",
+      "models": {
+        "default": "default_model",
+        "chat": ["default_model"]
+      }
+    }
+  ]
+}

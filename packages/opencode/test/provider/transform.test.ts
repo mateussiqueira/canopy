@@ -2,8 +2,8 @@ import { describe, expect, test } from "bun:test"
 import { Effect } from "effect"
 import { ProviderTransform } from "@/provider/transform"
 import { LLMRequestPrep } from "@/session/llm/request"
-import { ProviderV2 } from "@opencode-ai/core/provider"
-import { ModelV2 } from "@opencode-ai/core/model"
+import { ProviderV2 } from "@canopystack/core/provider"
+import { ModelV2 } from "@canopystack/core/model"
 
 describe("ProviderTransform.options - setCacheKey", () => {
   const sessionID = "test-session-123"
@@ -2324,7 +2324,7 @@ describe("ProviderTransform.message - strip openai metadata when store=false", (
       providerID: "opencode",
       api: {
         id: "opencode-test",
-        url: "https://api.opencode.ai",
+        url: "https://api.canopy.dev",
         npm: "@ai-sdk/openai-compatible",
       },
     }
@@ -2358,7 +2358,7 @@ describe("ProviderTransform.message - strip openai metadata when store=false", (
       providerID: "opencode",
       api: {
         id: "opencode-test",
-        url: "https://api.opencode.ai",
+        url: "https://api.canopy.dev",
         npm: "@ai-sdk/openai-compatible",
       },
     }

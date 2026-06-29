@@ -1,5 +1,5 @@
 import type { Page } from "@playwright/test"
-import { base64Encode } from "@opencode-ai/core/util/encode"
+import { base64Encode } from "@canopystack/core/util/encode"
 import { mockOpenCodeServer } from "../../utils/mock-server"
 import { fixture } from "./session-timeline-stress.fixture"
 

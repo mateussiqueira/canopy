@@ -9,7 +9,7 @@ import { UpgradeCommand } from "./cli/cmd/upgrade"
 import { UninstallCommand } from "./cli/cmd/uninstall"
 import { ModelsCommand } from "./cli/cmd/models"
 import { UI } from "./cli/ui"
-import { InstallationVersion } from "@opencode-ai/core/installation/version"
+import { InstallationVersion } from "@canopystack/core/installation/version"
 import { FormatError } from "./cli/error"
 import { ServeCommand } from "./cli/cmd/serve"
 import { DebugCommand } from "./cli/cmd/debug"
@@ -134,9 +134,5 @@ try {
   }
   process.exitCode = 1
 } finally {
-  // Some subprocesses don't react properly to SIGTERM and similar signals.
-  // Most notably, some docker-container-based MCP servers don't handle such signals unless
-  // run using `docker run --init`.
-  // Explicitly exit to avoid any hanging subprocesses.
-  process.exit()
+  process.exitCode = process.exitCode || 1
 }

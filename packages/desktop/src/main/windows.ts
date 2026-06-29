@@ -1,6 +1,6 @@
 import windowState from "electron-window-state"
-import { resolveThemeVariant } from "@opencode-ai/ui/theme/resolve"
-import type { DesktopTheme } from "@opencode-ai/ui/theme/types"
+import { resolveThemeVariant } from "@canopystack/ui/theme/resolve"
+import type { DesktopTheme } from "@canopystack/ui/theme/types"
 import oc2ThemeJson from "../../../ui/src/theme/themes/oc-2.json"
 import { app, BrowserWindow, dialog, net, nativeImage, nativeTheme, protocol } from "electron"
 import { dirname, isAbsolute, join, relative, resolve } from "node:path"
@@ -131,7 +131,7 @@ export function createMainWindow() {
     height: state.height,
     show: false,
     autoHideMenuBar: true,
-    title: "OpenCode",
+    title: "Canopy",
     icon: iconPath(),
     backgroundColor: backgroundColor ?? defaultBackgroundColor(),
     ...(process.platform === "darwin"

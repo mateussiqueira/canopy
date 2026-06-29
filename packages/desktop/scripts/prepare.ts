@@ -1,5 +1,5 @@
 #!/usr/bin/env bun
-import { Script } from "@opencode-ai/script"
+import { Script } from "@canopystack/script"
 
 await import("./prebuild")
 

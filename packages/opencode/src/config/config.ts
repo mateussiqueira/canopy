@@ -1,31 +1,31 @@
-import { LayerNode } from "@opencode-ai/core/effect/layer-node"
-import { httpClient } from "@opencode-ai/core/effect/layer-node-platform"
-import { serviceUse } from "@opencode-ai/core/effect/service-use"
+import { LayerNode } from "@canopystack/core/effect/layer-node"
+import { httpClient } from "@canopystack/core/effect/layer-node-platform"
+import { serviceUse } from "@canopystack/core/effect/service-use"
 import path from "path"
 import { pathToFileURL } from "url"
 import os from "os"
 import { mergeDeep } from "remeda"
-import { Global } from "@opencode-ai/core/global"
+import { Global } from "@canopystack/core/global"
 import fsNode from "fs/promises"
-import { Flag } from "@opencode-ai/core/flag/flag"
+import { Flag } from "@canopystack/core/flag/flag"
 import { Auth } from "../auth"
 import { Env } from "../env"
 import { applyEdits, modify } from "jsonc-parser"
-import { InstallationLocal, InstallationVersion } from "@opencode-ai/core/installation/version"
+import { InstallationLocal, InstallationVersion } from "@canopystack/core/installation/version"
 import { existsSync } from "fs"
 import { Account } from "@/account/account"
 import { isRecord } from "@/util/record"
-import type { ConsoleState } from "@opencode-ai/core/v1/config/console-state"
-import { FSUtil } from "@opencode-ai/core/fs-util"
+import type { ConsoleState } from "@canopystack/core/v1/config/console-state"
+import { FSUtil } from "@canopystack/core/fs-util"
 import { InstanceState } from "@/effect/instance-state"
 import { Context, Duration, Effect, Exit, Fiber, Layer, Option, Schema } from "effect"
 import { FetchHttpClient, HttpClient, HttpClientRequest } from "effect/unstable/http"
-import { EffectFlock } from "@opencode-ai/core/util/effect-flock"
+import { EffectFlock } from "@canopystack/core/util/effect-flock"
 import { containsPath, type InstanceContext } from "../project/instance-context"
-import { ConfigV1 } from "@opencode-ai/core/v1/config/config"
-import { RemoteAuthError } from "@opencode-ai/core/v1/config/error"
-import { ConfigPermissionV1 } from "@opencode-ai/core/v1/config/permission"
-import { ConfigPluginV1 } from "@opencode-ai/core/v1/config/plugin"
+import { ConfigV1 } from "@canopystack/core/v1/config/config"
+import { RemoteAuthError } from "@canopystack/core/v1/config/error"
+import { ConfigPermissionV1 } from "@canopystack/core/v1/config/permission"
+import { ConfigPluginV1 } from "@canopystack/core/v1/config/plugin"
 import { ConfigAgent } from "./agent"
 import { ConfigCommand } from "./command"
 import { ConfigManaged } from "./managed"
@@ -33,7 +33,7 @@ import { ConfigParse } from "./parse"
 import { ConfigPaths } from "./paths"
 import { ConfigPlugin } from "./plugin"
 import { ConfigVariable } from "./variable"
-import { Npm } from "@opencode-ai/core/npm"
+import { Npm } from "@canopystack/core/npm"
 import { withTransientReadRetry } from "@/util/effect-http-client"
 
 // Custom merge function that concatenates array fields instead of replacing them
@@ -229,8 +229,8 @@ export const layer = Layer.effect(
 
       yield* Effect.promise(() => resolveLoadedPlugins(data, options.path))
       if (!data.$schema) {
-        data.$schema = "https://opencode.ai/config.json"
-        const updated = text.replace(/^\s*\{/, '{\n  "$schema": "https://opencode.ai/config.json",')
+        data.$schema = "https://canopy.dev/config.json"
+        const updated = text.replace(/^\s*\{/, '{\n  "$schema": "https://canopy.dev/config.json",')
         yield* fs.writeFileString(options.path, updated).pipe(Effect.catch(() => Effect.void))
       }
       return data
@@ -251,7 +251,7 @@ export const layer = Layer.effect(
         const file = globalConfigFile()
         if (!existsSync(file)) {
           yield* fs
-            .writeWithDirs(file, JSON.stringify({ $schema: "https://opencode.ai/config.json" }, null, 2))
+            .writeWithDirs(file, JSON.stringify({ $schema: "https://canopy.dev/config.json" }, null, 2))
             .pipe(Effect.catch(() => Effect.void))
         }
       }
@@ -266,7 +266,7 @@ export const layer = Layer.effect(
             .then(async (mod) => {
               const { provider, model, ...rest } = mod.default
               if (provider && model) result.model = `${provider}/${model}`
-              result["$schema"] = "https://opencode.ai/config.json"
+              result["$schema"] = "https://canopy.dev/config.json"
               result = mergeConfig(result, rest)
               await fsNode.writeFile(path.join(Global.Path.config, "config.json"), JSON.stringify(result, null, 2))
               await fsNode.unlink(legacy)
@@ -379,7 +379,7 @@ export const layer = Layer.effect(
                 })
               : {}
             const remoteConfig = mergeConfig(isRecord(wellknown.config) ? wellknown.config : {}, fetchedConfig)
-            if (!remoteConfig.$schema) remoteConfig.$schema = "https://opencode.ai/config.json"
+            if (!remoteConfig.$schema) remoteConfig.$schema = "https://canopy.dev/config.json"
             const source = wellknownURL
             const next = yield* loadConfig(
               JSON.stringify(remoteConfig),
@@ -438,7 +438,7 @@ export const layer = Layer.effect(
             .install(dir, {
               add: [
                 {
-                  name: "@opencode-ai/plugin",
+                  name: "@canopystack/plugin",
                   version: InstallationLocal ? undefined : InstallationVersion,
                 },
               ],

@@ -1,9 +1,9 @@
-import { ConfigV1 } from "@opencode-ai/core/v1/config/config"
-import { SessionV1 } from "@opencode-ai/core/v1/session"
-import { FSUtil } from "@opencode-ai/core/fs-util"
-import { ModelsDev } from "@opencode-ai/core/models-dev"
-import { HttpRecorder } from "@opencode-ai/http-recorder"
-import { HttpRecorderInternal } from "@opencode-ai/http-recorder/internal"
+import { ConfigV1 } from "@canopystack/core/v1/config/config"
+import { SessionV1 } from "@canopystack/core/v1/session"
+import { FSUtil } from "@canopystack/core/fs-util"
+import { ModelsDev } from "@canopystack/core/models-dev"
+import { HttpRecorder } from "@canopystack/http-recorder"
+import { HttpRecorderInternal } from "@canopystack/http-recorder/internal"
 import { describe, expect, test } from "bun:test"
 import { tool, type ModelMessage, type JSONValue } from "ai"
 import { Effect, Layer, Option, Schema, Stream } from "effect"
@@ -15,8 +15,8 @@ import { Plugin } from "@/plugin"
 import { Provider } from "@/provider/provider"
 
 import { Filesystem } from "@/util/filesystem"
-import { LLMEvent, LLMResponse } from "@opencode-ai/llm"
-import { LLMClient, RequestExecutor, WebSocketExecutor } from "@opencode-ai/llm/route"
+import { LLMEvent, LLMResponse } from "@canopystack/llm"
+import { LLMClient, RequestExecutor, WebSocketExecutor } from "@canopystack/llm/route"
 import { Env } from "@/env"
 import { RuntimeFlags } from "@/effect/runtime-flags"
 import type { Agent } from "../../src/agent/agent"
@@ -24,12 +24,12 @@ import { LLM } from "../../src/session/llm"
 import { MessageID, SessionID } from "../../src/session/schema"
 import { TestInstance } from "../fixture/fixture"
 import { testEffect } from "../lib/effect"
-import { ProviderV2 } from "@opencode-ai/core/provider"
-import { ModelV2 } from "@opencode-ai/core/model"
+import { ProviderV2 } from "@canopystack/core/provider"
+import { ModelV2 } from "@canopystack/core/model"
 
 const FIXTURES_DIR = path.join(import.meta.dir, "../fixtures/recordings")
 
-const zenURL = (connection: string) => `https://console.opencode.ai/proxy/connections/${connection}/v1`
+const zenURL = (connection: string) => `https://console.canopy.dev/proxy/connections/${connection}/v1`
 
 const replayOpenAIOAuth = {
   type: "oauth",
@@ -311,7 +311,7 @@ const writeConfig = (directory: string, scenario: RecordedScenario, model: Model
   Effect.promise(() =>
     Bun.write(
       path.join(directory, "opencode.json"),
-      JSON.stringify({ $schema: "https://opencode.ai/config.json", ...scenario.config(model) }),
+      JSON.stringify({ $schema: "https://canopy.dev/config.json", ...scenario.config(model) }),
     ),
   )
 

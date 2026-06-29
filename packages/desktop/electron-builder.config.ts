@@ -74,8 +74,8 @@ const getBase = (appId: string): Configuration => ({
     sign: true,
   },
   protocols: {
-    name: "OpenCode",
-    schemes: ["opencode"],
+    name: "Canopy",
+    schemes: ["canopy"],
   },
   win: {
     icon: `resources/icons/icon.ico`,
@@ -115,7 +115,7 @@ function getConfig() {
       return {
         ...base,
         appId,
-        productName: "OpenCode Dev",
+        productName: "Canopy Dev",
         rpm: { packageName: "opencode-dev" },
       }
     }
@@ -123,21 +123,21 @@ function getConfig() {
       return {
         ...base,
         appId,
-        productName: "OpenCode Beta",
-        protocols: { name: "OpenCode Beta", schemes: ["opencode"] },
-        publish: { provider: "github", owner: "anomalyco", repo: "opencode-beta", channel: "latest" },
-        rpm: { packageName: "opencode-beta" },
+        productName: "Canopy Beta",
+        protocols: { name: "Canopy Beta", schemes: ["canopy"] },
+        publish: { provider: "github", owner: "mateussiqueira", repo: "canopy-beta", channel: "latest" },
+        rpm: { packageName: "canopy-beta" },
       }
     }
     case "prod": {
       return {
         ...base,
         appId,
-        productName: "OpenCode",
-        protocols: { name: "OpenCode", schemes: ["opencode"] },
-        publish: { provider: "github", owner: "anomalyco", repo: "opencode", channel: "latest" },
+        productName: "Canopy",
+        protocols: { name: "Canopy", schemes: ["canopy"] },
+        publish: { provider: "github", owner: "mateussiqueira", repo: "canopy", channel: "latest" },
         deb: { fpm: [legacyDesktopEntryFpm] },
-        rpm: { packageName: "opencode", fpm: [legacyDesktopEntryFpm] },
+        rpm: { packageName: "canopy", fpm: [legacyDesktopEntryFpm] },
       }
     }
   }

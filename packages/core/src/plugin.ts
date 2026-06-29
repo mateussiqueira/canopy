@@ -1,7 +1,7 @@
 export * as PluginV2 from "./plugin"
 
 import { Context, Deferred, Effect, Exit, Layer, Schema, Scope } from "effect"
-import type { Plugin } from "@opencode-ai/plugin/v2/effect"
+import type { Plugin } from "@canopystack/plugin/v2/effect"
 import { AgentV2 } from "./agent"
 import { AISDK } from "./aisdk"
 import { Catalog } from "./catalog"

@@ -1,18 +1,7 @@
-<svg width="234" height="42" viewBox="0 0 234 42" fill="none" xmlns="http://www.w3.org/2000/svg">
-<path d="M18 30H6V18H18V30Z" fill="#CFCECD"/>
-<path d="M18 12H6V30H18V12ZM24 36H0V6H24V36Z" fill="#656363"/>
-<path d="M48 30H36V18H48V30Z" fill="#CFCECD"/>
-<path d="M36 30H48V12H36V30ZM54 36H36V42H30V6H54V36Z" fill="#656363"/>
-<path d="M84 24V30H66V24H84Z" fill="#CFCECD"/>
-<path d="M84 24H66V30H84V36H60V6H84V24ZM66 18H78V12H66V18Z" fill="#656363"/>
-<path d="M108 36H96V18H108V36Z" fill="#CFCECD"/>
-<path d="M108 12H96V36H90V6H108V12ZM114 36H108V12H114V36Z" fill="#656363"/>
-<path d="M144 30H126V18H144V30Z" fill="#CFCECD"/>
-<path d="M144 12H126V30H144V36H120V6H144V12Z" fill="#211E1E"/>
-<path d="M168 30H156V18H168V30Z" fill="#CFCECD"/>
-<path d="M168 12H156V30H168V12ZM174 36H150V6H174V36Z" fill="#211E1E"/>
-<path d="M198 30H186V18H198V30Z" fill="#CFCECD"/>
-<path d="M198 12H186V30H198V12ZM204 36H180V6H198V0H204V36Z" fill="#211E1E"/>
-<path d="M234 24V30H216V24H234Z" fill="#CFCECD"/>
-<path d="M216 12V18H228V12H216ZM234 24H216V30H234V36H210V6H234V24Z" fill="#211E1E"/>
+<svg width="200" height="48" viewBox="0 0 200 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <path d="M12 32L24 8L36 32H30L24 18L18 32H12Z" fill="#22C55E"/>
+  <path d="M6 36L24 4L42 36H34L24 16L14 36H6Z" fill="#16A34A" fill-opacity="0.5"/>
+  <path d="M24 8C24 8 30 20 36 32H30L24 18L18 32H12C18 20 24 8 24 8Z" fill="#22C55E"/>
+  <text x="52" y="30" font-family="'SF Pro Display','Inter','Segoe UI',sans-serif" font-size="28" font-weight="700" fill="#1A1A1A" letter-spacing="-0.5">Canopy</text>
+  <text x="52" y="42" font-family="'SF Pro Display','Inter','Segoe UI',sans-serif" font-size="11" font-weight="400" fill="#666666" letter-spacing="2">AI CODING AGENT</text>
 </svg>

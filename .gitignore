@@ -32,3 +32,15 @@ UPCOMING_CHANGELOG.md
 logs/
 *.bun-build
 tsconfig.tsbuildinfo
+.env.production
+.env.development
+*.log
+coverage/
+.history/
+*.swp
+*.swo
+.pnpm-store/
+.vercel
+out/
+.next/
+.canopy

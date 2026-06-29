@@ -1,9 +1,9 @@
 import { describe, expect } from "bun:test"
 import { Effect, Layer } from "effect"
-import { AbsolutePath } from "@opencode-ai/core/schema"
-import { Reference } from "@opencode-ai/core/reference"
-import { ReferenceGuidance } from "@opencode-ai/core/reference/guidance"
-import { SystemContext } from "@opencode-ai/core/system-context/index"
+import { AbsolutePath } from "@canopystack/core/schema"
+import { Reference } from "@canopystack/core/reference"
+import { ReferenceGuidance } from "@canopystack/core/reference/guidance"
+import { SystemContext } from "@canopystack/core/system-context/index"
 import { it } from "./lib/effect"
 
 describe("ReferenceGuidance", () => {
