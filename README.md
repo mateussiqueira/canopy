@@ -1,10 +1,10 @@
 <p align="center">
   <picture>
-    <source srcset="public/logo.svg" media="(prefers-color-scheme: dark)">
-    <img src="public/logo.svg" alt="Canopy logo" width="120">
+    <source srcset="packages/web/src/assets/logo-dark.svg" media="(prefers-color-scheme: dark)">
+    <img src="packages/web/src/assets/logo-light.svg" alt="Canopy logo" width="200">
   </picture>
 </p>
-<p align="center"><strong>Canopy</strong> — Fork do OpenCode com melhorias em estabilidade e DX.</p>
+<p align="center"><strong>Canopy</strong> — AI coding agent. Smarter, leaner, yours.</p>
 <p align="center">
   <a href="https://github.com/mateussiqueira/canopy"><img alt="GitHub" src="https://img.shields.io/github/stars/mateussiqueira/canopy?style=flat-square" /></a>
   <a href="https://github.com/mateussiqueira/canopy/blob/dev/LICENSE"><img alt="License" src="https://img.shields.io/github/license/mateussiqueira/canopy?style=flat-square" /></a>
@@ -12,58 +12,49 @@
 
 ---
 
-Fork do [OpenCode](https://github.com/anomalyco/opencode) focado em:
+Canopy é um fork do [OpenCode](https://github.com/anomalyco/opencode) com foco em **economia de tokens**, **model routing inteligente**, e **skills modulares**.
 
-- **Overflow recovery** — Sessões longas não matam o contexto
-- **Memória** — RSS menor em sessões com muitas tool calls
-- **Segurança** — Proteção contra delete acidental de arquivos
-- **Extended thinking** — Suporte a Bedrock Converse
+## Diferenciais
+
+- **🧠 Model Routing** — Seleciona automaticamente o modelo mais barato e capaz para cada tarefa: DeepSeek/MiMo para scripts, Kimi para dev, Qwen para investigação, GLM para planejamento.
+- **💰 Token Economy** — Prompts otimizados (-66%), descrições de ferramentas enxutas (-30%), compressão de contexto agressiva (-25% por turno).
+- **🎓 Skills Modulares** — Skill `job-search` built-in com templates de currículo ATS, otimização de LinkedIn, preparação para entrevista. Suporte PT-BR (CV Aprovado) e EN (Resume Doctor).
+- **🔧 System prompts reescritos** — Instruções mais diretas, zero referências mortas, foco em eficiência.
+- **⚙️ Config otimizada** — Compaction automático, tool output truncado, primary tools configurados.
+- **🔄 Dual env vars** — `CANOPY_*` e `OPENCODE_*` suportados simultaneamente (migração gradual).
 
 ## Instalação
 
 ```bash
 # Via script
 curl -fsSL https://canopy.dev/install | bash
+```
 
-# Do zero
+```bash
+# Desenvolvimento local
 git clone https://github.com/mateussiqueira/canopy.git
 cd canopy
 bun install
-bun run build
+bun run --cwd packages/canopy --conditions=browser src/index.ts
 ```
 
-## Uso
+## Comece por aqui
 
 ```bash
-canopy                    # inicia no diretório atual
-canopy /path/to/project   # abre projeto específico
+# Ajuda
+canopy --help
+
+# Iniciar TUI no diretório atual
+canopy
+
+# Escolher modelo específico
+canopy -m openai/gpt-4o
+
+# Usar skill de recolocação
+# Configure em .opencode/opencode.json:
+# "skills": { "paths": [".opencode/skills"] }
 ```
 
-## Desenvolvimento
+## Licença
 
-```bash
-bun install
-bun run dev
-```
-
-## Testes
-
-```bash
-bun run test              # unitários
-bun run test:e2e          # e2e com Playwright
-```
-
-## Estrutura
-
-```
-packages/
-├── core/         # Lógica principal (agent, session, tools)
-├── llm/          # Client LLM (providers, streaming)
-├── opencode/     # CLI/TUI
-├── app/          # Web UI
-└── ui/           # Componentes
-```
-
-## License
-
-[MIT](LICENSE)
+Apache 2.0 — veja [LICENSE](LICENSE).
