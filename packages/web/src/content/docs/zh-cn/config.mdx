@@ -178,7 +178,7 @@ opencode run "Hello world"
 
 ### 服务器
 
-您可以通过 `server` 选项为 `opencode serve` 和 `opencode web` 命令配置服务器设置。
+您可以通过 `server` 选项为 `canopy serve` 和 `canopy web` 命令配置服务器设置。
 
 ```json title="opencode.json"
 {
@@ -350,7 +350,7 @@ Bearer Token（`AWS_BEARER_TOKEN_BEDROCK` 或 `/connect`）优先于基于配置
 
 默认代理必须是主代理（不能是子代理）。可以是内置代理（如 `"build"` 或 `"plan"`），也可以是您定义的[自定义代理](/docs/agents)。如果指定的代理不存在或是子代理，Canopy 将回退到 `"build"` 并发出警告。
 
-此设置适用于所有界面：TUI、CLI（`opencode run`）、桌面应用和 GitHub Action。
+此设置适用于所有界面：TUI、CLI（`canopy run`）、桌面应用和 GitHub Action。
 
 ---
 

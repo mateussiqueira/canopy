@@ -180,7 +180,7 @@ Le chiavi legacy `theme`, `keybinds` e `tui` in `opencode.json` sono deprecate e
 
 ### Server
 
-Puoi configurare le impostazioni del server per i comandi `opencode serve` e `opencode web` tramite l'opzione `server`.
+Puoi configurare le impostazioni del server per i comandi `canopy serve` e `canopy web` tramite l'opzione `server`.
 
 ```json title="opencode.json"
 {
@@ -352,7 +352,7 @@ Puoi impostare l'agente predefinito usando l'opzione `default_agent`. Questo det
 
 L'agente predefinito deve essere un agente primary (non un subagent). Puo essere un agente integrato come `"build"` o `"plan"`, oppure un [agente personalizzato](/docs/agents) che hai definito. Se l'agente specificato non esiste o e un subagent, Canopy fara fallback su `"build"` mostrando un avviso.
 
-Questa impostazione si applica a tutte le interfacce: TUI, CLI (`opencode run`), app desktop e GitHub Action.
+Questa impostazione si applica a tutte le interfacce: TUI, CLI (`canopy run`), app desktop e GitHub Action.
 
 ---
 

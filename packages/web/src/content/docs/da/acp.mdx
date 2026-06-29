@@ -15,7 +15,7 @@ ACP er en åben protokol, der standardiserer kommunikation mellem kodeeditorer o
 
 ## Konfiguration
 
-For at bruge Canopy via ACP, konfigurer din editor til at køre kommandoen `opencode acp`.
+For at bruge Canopy via ACP, konfigurer din editor til at køre kommandoen `canopy acp`.
 
 Kommandoen starter Canopy som en ACP-kompatibel underproces, der kommunikerer med din editor over JSON-RPC via stdio.
 
@@ -31,7 +31,7 @@ Føj til din [Zed](https://zed.dev)-konfiguration (`~/.config/zed/settings.json`
 {
   "agent_servers": {
     "Canopy": {
-      "command": "opencode",
+      "command": "canopy",
       "args": ["acp"]
     }
   }
@@ -53,7 +53,7 @@ Du kan også binde en tastaturgenvej ved at redigere din `keymap.json`:
             "custom": {
               "name": "Canopy",
               "command": {
-                "command": "opencode",
+                "command": "canopy",
                 "args": ["acp"]
               }
             }

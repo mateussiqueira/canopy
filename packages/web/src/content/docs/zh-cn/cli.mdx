@@ -94,7 +94,7 @@ opencode attach http://10.20.30.40:4096
 使用自定义配置创建新的代理。
 
 ```bash
-opencode agent create
+canopy agent create
 ```
 
 此命令将引导您使用自定义系统提示词和工具配置来创建新的代理。
@@ -123,7 +123,7 @@ opencode auth [command]
 
 #### login
 
-Canopy 基于 [Models.dev](https://models.dev) 的提供商列表运行，因此您可以使用 `opencode auth login` 为任何想要使用的提供商配置 API 密钥。密钥存储在 `~/.local/share/opencode/auth.json` 中。
+Canopy 基于 [Models.dev](https://models.dev) 的提供商列表运行，因此您可以使用 `canopy auth login` 为任何想要使用的提供商配置 API 密钥。密钥存储在 `~/.local/share/opencode/auth.json` 中。
 
 ```bash
 opencode auth login
@@ -327,7 +327,7 @@ opencode run [message..]
 opencode run Explain the use of context in Go
 ```
 
-您还可以连接到正在运行的 `opencode serve` 实例，以避免每次运行时 MCP 服务器的冷启动时间：
+您还可以连接到正在运行的 `canopy serve` 实例，以避免每次运行时 MCP 服务器的冷启动时间：
 
 ```bash
 # Start a headless server in one terminal

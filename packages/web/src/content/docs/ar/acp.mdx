@@ -15,7 +15,7 @@ ACP بروتوكول مفتوح يوحّد آلية التواصل بين محر
 
 ## الإعداد
 
-لاستخدام Canopy عبر ACP، اضبط محررك ليشغّل الأمر `opencode acp`.
+لاستخدام Canopy عبر ACP، اضبط محررك ليشغّل الأمر `canopy acp`.
 
 يشغّل هذا الأمر Canopy كعملية فرعية متوافقة مع ACP تتواصل مع محررك عبر JSON-RPC باستخدام stdio.
 
@@ -31,7 +31,7 @@ ACP بروتوكول مفتوح يوحّد آلية التواصل بين محر
 {
   "agent_servers": {
     "Canopy": {
-      "command": "opencode",
+      "command": "canopy",
       "args": ["acp"]
     }
   }
@@ -53,7 +53,7 @@ ACP بروتوكول مفتوح يوحّد آلية التواصل بين محر
             "custom": {
               "name": "Canopy",
               "command": {
-                "command": "opencode",
+                "command": "canopy",
                 "args": ["acp"]
               }
             }

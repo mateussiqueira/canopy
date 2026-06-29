@@ -94,7 +94,7 @@ opencode attach http://10.20.30.40:4096
 Kreirajte novog agenta s prilagođenom konfiguracijom.
 
 ```bash
-opencode agent create
+canopy agent create
 ```
 
 Ova naredba će vas voditi kroz kreiranje novog agenta sa prilagođenim sistemskim promptom i konfiguracijom alata.
@@ -123,7 +123,7 @@ opencode auth [command]
 
 #### login
 
-Canopy pokreće lista provajdera na [Models.dev](https://models.dev), tako da možete koristiti `opencode auth login` da konfigurirate API ključeve za bilo kojeg provajdera kojeg želite koristiti. Ovo je pohranjeno u `~/.local/share/opencode/auth.json`.
+Canopy pokreće lista provajdera na [Models.dev](https://models.dev), tako da možete koristiti `canopy auth login` da konfigurirate API ključeve za bilo kojeg provajdera kojeg želite koristiti. Ovo je pohranjeno u `~/.local/share/opencode/auth.json`.
 
 ```bash
 opencode auth login
@@ -324,7 +324,7 @@ Ovo je korisno za skriptiranje, automatizaciju ili kada želite brz odgovor bez 
 opencode run Explain the use of context in Go
 ```
 
-Također možete priključiti pokrenutu `opencode serve` instancu kako biste izbjegli vrijeme hladnog pokretanja MCP servera pri svakom pokretanju:
+Također možete priključiti pokrenutu `canopy serve` instancu kako biste izbjegli vrijeme hladnog pokretanja MCP servera pri svakom pokretanju:
 
 ```bash
 # Start a headless server in one terminal

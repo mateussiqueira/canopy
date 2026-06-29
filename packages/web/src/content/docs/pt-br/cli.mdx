@@ -94,7 +94,7 @@ opencode attach http://10.20.30.40:4096
 Crie um novo agente com configuração personalizada.
 
 ```bash
-opencode agent create
+canopy agent create
 ```
 
 Este comando irá guiá-lo na criação de um novo agente com um prompt de sistema personalizado e configuração de ferramentas.
@@ -123,7 +123,7 @@ opencode auth [command]
 
 #### login
 
-O opencode é alimentado pela lista de provedores em [Models.dev](https://models.dev), então você pode usar `opencode auth login` para configurar chaves de API para qualquer provedor que você gostaria de usar. Isso é armazenado em `~/.local/share/opencode/auth.json`.
+O opencode é alimentado pela lista de provedores em [Models.dev](https://models.dev), então você pode usar `canopy auth login` para configurar chaves de API para qualquer provedor que você gostaria de usar. Isso é armazenado em `~/.local/share/opencode/auth.json`.
 
 ```bash
 opencode auth login
@@ -327,7 +327,7 @@ Isso é útil para scripts, automação ou quando você deseja uma resposta ráp
 opencode run Explique o uso de context em Go
 ```
 
-Você também pode se anexar a uma instância em execução do `opencode serve` para evitar tempos de inicialização a frio do servidor MCP em cada execução:
+Você também pode se anexar a uma instância em execução do `canopy serve` para evitar tempos de inicialização a frio do servidor MCP em cada execução:
 
 ```bash
 # Inicie um servidor sem cabeça em um terminal

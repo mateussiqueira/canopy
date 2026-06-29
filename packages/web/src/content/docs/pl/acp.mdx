@@ -17,7 +17,7 @@ ACP to otwarty standard, który ujednolica komunikację między edytorami kodu a
 
 ## Konfiguracja
 
-Aby używać Canopy przez ACP, skonfiguruj swój edytor tak, aby uruchamiał polecenie `opencode acp`.
+Aby używać Canopy przez ACP, skonfiguruj swój edytor tak, aby uruchamiał polecenie `canopy acp`.
 
 Uruchamia to Canopy jako podproces zgodny z ACP, który komunikuje się z edytorem za pomocą JSON-RPC przez stdio.
 
@@ -33,7 +33,7 @@ Dodaj do konfiguracji [Zed](https://zed.dev) (`~/.config/zed/settings.json`):
 {
   "agent_servers": {
     "Canopy": {
-      "command": "opencode",
+      "command": "canopy",
       "args": ["acp"]
     }
   }
@@ -55,7 +55,7 @@ Możesz także przypisać skrót klawiszowy, edytując `keymap.json`:
             "custom": {
               "name": "Canopy",
               "command": {
-                "command": "opencode",
+                "command": "canopy",
                 "args": ["acp"]
               }
             }

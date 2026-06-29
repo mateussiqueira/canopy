@@ -94,7 +94,7 @@ opencode attach http://10.20.30.40:4096
 إنشاء وكيل جديد بإعدادات مخصصة.
 
 ```bash
-opencode agent create
+canopy agent create
 ```
 
 سيرشدك هذا الأمر خلال إنشاء وكيل جديد مع موجه نظام مخصص وإعدادات الأدوات.
@@ -123,7 +123,7 @@ opencode auth [command]
 
 #### login
 
-يعتمد Canopy على قائمة المزودين في [Models.dev](https://models.dev)، لذا يمكنك استخدام `opencode auth login` لتهيئة مفاتيح API لأي مزود ترغب باستخدامه. يتم حفظ ذلك في `~/.local/share/opencode/auth.json`.
+يعتمد Canopy على قائمة المزودين في [Models.dev](https://models.dev)، لذا يمكنك استخدام `canopy auth login` لتهيئة مفاتيح API لأي مزود ترغب باستخدامه. يتم حفظ ذلك في `~/.local/share/opencode/auth.json`.
 
 ```bash
 opencode auth login
@@ -327,7 +327,7 @@ opencode run [message..]
 opencode run Explain the use of context in Go
 ```
 
-يمكنك أيضا الإرفاق بمثيل `opencode serve` قيد التشغيل لتجنّب زمن الإقلاع البارد لخوادم MCP في كل تشغيل:
+يمكنك أيضا الإرفاق بمثيل `canopy serve` قيد التشغيل لتجنّب زمن الإقلاع البارد لخوادم MCP في كل تشغيل:
 
 ```bash
 # ابدأ خادمًا بلا واجهة في محطة طرفية واحدة

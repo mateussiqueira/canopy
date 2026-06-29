@@ -6,7 +6,7 @@ description: Nutze den opencode-Server ueber HTTP.
 import config from "../../../../config.mjs"
 export const typesUrl = `${config.github}/blob/dev/packages/sdk/js/src/gen/types.gen.ts`
 
-Der Befehl `opencode serve` startet einen headless HTTP-Server.
+Der Befehl `canopy serve` startet einen headless HTTP-Server.
 Er stellt einen OpenAPI-Endpunkt bereit, den ein opencode-Client nutzen kann.
 
 ---
@@ -38,7 +38,7 @@ opencode serve --cors http://localhost:5173 --cors https://app.example.com
 ### Authentifizierung
 
 Setze `OPENCODE_SERVER_PASSWORD`, um den Server mit HTTP Basic Auth zu schuetzen.
-Der Benutzername ist standardmaessig `opencode`, kann aber mit `OPENCODE_SERVER_USERNAME` ueberschrieben werden. Das gilt fuer `opencode serve` und `opencode web`.
+Der Benutzername ist standardmaessig `opencode`, kann aber mit `OPENCODE_SERVER_USERNAME` ueberschrieben werden. Das gilt fuer `canopy serve` und `canopy web`.
 
 ```bash
 OPENCODE_SERVER_PASSWORD=your-password opencode serve
@@ -57,8 +57,8 @@ Nutze den opencode-Server, um opencode programmatisch anzusteuern.
 
 Diese Architektur erlaubt mehrere Clients und programmatische Nutzung.
 
-Mit `opencode serve` startest du einen eigenstaendigen Server.
-Laeuft bereits eine TUI, startet `opencode serve` trotzdem eine neue Serverinstanz.
+Mit `canopy serve` startest du einen eigenstaendigen Server.
+Laeuft bereits eine TUI, startet `canopy serve` trotzdem eine neue Serverinstanz.
 
 ---
 

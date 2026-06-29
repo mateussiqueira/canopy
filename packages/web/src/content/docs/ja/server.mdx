@@ -6,7 +6,7 @@ description: HTTP 経由で Canopy サーバーと通信します。
 import config from "../../../../config.mjs"
 export const typesUrl = `${config.github}/blob/dev/packages/sdk/js/src/gen/types.gen.ts`
 
-`opencode serve` コマンドは、Canopy クライアントが使用できる OpenAPI エンドポイントを公開するヘッドレス HTTP サーバーを実行します。
+`canopy serve` コマンドは、Canopy クライアントが使用できる OpenAPI エンドポイントを公開するヘッドレス HTTP サーバーを実行します。
 
 ---
 
@@ -36,7 +36,7 @@ opencode serve --cors http://localhost:5173 --cors https://app.example.com
 
 ### 認証
 
-HTTP 基本認証でサーバーを保護するには、`OPENCODE_SERVER_PASSWORD` を設定します。ユーザー名はデフォルトで `opencode` になるか、`OPENCODE_SERVER_USERNAME` を設定してオーバーライドします。これは、`opencode serve` と `opencode web` の両方に当てはまります。
+HTTP 基本認証でサーバーを保護するには、`OPENCODE_SERVER_PASSWORD` を設定します。ユーザー名はデフォルトで `opencode` になるか、`OPENCODE_SERVER_USERNAME` を設定してオーバーライドします。これは、`canopy serve` と `canopy web` の両方に当てはまります。
 
 ```bash
 OPENCODE_SERVER_PASSWORD=your-password opencode serve
@@ -52,7 +52,7 @@ OPENCODE_SERVER_PASSWORD=your-password opencode serve
 Canopy サーバーを使用して、プログラムで Canopy と対話します。
 :::
 
-`opencode serve` を実行してスタンドアロンサーバーを起動できます。すでに Canopy TUI を実行している場合でも、`opencode serve` は新しいサーバーを起動します。
+`canopy serve` を実行してスタンドアロンサーバーを起動できます。すでに Canopy TUI を実行している場合でも、`canopy serve` は新しいサーバーを起動します。
 
 ---
 

@@ -15,7 +15,7 @@ ACP 是一个开放协议，用于标准化代码编辑器与 AI 编码代理之
 
 ## 配置
 
-要通过 ACP 使用 Canopy，请在编辑器中配置运行 `opencode acp` 命令。
+要通过 ACP 使用 Canopy，请在编辑器中配置运行 `canopy acp` 命令。
 
 该命令会将 Canopy 作为兼容 ACP 的子进程启动，通过 stdio 上的 JSON-RPC 与编辑器进行通信。
 
@@ -31,7 +31,7 @@ ACP 是一个开放协议，用于标准化代码编辑器与 AI 编码代理之
 {
   "agent_servers": {
     "Canopy": {
-      "command": "opencode",
+      "command": "canopy",
       "args": ["acp"]
     }
   }
@@ -53,7 +53,7 @@ ACP 是一个开放协议，用于标准化代码编辑器与 AI 编码代理之
             "custom": {
               "name": "Canopy",
               "command": {
-                "command": "opencode",
+                "command": "canopy",
                 "args": ["acp"]
               }
             }

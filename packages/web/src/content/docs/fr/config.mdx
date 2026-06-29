@@ -181,7 +181,7 @@ Les anciennes clés `theme`, `keybinds` et `tui` dans `opencode.json` sont obsol
 
 ### Serveur
 
-Vous pouvez configurer les paramètres du serveur pour les commandes `opencode serve` et `opencode web` via l'option `server`.
+Vous pouvez configurer les paramètres du serveur pour les commandes `canopy serve` et `canopy web` via l'option `server`.
 
 ```json title="opencode.json"
 {
@@ -353,7 +353,7 @@ Vous pouvez définir l'agent par défaut à l'aide de l'option `default_agent`. 
 
 L'agent par défaut doit être un agent principal (et non un sous-agent). Il peut s'agir d'un agent intégré tel que `"build"` ou `"plan"`, ou d'un [agent personnalisé](/docs/agents) que vous avez défini. Si l'agent spécifié n'existe pas ou est un sous-agent, Canopy reviendra à `"build"` avec un avertissement.
 
-Ce paramètre s'applique à toutes les interfaces : TUI, CLI (`opencode run`), application de bureau et GitHub Action.
+Ce paramètre s'applique à toutes les interfaces : TUI, CLI (`canopy run`), application de bureau et GitHub Action.
 
 ---
 

@@ -94,7 +94,7 @@ opencode attach http://10.20.30.40:4096
 カスタム構成で新しいエージェントを作成します。
 
 ```bash
-opencode agent create
+canopy agent create
 ```
 
 このコマンドは、カスタムシステムプロンプトとツール構成を使用して新しいエージェントを作成する手順を示します。
@@ -123,7 +123,7 @@ opencode auth [command]
 
 #### login
 
-Canopy は [Models.dev](https://models.dev) のプロバイダーリストを利用しているため、`opencode auth login` を使用して、使用したいプロバイダーの API キーを構成できます。これは `~/.local/share/opencode/auth.json` に保存されます。
+Canopy は [Models.dev](https://models.dev) のプロバイダーリストを利用しているため、`canopy auth login` を使用して、使用したいプロバイダーの API キーを構成できます。これは `~/.local/share/opencode/auth.json` に保存されます。
 
 ```bash
 opencode auth login
@@ -327,7 +327,7 @@ opencode run [message..]
 opencode run Explain the use of context in Go
 ```
 
-実行中の `opencode serve` インスタンスにアタッチして、実行ごとの MCP サーバーのコールドブート時間を回避することもできます。
+実行中の `canopy serve` インスタンスにアタッチして、実行ごとの MCP サーバーのコールドブート時間を回避することもできます。
 
 ```bash
 # Start a headless server in one terminal

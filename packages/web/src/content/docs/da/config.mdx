@@ -182,7 +182,7 @@ Tilgængelige muligheder:
 
 ### Server
 
-Du kan konfigurere serverindstillinger for kommandoerne `opencode serve` og `opencode web` gennem indstillingen `server`.
+Du kan konfigurere serverindstillinger for kommandoerne `canopy serve` og `canopy web` gennem indstillingen `server`.
 
 ```json title="opencode.json"
 {
@@ -354,7 +354,7 @@ Du kan indstille standardagenten ved at bruge indstillingen `default_agent`. Det
 
 Standardagenten skal være en primær agent (ikke en subagent). Dette kan være en indbygget agent som `"build"` eller `"plan"`, eller en [custom agent](/docs/agents), du har defineret. Hvis den angivne agent ikke eksisterer eller er en underagent, vil Canopy falde tilbage til `"build"` med en advarsel.
 
-Denne indstilling gælder på tværs af alle grænseflader: TUI, CLI (`opencode run`), desktop-app og GitHub Action.
+Denne indstilling gælder på tværs af alle grænseflader: TUI, CLI (`canopy run`), desktop-app og GitHub Action.
 
 ---
 

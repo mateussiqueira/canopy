@@ -94,7 +94,7 @@ opencode attach http://10.20.30.40:4096
 커스텀 설정으로 새 에이전트를 만듭니다.
 
 ```bash
-opencode agent create
+canopy agent create
 ```
 
 이 명령은 커스텀 시스템 프롬프트와 도구 설정을 사용해 새 에이전트를 만드는 과정을 안내합니다.
@@ -123,7 +123,7 @@ opencode auth [command]
 
 #### login
 
-Canopy는 [Models.dev](https://models.dev)의 provider 목록을 기반으로 동작하므로, `opencode auth login`으로 원하는 provider의 API 키를 설정할 수 있습니다. 인증 정보는 `~/.local/share/opencode/auth.json`에 저장됩니다.
+Canopy는 [Models.dev](https://models.dev)의 provider 목록을 기반으로 동작하므로, `canopy auth login`으로 원하는 provider의 API 키를 설정할 수 있습니다. 인증 정보는 `~/.local/share/opencode/auth.json`에 저장됩니다.
 
 ```bash
 opencode auth login
@@ -327,7 +327,7 @@ opencode run [message..]
 opencode run Explain the use of context in Go
 ```
 
-매번 MCP 서버 콜드 부트가 발생하지 않도록, 실행 중인 `opencode serve` 인스턴스에 붙어서 실행할 수도 있습니다.
+매번 MCP 서버 콜드 부트가 발생하지 않도록, 실행 중인 `canopy serve` 인스턴스에 붙어서 실행할 수도 있습니다.
 
 ```bash
 # Start a headless server in one terminal
