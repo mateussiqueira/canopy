@@ -44,3 +44,5 @@ coverage/
 out/
 .next/
 .canopy
+.build/
+Package.resolved
