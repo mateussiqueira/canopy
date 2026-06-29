@@ -6,10 +6,10 @@ import { define } from "./internal"
 import { Effect } from "effect"
 import { AbsolutePath } from "../schema"
 import { SkillV2 } from "../skill"
-import customizeOpencodeContent from "./skill/customize-opencode.md" with { type: "text" }
+import customizeCanopyContent from "./skill/customize-canopy.md" with { type: "text" }
 import jobSearchContent from "./skill/job-search.md" with { type: "text" }
 
-export const CustomizeOpencodeContent = customizeOpencodeContent
+export const CustomizeCanopyContent = customizeCanopyContent
 export const JobSearchContent = jobSearchContent
 
 export const Plugin = define({
@@ -20,11 +20,11 @@ export const Plugin = define({
         new SkillV2.EmbeddedSource({
           type: "embedded",
           skill: new SkillV2.Info({
-            name: "customize-opencode",
+            name: "customize-canopy",
             description:
-              "Use ONLY when the user is editing or creating opencode's own configuration: opencode.json, opencode.jsonc, files under .opencode/, or files under ~/.config/opencode/. Also use when creating or fixing opencode agents, subagents, commands, skills, plugins, MCP servers, or permission rules. Do not use for the user's own application code, or for any project that is not configuring opencode itself.",
-            location: AbsolutePath.make("/builtin/customize-opencode.md"),
-            content: CustomizeOpencodeContent,
+              "Use ONLY when the user is editing or creating Canopy's own configuration: opencode.json, opencode.jsonc, files under .opencode/, or files under ~/.config/opencode/. Also use when creating or fixing Canopy agents, subagents, commands, skills, plugins, MCP servers, or permission rules. Do not use for the user's own application code, or for any project that is not configuring Canopy itself.",
+            location: AbsolutePath.make("/builtin/customize-canopy.md"),
+            content: CustomizeCanopyContent,
           }),
         }),
       )

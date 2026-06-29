@@ -1,13 +1,13 @@
 <!--
   Built-in skill. Name and description are registered in code at
   packages/core/src/plugin/skill.ts
-  and CUSTOMIZE_OPENCODE_SKILL_DESCRIPTION). The body below becomes the
+  and CUSTOMIZE_CANOPY_SKILL_DESCRIPTION). The body below becomes the
   skill's content.
 -->
 
-# Customizing opencode
+# Customizing Canopy
 
-opencode validates its own config strictly and refuses to start when a field
+Canopy validates its own config strictly and refuses to start when a field
 is wrong. The shapes below cover the common surface area, but they are a
 **summary, not the source of truth**.
 
@@ -20,7 +20,7 @@ defaults, and descriptions — lives in the published JSON Schema:
 
 If a field is not documented in this skill, or you need to confirm an exact
 shape before writing config, **fetch that URL and read the schema directly**
-rather than guessing. opencode hard-fails on invalid config, so the cost of a
+rather than guessing. Canopy hard-fails on invalid config, so the cost of a
 wrong shape is a broken startup.
 
 Independently, every `opencode.json` should declare
@@ -29,9 +29,9 @@ mistakes as they type.
 
 ## Applying changes
 
-Config is loaded once when opencode starts and is not hot-reloaded. After
+Config is loaded once when Canopy starts and is not hot-reloaded. After
 saving changes to `opencode.json`, an agent file, a skill, a plugin, or any
-other config-time file, **tell the user to quit and restart opencode** for
+other config-time file, **tell the user to quit and restart Canopy** for
 the changes to take effect. The running session will keep using the
 already-loaded config until then.
 
@@ -122,10 +122,10 @@ Every field is optional.
   },
 
   "plugin": [
-    "opencode-gemini-auth",
-    "opencode-foo@1.2.3",
+    "canopy-gemini-auth",
+    "canopy-foo@1.2.3",
     "./local-plugin.ts",
-    ["opencode-bar", { "option": "value" }]
+    ["canopy-bar", { "option": "value" }]
   ],
 
   "permission": {
@@ -276,13 +276,13 @@ file, `disable: true` in frontmatter.
 
 ### Built-in agents
 
-opencode ships with `build`, `plan`, `general`, `explore`. Hidden internal agents:
+Canopy ships with `build`, `plan`, `general`, `explore`. Hidden internal agents:
 `compaction`, `title`, `summary`. To override a built-in's fields, define the
 same key in `agent: { <name>: { ... } }`.
 
 ## Commands
 
-opencode's command loader scans for `**/*.md` inside command directories. The
+Canopy's command loader scans for `**/*.md` inside command directories. The
 file is named after the command, and lives directly inside the `command` folder:
 
 ```
@@ -298,10 +298,10 @@ agent: build
 model: anthropic/claude-sonnet-4-6
 ---
 
-(command body in markdown: the prompt opencode runs, with $ARGUMENTS for the user's input)
+(command body in markdown: the prompt Canopy runs, with $ARGUMENTS for the user's input)
 ```
 
-- `template` is the command body — everything below the frontmatter — and is required: it is the prompt opencode runs when the command is invoked. Do not also put a `template:` key in the frontmatter.
+- `template` is the command body — everything below the frontmatter — and is required: it is the prompt Canopy runs when the command is invoked. Do not also put a `template:` key in the frontmatter.
 - `$ARGUMENTS` is replaced with everything the user typed after the command; `$1`, `$2`, … pull individual positional arguments.
 - Optional: `description`, `agent`, `model`, `variant`, `subtask`.
 
@@ -311,11 +311,11 @@ model: anthropic/claude-sonnet-4-6
 
 ```json
 "plugin": [
-  "opencode-gemini-auth",            // npm spec, latest
-  "opencode-foo@1.2.3",              // npm spec, pinned
+  "canopy-gemini-auth",            // npm spec, latest
+  "canopy-foo@1.2.3",              // npm spec, pinned
   "./local-plugin.ts",               // file path, relative to the declaring config
   "file:///abs/path/plugin.js",      // file URL
-  ["opencode-bar", { "key": "val" }] // tuple form with options
+  ["canopy-bar", { "key": "val" }] // tuple form with options
 ]
 ```
 
@@ -328,7 +328,7 @@ function, not a plain object literal, and the function returns an object
 (return `{}` if there is nothing to register).
 
 ```ts
-import type { Plugin } from "@opencode-ai/plugin"
+import type { Plugin } from "@canopystack/plugin"
 
 export default (async ({ client, project, directory, $ }) => {
   return {
@@ -403,7 +403,7 @@ Actions: `"allow"`, `"ask"`, `"deny"`.
 
 Per-tool value forms: `"allow"` shorthand (treated as `{"*": "allow"}`), or an
 object `{ pattern: action }`. Within an object, **insertion order matters**.
-opencode evaluates the LAST matching rule, so put broad rules first and narrow
+Canopy evaluates the LAST matching rule, so put broad rules first and narrow
 rules last.
 
 `permission: "allow"` (a string at the top level) is shorthand for "allow
@@ -446,7 +446,7 @@ When a user's config is broken and opencode won't start, these env vars help:
 - For agent, command, skill, and plugin definitions, prefer creating new files
   in the correct location over inlining everything in `opencode.json`.
 - If the user's existing config is malformed, point them at the env-var escape
-  hatches above so they can edit from inside opencode without breaking their
+  hatches above so they can edit from inside Canopy without breaking their
   session.
-- After saving any config change, remind the user to quit and restart opencode
+- After saving any config change, remind the user to quit and restart Canopy
   — running sessions keep using the already-loaded config.
