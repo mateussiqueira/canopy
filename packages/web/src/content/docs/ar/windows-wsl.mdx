@@ -35,7 +35,7 @@ import { Steps } from "@astrojs/starlight/components"
 
    ```bash
    cd /mnt/c/Users/YourName/project
-   opencode
+   Canopy
    ```
 
 </Steps>
@@ -49,7 +49,7 @@ import { Steps } from "@astrojs/starlight/components"
 1. **ابدأ الخادم داخل WSL** مع `--hostname 0.0.0.0` للسماح بالاتصالات الخارجية:
 
    ```bash
-   opencode serve --hostname 0.0.0.0 --port 4096
+   Canopy serve --hostname 0.0.0.0 --port 4096
    ```
 
 2. **اربط تطبيق سطح المكتب** على `http://localhost:4096`
@@ -62,7 +62,7 @@ import { Steps } from "@astrojs/starlight/components"
 عند استخدام `--hostname 0.0.0.0`، اضبط `OPENCODE_SERVER_PASSWORD` لحماية الخادم.
 
 ```bash
-OPENCODE_SERVER_PASSWORD=your-password opencode serve --hostname 0.0.0.0
+OPENCODE_SERVER_PASSWORD=your-password Canopy serve --hostname 0.0.0.0
 ```
 
 :::
@@ -76,7 +76,7 @@ OPENCODE_SERVER_PASSWORD=your-password opencode serve --hostname 0.0.0.0
 1. **شغّل `canopy web` من terminal داخل WSL** بدلًا من PowerShell:
 
    ```bash
-   opencode web --hostname 0.0.0.0
+   Canopy web --hostname 0.0.0.0
    ```
 
 2. **افتحه من متصفح Windows** عبر `http://localhost:<port>` (يعرض Canopy الرابط)
@@ -97,7 +97,7 @@ OPENCODE_SERVER_PASSWORD=your-password opencode serve --hostname 0.0.0.0
 
 ```bash
 cd /mnt/c/Users/YourName/Documents/project
-opencode
+Canopy
 ```
 
 :::tip
@@ -110,4 +110,4 @@ opencode
 
 - شغّل Canopy داخل WSL للمشاريع المخزنة على أقراص Windows حتى يكون الوصول للملفات سلسًا
 - استخدم [إضافة WSL في VS Code](https://code.visualstudio.com/docs/remote/wsl) مع Canopy لسير عمل تطوير متكامل
-- إعدادات Canopy وجلساته تُخزَّن داخل بيئة WSL في `~/.local/share/opencode/`
+- إعدادات Canopy وجلساته تُخزَّن داخل بيئة WSL في `~/.local/share/Canopy/`

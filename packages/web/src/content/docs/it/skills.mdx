@@ -13,8 +13,8 @@ Le skill vengono caricate on-demand tramite lo strumento nativo `skill`: gli age
 Crea una cartella per ogni nome di skill e metti un `SKILL.md` al suo interno.
 Canopy cerca in queste posizioni:
 
-- Config di progetto: `.opencode/skills/<name>/SKILL.md`
-- Config globale: `~/.config/opencode/skills/<name>/SKILL.md`
+- Config di progetto: `.Canopy/skills/<name>/SKILL.md`
+- Config globale: `~/.config/Canopy/skills/<name>/SKILL.md`
 - Progetto compatibile con Claude: `.claude/skills/<name>/SKILL.md`
 - Globale compatibile con Claude: `~/.claude/skills/<name>/SKILL.md`
 - Progetto compatibile con agent: `.agents/skills/<name>/SKILL.md`
@@ -25,9 +25,9 @@ Canopy cerca in queste posizioni:
 ## Discovery
 
 Per i percorsi locali al progetto, Canopy risale dalla directory di lavoro corrente finche' non raggiunge il worktree git.
-Carica qualsiasi `skills/*/SKILL.md` corrispondente in `.opencode/` e qualsiasi `.claude/skills/*/SKILL.md` o `.agents/skills/*/SKILL.md` corrispondente lungo il percorso.
+Carica qualsiasi `skills/*/SKILL.md` corrispondente in `.Canopy/` e qualsiasi `.claude/skills/*/SKILL.md` o `.agents/skills/*/SKILL.md` corrispondente lungo il percorso.
 
-Le definizioni globali vengono caricate anche da `~/.config/opencode/skills/*/SKILL.md`, `~/.claude/skills/*/SKILL.md` e `~/.agents/skills/*/SKILL.md`.
+Le definizioni globali vengono caricate anche da `~/.config/Canopy/skills/*/SKILL.md`, `~/.claude/skills/*/SKILL.md` e `~/.agents/skills/*/SKILL.md`.
 
 ---
 
@@ -73,14 +73,14 @@ Tieni la descrizione abbastanza specifica da permettere all'agente di scegliere 
 
 ## Esempio
 
-Crea `.opencode/skills/git-release/SKILL.md` cosi':
+Crea `.Canopy/skills/git-release/SKILL.md` cosi':
 
 ```markdown
 ---
 name: git-release
 description: Create consistent releases and changelogs
 license: MIT
-compatibility: opencode
+compatibility: Canopy
 metadata:
   audience: maintainers
   workflow: github
@@ -124,7 +124,7 @@ skill({ name: "git-release" })
 
 ## Permessi
 
-Controlla a quali skill gli agenti possono accedere usando permessi basati su pattern in `opencode.json`:
+Controlla a quali skill gli agenti possono accedere usando permessi basati su pattern in `canopy.json.guard`:
 
 ```json
 {
@@ -163,7 +163,7 @@ permission:
 ---
 ```
 
-**Per agenti integrati** (in `opencode.json`):
+**Per agenti integrati** (in `canopy.json.guard`):
 
 ```json
 {

@@ -1,19 +1,19 @@
 ---
 title: Server
-description: Interager med opencode-serveren over HTTP.
+description: Interager med Canopy-serveren over HTTP.
 ---
 
 import config from "../../../../config.mjs"
 export const typesUrl = `${config.github}/blob/dev/packages/sdk/js/src/gen/types.gen.ts`
 
-Kommandoen `canopy serve` kører en hovedløs HTTP-server, som afslører et OpenAPI-endpoint, som en opencode-klient kan bruge.
+Kommandoen `canopy serve` kører en hovedløs HTTP-server, som afslører et OpenAPI-endpoint, som en Canopy-klient kan bruge.
 
 ---
 
 ### Brug
 
 ```bash
-opencode serve [--port <number>] [--hostname <string>] [--cors <origin>]
+Canopy serve [--port <number>] [--hostname <string>] [--cors <origin>]
 ```
 
 #### Indstillinger
@@ -23,41 +23,41 @@ opencode serve [--port <number>] [--hostname <string>] [--cors <origin>]
 | `--port`        | Port at lytte på                             | `4096`           |
 | `--hostname`    | Værtsnavn at lytte på                        | `127.0.0.1`      |
 | `--mdns`        | Aktiver mDNS-opdagelse                       | `false`          |
-| `--mdns-domain` | Brugerdefineret domænenavn for mDNS-tjeneste | `opencode.local` |
+| `--mdns-domain` | Brugerdefineret domænenavn for mDNS-tjeneste | `Canopy.local` |
 | `--cors`        | Yderligere browseroprindelse for at tillade  | `[]`             |
 
 `--cors` kan angives flere gange:
 
 ```bash
-opencode serve --cors http://localhost:5173 --cors https://app.example.com
+Canopy serve --cors http://localhost:5173 --cors https://app.example.com
 ```
 
 ---
 
 ### Godkendelse
 
-Indstil `OPENCODE_SERVER_PASSWORD` for at beskytte serveren med HTTP grundlæggende godkendelse. Brugernavnet er som standard `opencode`, eller indstil `OPENCODE_SERVER_USERNAME` for at tilsidesætte det. Dette gælder både `canopy serve` og `canopy web`.
+Indstil `OPENCODE_SERVER_PASSWORD` for at beskytte serveren med HTTP grundlæggende godkendelse. Brugernavnet er som standard `Canopy`, eller indstil `OPENCODE_SERVER_USERNAME` for at tilsidesætte det. Dette gælder både `canopy serve` og `canopy web`.
 
 ```bash
-OPENCODE_SERVER_PASSWORD=your-password opencode serve
+OPENCODE_SERVER_PASSWORD=your-password Canopy serve
 ```
 
 ---
 
 ### Sådan fungerer det
 
-Når du kører `opencode` starter den en TUI og en server. Hvor TUI er
+Når du kører `Canopy` starter den en TUI og en server. Hvor TUI er
 klient som taler med serveren. Serveren viser en OpenAPI 3.1-specifikation
 endpoint. Dette endpoint bruges også til at generere en [SDK](/docs/sdk).
 
 :::tip
-Brug opencode-serveren til at interagere med opencode programmatisk.
+Brug Canopy-serveren til at interagere med Canopy programmatisk.
 :::
 
-Denne arkitektur lader opencode understøtte flere klienter og lader dig interagere med opencode programmatisk.
+Denne arkitektur lader Canopy understøtte flere klienter og lader dig interagere med Canopy programmatisk.
 
 Du kan køre `canopy serve` for at starte en selvstændig server. Hvis du har
-opencode TUI kørende, vil `canopy serve` starte en ny server.
+Canopy TUI kørende, vil `canopy serve` starte en ny server.
 
 ---
 

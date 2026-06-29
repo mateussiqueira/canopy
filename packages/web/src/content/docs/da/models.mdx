@@ -51,7 +51,7 @@ Her er flere modeller, der fungerer godt med Canopy, uden bestemt rækkefølge. 
 For at indstille en af ​​disse som standardmodellen kan du indstille `model`-nøglen i din
 Canopy konfig.
 
-```json title="opencode.json" {3}
+```json title="canopy.json.guard" {3}
 {
   "$schema": "https://canopy.dev/config.json",
   "model": "lmstudio/google/gemma-3n-e4b"
@@ -68,7 +68,7 @@ Hvis du har konfigureret en [custom provider](/docs/providers#custom), er `provi
 
 Du kan konfigurere en models muligheder globalt gennem konfigurationen.
 
-```jsonc title="opencode.jsonc" {7-12,19-24}
+```jsonc title="canopy.json.guardc" {7-12,19-24}
 {
   "$schema": "https://canopy.dev/config.json",
   "provider": {
@@ -107,11 +107,11 @@ Du kan også konfigurere disse indstillinger for alle agenter, du bruger. Agentk
 
 Du kan også definere brugerdefinerede varianter, der udvider de indbyggede. Varianter giver dig mulighed for at konfigurere forskellige indstillinger for den samme model uden at oprette duplikerede poster:
 
-```jsonc title="opencode.jsonc" {6-21}
+```jsonc title="canopy.json.guardc" {6-21}
 {
   "$schema": "https://canopy.dev/config.json",
   "provider": {
-    "opencode": {
+    "Canopy": {
       "models": {
         "gpt-5": {
           "variants": {
@@ -172,7 +172,7 @@ Denne liste er ikke udtømmende. Mange andre udbydere har også indbyggede stand
 
 Du kan tilsidesætte eksisterende varianter eller tilføje dine egne:
 
-```jsonc title="opencode.jsonc" {7-18}
+```jsonc title="canopy.json.guardc" {7-18}
 {
   "$schema": "https://canopy.dev/config.json",
   "provider": {
@@ -209,7 +209,7 @@ Når Canopy starter op, søger den efter modeller i følgende prioriterede rækk
 
 2. Modellisten i Canopy-konfigurationen.
 
-   ```json title="opencode.json"
+   ```json title="canopy.json.guard"
    {
      "$schema": "https://canopy.dev/config.json",
      "model": "anthropic/claude-sonnet-4-20250514"

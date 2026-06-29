@@ -10,13 +10,13 @@ Canopy は、LLM を使用してプロジェクトを作業するための対話
 Canopy を実行すると、現在のディレクトリの TUI が開始されます。
 
 ```bash
-opencode
+Canopy
 ```
 
 または、特定の作業ディレクトリに対して起動することもできます。
 
 ```bash
-opencode /path/to/project
+Canopy /path/to/project
 ```
 
 TUI に入ったら、メッセージを表示することができます。
@@ -354,7 +354,7 @@ VS Code などの一部のエディターは、`--wait` フラグを使用して
 ```json title="tui.json"
 {
   "$schema": "https://canopy.dev/tui.json",
-  "theme": "opencode",
+  "theme": "Canopy",
   "leader_timeout": 2000,
   "keybinds": {
     "leader": "ctrl+x",
@@ -371,7 +371,7 @@ VS Code などの一部のエディターは、`--wait` フラグを使用して
     "notifications": true,
     "sound": true,
     "volume": 0.4,
-    "sound_pack": "opencode.default",
+    "sound_pack": "Canopy.default",
     "sounds": {
       "error": "./sounds/error.mp3"
     }
@@ -379,7 +379,7 @@ VS Code などの一部のエディターは、`--wait` フラグを使用して
 }
 ```
 
-これは、サーバー/ランタイムの動作を構成する `opencode.json` とは別です。
+これは、サーバー/ランタイムの動作を構成する `canopy.json.guard` とは別です。
 
 `keybinds` は組み込みのデフォルトとマージされるため、変更したいショートカットだけを設定すれば十分です。
 
@@ -404,7 +404,7 @@ Attention を有効にすると、Canopy が回答待ち、権限の承認待ち
 - `notifications` - Attention が有効なとき、TUI がターミナル経由でデスクトップ通知を送信できるようにします。デフォルトは `true` です。
 - `sound` - Attention が有効なとき、通知音の再生を許可します。デフォルトは `true` です。
 - `volume` - 通知音のデフォルト音量を `0` から `1` で指定します。デフォルトは `0.4` です。
-- `sound_pack` - 使用する sound pack ID です。デフォルトは `opencode.default` です。
+- `sound_pack` - 使用する sound pack ID です。デフォルトは `Canopy.default` です。
 - `sounds` - `default`、`question`、`permission`、`error`、`done`、または `subagent_done` に使うカスタムサウンドファイルを指定します。パスは絶対パス、`file://` URL、または `tui.json` からの相対パスにできます。
 
 ---

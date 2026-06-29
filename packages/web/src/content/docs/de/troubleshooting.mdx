@@ -11,8 +11,8 @@ Wenn Canopy Probleme macht, starte mit Logs und lokal gespeicherten Daten auf de
 
 Logdateien werden hier gespeichert:
 
-- **macOS/Linux**: `~/.local/share/opencode/log/`
-- **Windows**: Druecke `WIN+R` und fuege ein: `%USERPROFILE%\.local\share\opencode\log`
+- **macOS/Linux**: `~/.local/share/Canopy/log/`
+- **Windows**: Druecke `WIN+R` und fuege ein: `%USERPROFILE%\.local\share\Canopy\log`
 
 Dateinamen enthalten Zeitstempel (z. B. `2025-01-09T123456.log`) und es bleiben die letzten 10 Logs erhalten.
 
@@ -22,10 +22,10 @@ Mit `--log-level` bekommst du detailliertere Diagnoseinfos, z. B. `canopy --log-
 
 ## Speicher
 
-opencode speichert Sitzungs- und App-Daten auf der Festplatte unter:
+Canopy speichert Sitzungs- und App-Daten auf der Festplatte unter:
 
-- **macOS/Linux**: `~/.local/share/opencode/`
-- **Windows**: Druecke `WIN+R` und fuege ein: `%USERPROFILE%\.local\share\opencode`
+- **macOS/Linux**: `~/.local/share/Canopy/`
+- **Windows**: Druecke `WIN+R` und fuege ein: `%USERPROFILE%\.local\share\Canopy`
 
 Dieses Verzeichnis enthaelt:
 
@@ -39,7 +39,7 @@ Dieses Verzeichnis enthaelt:
 
 ## Desktop-App
 
-Canopy Desktop startet im Hintergrund einen lokalen Canopy-Server (`opencode-cli`-Sidecar).
+Canopy Desktop startet im Hintergrund einen lokalen Canopy-Server (`Canopy-cli`-Sidecar).
 Viele Probleme kommen von fehlerhaften Plugins, kaputtem Cache oder falschen Server-Einstellungen.
 
 ### Schnellchecks
@@ -58,9 +58,9 @@ Wenn die Desktop-App beim Start abstuerzt, haengt oder sich seltsam verhaelt, de
 
 Oeffne deine globale Konfigurationsdatei und suche nach dem `plugin`-Schluessel.
 
-- **macOS/Linux**: `~/.config/opencode/opencode.jsonc` (oder `~/.config/opencode/opencode.json`)
-- **macOS/Linux** (aeltere Installationen): `~/.local/share/opencode/opencode.jsonc`
-- **Windows**: Druecke `WIN+R` und fuege ein: `%USERPROFILE%\.config\opencode\opencode.jsonc`
+- **macOS/Linux**: `~/.config/Canopy/canopy.json.guardc` (oder `~/.config/Canopy/canopy.json.guard`)
+- **macOS/Linux** (aeltere Installationen): `~/.local/share/Canopy/canopy.json.guardc`
+- **Windows**: Druecke `WIN+R` und fuege ein: `%USERPROFILE%\.config\Canopy\canopy.json.guardc`
 
 Wenn du Plugins konfiguriert hast, deaktiviere sie voruebergehend, indem du den Schluessel entfernst oder auf ein leeres Array setzt:
 
@@ -76,10 +76,10 @@ Wenn du Plugins konfiguriert hast, deaktiviere sie voruebergehend, indem du den 
 Canopy kann auch lokale Plugins von der Festplatte laden. Verschiebe diese voruebergehend (oder benenne den Ordner um) und starte die Desktop-App neu:
 
 - **Globale Plugins**
-  - **macOS/Linux**: `~/.config/opencode/plugins/`
-  - **Windows**: Druecke `WIN+R` und fuege ein: `%USERPROFILE%\.config\opencode\plugins`
+  - **macOS/Linux**: `~/.config/Canopy/plugins/`
+  - **Windows**: Druecke `WIN+R` und fuege ein: `%USERPROFILE%\.config\Canopy\plugins`
 - **Projekt-Plugins** (nur bei projektspezifischer Konfig)
-  - `<your-project>/.opencode/plugins/`
+  - `<your-project>/.Canopy/plugins/`
 
 Wenn die App wieder funktioniert, aktiviere Plugins nacheinander, um den Verursacher zu finden.
 
@@ -92,9 +92,9 @@ Wenn das Deaktivieren von Plugins nicht hilft (oder eine Plugin-Installation hae
 1. Beende Canopy Desktop komplett.
 2. Loesche das Cache-Verzeichnis:
 
-- **macOS**: Finder -> `Cmd+Shift+G` -> einfuegen: `~/.cache/opencode`
-- **Linux**: loesche `~/.cache/opencode` (oder fuehre aus: `rm -rf ~/.cache/opencode`)
-- **Windows**: Druecke `WIN+R` und fuege ein: `%USERPROFILE%\.cache\opencode`
+- **macOS**: Finder -> `Cmd+Shift+G` -> einfuegen: `~/.cache/Canopy`
+- **Linux**: loesche `~/.cache/Canopy` (oder fuehre aus: `rm -rf ~/.cache/Canopy`)
+- **Windows**: Druecke `WIN+R` und fuege ein: `%USERPROFILE%\.cache\Canopy`
 
 3. Starte Canopy Desktop neu.
 
@@ -112,7 +112,7 @@ Klicke im Startbildschirm auf den Servernamen (mit dem Statuspunkt), um die Serv
 
 #### `server.port` / `server.hostname` aus Konfiguration entfernen
 
-Wenn deine `opencode.json(c)` einen `server`-Abschnitt enthaelt, entferne ihn voruebergehend und starte die Desktop-App neu.
+Wenn deine `canopy.json.guard(c)` einen `server`-Abschnitt enthaelt, entferne ihn voruebergehend und starte die Desktop-App neu.
 
 #### Umgebungsvariablen prüfen
 
@@ -159,8 +159,8 @@ Wenn die App nicht startet und du Einstellungen nicht in der UI loeschen kannst,
 1. Beende Canopy Desktop.
 2. Finde und loesche diese Dateien (im App-Data-Verzeichnis von Canopy Desktop):
 
-- `opencode.settings.dat` (desktop default server URL)
-- `opencode.global.dat` und `opencode.workspace.*.dat` (UI state like recent servers/projects)
+- `Canopy.settings.dat` (desktop default server URL)
+- `Canopy.global.dat` und `Canopy.workspace.*.dat` (UI state like recent servers/projects)
 
 So findest du das Verzeichnis schnell:
 
@@ -225,7 +225,7 @@ Beispiele:
 
 - `openai/gpt-4.1`
 - `openrouter/google/gemini-2.5-flash`
-- `opencode/kimi-k2`
+- `Canopy/kimi-k2`
 
 Um zu sehen, auf welche Modelle du Zugriff hast, fuehre `canopy models` aus.
 
@@ -241,10 +241,10 @@ Zur Loesung:
 2. Wenn das Problem besteht, versuche deine gespeicherte Konfiguration zu loeschen:
 
    ```bash
-   rm -rf ~/.local/share/opencode
+   rm -rf ~/.local/share/Canopy
    ```
 
-   Unter Windows druecke `WIN+R` und loesche: `%USERPROFILE%\.local\share\opencode`
+   Unter Windows druecke `WIN+R` und loesche: `%USERPROFILE%\.local\share\Canopy`
 
 3. Authentifiziere dich erneut beim Provider mit dem `/connect`-Befehl in der TUI.
 
@@ -252,21 +252,21 @@ Zur Loesung:
 
 ### AI_APICallError und Provider-Paket-Probleme
 
-Wenn du API-Call-Fehler erhaeltst, kann das an veralteten Provider-Paketen liegen. opencode installiert Provider-Pakete (OpenAI, Anthropic, Google, etc.) dynamisch bei Bedarf und cached sie lokal.
+Wenn du API-Call-Fehler erhaeltst, kann das an veralteten Provider-Paketen liegen. Canopy installiert Provider-Pakete (OpenAI, Anthropic, Google, etc.) dynamisch bei Bedarf und cached sie lokal.
 
 Um Provider-Paket-Probleme zu loesen:
 
 1. Leere den Provider-Paket-Cache:
 
    ```bash
-   rm -rf ~/.cache/opencode
+   rm -rf ~/.cache/Canopy
    ```
 
-   Unter Windows druecke `WIN+R` und loesche: `%USERPROFILE%\.cache\opencode`
+   Unter Windows druecke `WIN+R` und loesche: `%USERPROFILE%\.cache\Canopy`
 
-2. Starte opencode neu, um die neuesten Provider-Pakete zu installieren
+2. Starte Canopy neu, um die neuesten Provider-Pakete zu installieren
 
-Dies zwingt opencode, die neuesten Versionen der Provider-Pakete herunterzuladen, was oft Kompatibilitaetsprobleme mit Modellparametern und API-Aenderungen loest.
+Dies zwingt Canopy, die neuesten Versionen der Provider-Pakete herunterzuladen, was oft Kompatibilitaetsprobleme mit Modellparametern und API-Aenderungen loest.
 
 ---
 
@@ -297,4 +297,4 @@ Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &
 export DISPLAY=:99.0
 ```
 
-opencode erkennt, ob du Wayland nutzt und bevorzugt `wl-clipboard`, sonst versucht es `xclip` und `xsel` (in dieser Reihenfolge).
+Canopy erkennt, ob du Wayland nutzt und bevorzugt `wl-clipboard`, sonst versucht es `xclip` und `xsel` (in dieser Reihenfolge).

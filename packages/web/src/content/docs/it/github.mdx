@@ -3,7 +3,7 @@ title: GitHub
 description: Usa Canopy in issue e pull request su GitHub.
 ---
 
-Canopy si integra nel tuo workflow GitHub. Menziona `/opencode` o `/oc` in un commento e Canopy eseguira' i task dentro il runner di GitHub Actions.
+Canopy si integra nel tuo workflow GitHub. Menziona `/Canopy` o `/oc` in un commento e Canopy eseguira' i task dentro il runner di GitHub Actions.
 
 ---
 
@@ -20,7 +20,7 @@ Canopy si integra nel tuo workflow GitHub. Menziona `/opencode` o `/oc` in un co
 Esegui il comando seguente in un progetto che si trova in un repo GitHub:
 
 ```bash
-opencode github install
+Canopy github install
 ```
 
 Questo ti guidera' nell'installazione della GitHub app, nella creazione del workflow e nella configurazione dei secret.
@@ -33,14 +33,14 @@ In alternativa, puoi configurarlo manualmente.
 
 1. **Installa la GitHub app**
 
-   Vai su [**github.com/apps/opencode-agent**](https://github.com/apps/opencode-agent). Assicurati che sia installata sul repository di destinazione.
+   Vai su [**github.com/apps/Canopy-agent**](https://github.com/apps/Canopy-agent). Assicurati che sia installata sul repository di destinazione.
 
 2. **Aggiungi il workflow**
 
-   Aggiungi il seguente file workflow in `.github/workflows/opencode.yml` nel tuo repo. Assicurati di impostare il `model` appropriato e le API key richieste in `env`.
+   Aggiungi il seguente file workflow in `.github/workflows/Canopy.yml` nel tuo repo. Assicurati di impostare il `model` appropriato e le API key richieste in `env`.
 
-   ```yml title=".github/workflows/opencode.yml" {24,26}
-   name: opencode
+   ```yml title=".github/workflows/Canopy.yml" {24,26}
+   name: Canopy
 
    on:
      issue_comment:
@@ -49,10 +49,10 @@ In alternativa, puoi configurarlo manualmente.
        types: [created]
 
    jobs:
-     opencode:
+     Canopy:
        if: |
          contains(github.event.comment.body, '/oc') ||
-         contains(github.event.comment.body, '/opencode')
+         contains(github.event.comment.body, '/Canopy')
        runs-on: ubuntu-latest
        permissions:
          id-token: write
@@ -107,8 +107,8 @@ Canopy puo' essere attivato dai seguenti eventi GitHub:
 
 | Tipo evento                   | Attivato da                            | Dettagli                                                                                                                  |
 | ----------------------------- | -------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
-| `issue_comment`               | Commento su una issue o PR             | Menziona `/opencode` o `/oc` nel commento. Canopy legge il contesto e puo' creare branch, aprire PR o rispondere.       |
-| `pull_request_review_comment` | Commento su specifiche righe in una PR | Menziona `/opencode` o `/oc` durante una review. Canopy riceve path file, numeri di riga e contesto del diff.           |
+| `issue_comment`               | Commento su una issue o PR             | Menziona `/Canopy` o `/oc` nel commento. Canopy legge il contesto e puo' creare branch, aprire PR o rispondere.       |
+| `pull_request_review_comment` | Commento su specifiche righe in una PR | Menziona `/Canopy` o `/oc` durante una review. Canopy riceve path file, numeri di riga e contesto del diff.           |
 | `issues`                      | Issue aperta o modificata              | Attiva automaticamente Canopy quando le issue vengono create o modificate. Richiede l'input `prompt`.                   |
 | `pull_request`                | PR aperta o aggiornata                 | Attiva automaticamente Canopy quando le PR vengono aperte, sincronizzate o riaperte. Utile per review automatiche.      |
 | `schedule`                    | Pianificazione basata su cron          | Esegue Canopy a pianificazione. Richiede l'input `prompt`. Output nei log e nelle PR (nessuna issue su cui commentare). |
@@ -118,7 +118,7 @@ Canopy puo' essere attivato dai seguenti eventi GitHub:
 
 Esegui Canopy a pianificazione per eseguire task automatizzati:
 
-```yaml title=".github/workflows/opencode-scheduled.yml"
+```yaml title=".github/workflows/Canopy-scheduled.yml"
 name: Scheduled Canopy Task
 
 on:
@@ -126,7 +126,7 @@ on:
     - cron: "0 9 * * 1" # Every Monday at 9am UTC
 
 jobs:
-  opencode:
+  Canopy:
     runs-on: ubuntu-latest
     permissions:
       id-token: write
@@ -158,8 +158,8 @@ Per gli eventi schedulati, l'input `prompt` e' **obbligatorio** dato che non c'e
 
 Review automatica delle PR quando vengono aperte o aggiornate:
 
-```yaml title=".github/workflows/opencode-review.yml"
-name: opencode-review
+```yaml title=".github/workflows/Canopy-review.yml"
+name: Canopy-review
 
 on:
   pull_request:
@@ -199,7 +199,7 @@ Per gli eventi `pull_request`, se non viene fornito alcun `prompt`, Canopy fa di
 
 Triage automatico delle nuove issue. Questo esempio filtra gli account piu' vecchi di 30 giorni per ridurre lo spam:
 
-```yaml title=".github/workflows/opencode-triage.yml"
+```yaml title=".github/workflows/Canopy-triage.yml"
 name: Issue Triage
 
 on:
@@ -254,7 +254,7 @@ Per gli eventi `issues`, l'input `prompt` e' **obbligatorio** dato che non c'e' 
 
 Sovrascrivi il prompt di default per personalizzare il comportamento di Canopy nel tuo workflow.
 
-```yaml title=".github/workflows/opencode.yml"
+```yaml title=".github/workflows/Canopy.yml"
 - uses: mateussiqueira/canopy/github@latest
   with:
     model: anthropic/claude-sonnet-4-5
@@ -278,7 +278,7 @@ Ecco alcuni esempi di come puoi usare Canopy su GitHub.
   Aggiungi questo commento in una issue GitHub.
 
   ```
-  /opencode explain this issue
+  /Canopy explain this issue
   ```
 
   Canopy leggera' l'intero thread, inclusi tutti i commenti, e rispondera' con una spiegazione chiara.
@@ -288,7 +288,7 @@ Ecco alcuni esempi di come puoi usare Canopy su GitHub.
   In una issue GitHub, scrivi:
 
   ```
-  /opencode fix this
+  /Canopy fix this
   ```
 
   Canopy creera' un nuovo branch, implementera' le modifiche e aprira' una PR con i cambiamenti.

@@ -224,19 +224,19 @@ You can manually trigger authentication or manage credentials.
 Authenticate with a specific MCP server:
 
 ```bash
-opencode mcp auth my-oauth-server
+canopy mcp auth my-oauth-server
 ```
 
 List all MCP servers and their auth status:
 
 ```bash
-opencode mcp list
+canopy mcp list
 ```
 
 Remove stored credentials:
 
 ```bash
-opencode mcp logout my-oauth-server
+canopy mcp logout my-oauth-server
 ```
 
 The `mcp auth` command will open your browser for authorization. After you authorize, Canopy will store the tokens securely in `~/.local/share/opencode/mcp-auth.json`.
@@ -280,10 +280,10 @@ If a remote MCP server is failing to authenticate, you can diagnose issues with:
 
 ```bash
 # View auth status for all OAuth-capable servers
-opencode mcp auth list
+canopy mcp auth list
 
 # Debug connection and OAuth flow for a specific server
-opencode mcp debug my-oauth-server
+canopy mcp debug my-oauth-server
 ```
 
 The `mcp debug` command shows the current auth status, tests HTTP connectivity, and attempts the OAuth discovery flow.
@@ -421,7 +421,7 @@ Add the [Sentry MCP server](https://mcp.sentry.dev) to interact with your Sentry
 After adding the configuration, authenticate with Sentry:
 
 ```bash
-opencode mcp auth sentry
+canopy mcp auth sentry
 ```
 
 This will open a browser window to complete the OAuth flow and connect Canopy to your Sentry account.

@@ -10,13 +10,13 @@ import { Tabs, TabItem } from "@astrojs/starlight/components"
 يؤدي تشغيل Canopy إلى بدء واجهة TUI للدليل الحالي.
 
 ```bash
-opencode
+Canopy
 ```
 
 أو يمكنك تشغيلها لدليل عمل محدد.
 
 ```bash
-opencode /path/to/project
+Canopy /path/to/project
 ```
 
 بعد الدخول إلى واجهة TUI، يمكنك إرسال رسالة كطلب.
@@ -357,7 +357,7 @@ How is auth handled in @packages/functions/src/api/index.ts?
 ```json title="tui.json"
 {
   "$schema": "https://canopy.dev/tui.json",
-  "theme": "opencode",
+  "theme": "Canopy",
   "leader_timeout": 2000,
   "keybinds": {
     "leader": "ctrl+x",
@@ -374,7 +374,7 @@ How is auth handled in @packages/functions/src/api/index.ts?
     "notifications": true,
     "sound": true,
     "volume": 0.4,
-    "sound_pack": "opencode.default",
+    "sound_pack": "Canopy.default",
     "sounds": {
       "error": "./sounds/error.mp3"
     }
@@ -382,7 +382,7 @@ How is auth handled in @packages/functions/src/api/index.ts?
 }
 ```
 
-هذا منفصل عن `opencode.json`، الذي يضبط سلوك الخادم ووقت التشغيل.
+هذا منفصل عن `canopy.json.guard`، الذي يضبط سلوك الخادم ووقت التشغيل.
 
 يتم دمج `keybinds` مع الاختصارات الافتراضية المدمجة، لذلك لا تحتاج إلا إلى ضبط الاختصارات التي تريد تغييرها.
 
@@ -407,7 +407,7 @@ How is auth handled in @packages/functions/src/api/index.ts?
 - `notifications` - عند تفعيل Attention، يسمح لـ TUI بإرسال desktop notifications عبر terminal. القيمة الافتراضية `true`.
 - `sound` - عند تفعيل Attention، يسمح بتشغيل أصوات التنبيه. القيمة الافتراضية `true`.
 - `volume` - مستوى صوت التنبيهات الافتراضي من `0` إلى `1`. القيمة الافتراضية `0.4`.
-- `sound_pack` - sound pack ID المراد استخدامه. القيمة الافتراضية `opencode.default`.
+- `sound_pack` - sound pack ID المراد استخدامه. القيمة الافتراضية `Canopy.default`.
 - `sounds` - يحدد ملفات صوت مخصصة لـ `default` أو `question` أو `permission` أو `error` أو `done` أو `subagent_done`. يمكن أن تكون المسارات مطلقة، أو `file://` URLs، أو نسبية إلى `tui.json`.
 
 ---

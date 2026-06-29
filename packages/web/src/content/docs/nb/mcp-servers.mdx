@@ -25,7 +25,7 @@ Enkelte MCP-servere, som GitHub MCP-serveren, har en tendens til å legge til ma
 
 Du kan definere MCP-servere i [Canopy Config](https://canopy.dev/docs/config/) under `mcp`. Legg til hver MCP med et unikt navn. Du kan referere til den MCP ved navn når du spør LLM-en.
 
-```jsonc title="opencode.jsonc" {6}
+```jsonc title="canopy.json.guardc" {6}
 {
   "$schema": "https://canopy.dev/config.json",
   "mcp": {
@@ -46,11 +46,11 @@ Du kan også deaktivere en server ved å sette `enabled` til `false`. Dette er n
 
 ### Overstyring av fjernstandarder
 
-Organisasjoner kan tilby standard MCP-servere via deres `.well-known/opencode`-endepunkt. Disse serverne kan være deaktivert som standard, slik at brukere kan melde seg på de de trenger.
+Organisasjoner kan tilby standard MCP-servere via deres `.well-known/Canopy`-endepunkt. Disse serverne kan være deaktivert som standard, slik at brukere kan melde seg på de de trenger.
 
 For å aktivere en spesifikk server fra organisasjonens eksterne konfigurasjon, legg den til i din lokale konfigurasjon med `enabled: true`:
 
-```json title="opencode.json"
+```json title="canopy.json.guard"
 {
   "$schema": "https://canopy.dev/config.json",
   "mcp": {
@@ -71,7 +71,7 @@ Dine lokale konfigurasjonsverdier overstyrer de eksterne standardinnstillingene.
 
 Legg til lokale MCP-servere ved å bruke `type` til `"local"` i MCP-objektet.
 
-```jsonc title="opencode.jsonc" {15}
+```jsonc title="canopy.json.guardc" {15}
 {
   "$schema": "https://canopy.dev/config.json",
   "mcp": {
@@ -92,7 +92,7 @@ Kommandoen er hvordan den lokale MCP-serveren startes. Du kan også sende inn en
 
 For eksempel, her er hvordan du kan legge til test [`@modelcontextprotocol/server-everything`](https://www.npmjs.com/package/@modelcontextprotocol/server-everything) MCP serveren.
 
-```jsonc title="opencode.jsonc"
+```jsonc title="canopy.json.guardc"
 {
   "$schema": "https://canopy.dev/config.json",
   "mcp": {
@@ -130,7 +130,7 @@ Her er alle alternativene for å konfigurere en lokal MCP-server.
 
 Legg til eksterne MCP-servere ved å sette `type` til `"remote"`.
 
-```json title="opencode.json"
+```json title="canopy.json.guard"
 {
   "$schema": "https://canopy.dev/config.json",
   "mcp": {
@@ -177,7 +177,7 @@ Canopy håndterer automatisk OAuth-autentisering for eksterne MCP-servere. Når 
 
 For de fleste OAuth-aktiverte MCP-servere er ingen spesiell konfigurasjon nødvendig. Bare konfigurer den eksterne serveren:
 
-```json title="opencode.json"
+```json title="canopy.json.guard"
 {
   "$schema": "https://canopy.dev/config.json",
   "mcp": {
@@ -197,7 +197,7 @@ Hvis serveren krever autentisering, vil Canopy be deg om å autentisere når du 
 
 Hvis du har klientlegitimasjon fra MCP-serverleverandøren, kan du konfigurere dem:
 
-```json title="opencode.json" {7-11}
+```json title="canopy.json.guard" {7-11}
 {
   "$schema": "https://canopy.dev/config.json",
   "mcp": {
@@ -223,22 +223,22 @@ Du kan utløse autentisering manuelt eller administrere legitimasjon.
 Autentiser med en spesifikk MCP-server:
 
 ```bash
-opencode mcp auth my-oauth-server
+Canopy mcp auth my-oauth-server
 ```
 
 Liste alle MCP-servere og deres autentiseringsstatus:
 
 ```bash
-opencode mcp list
+Canopy mcp list
 ```
 
 Fjern lagret legitimasjon:
 
 ```bash
-opencode mcp logout my-oauth-server
+Canopy mcp logout my-oauth-server
 ```
 
-Kommandoen `mcp auth` åpner nettleseren din for autorisasjon. Etter at du har godkjent, vil Canopy lagre tokens sikkert i `~/.local/share/opencode/mcp-auth.json`.
+Kommandoen `mcp auth` åpner nettleseren din for autorisasjon. Etter at du har godkjent, vil Canopy lagre tokens sikkert i `~/.local/share/Canopy/mcp-auth.json`.
 
 ---
 
@@ -246,7 +246,7 @@ Kommandoen `mcp auth` åpner nettleseren din for autorisasjon. Etter at du har g
 
 Hvis du vil deaktivere automatisk OAuth for en server (f.eks. for servere som bruker API-nøkler i stedet), setter du `oauth` til `false`:
 
-```json title="opencode.json" {7}
+```json title="canopy.json.guard" {7}
 {
   "$schema": "https://canopy.dev/config.json",
   "mcp": {
@@ -279,10 +279,10 @@ Hvis en ekstern MCP-server ikke klarer å autentisere, kan du diagnostisere prob
 
 ```bash
 # View auth status for all OAuth-capable servers
-opencode mcp auth list
+Canopy mcp auth list
 
 # Debug connection and OAuth flow for a specific server
-opencode mcp debug my-oauth-server
+Canopy mcp debug my-oauth-server
 ```
 
 Kommandoen `mcp debug` viser gjeldende autentiseringsstatus, tester HTTP-tilkoblingen og forsøker OAuth-oppdagelsesflyten.
@@ -299,7 +299,7 @@ MCP-ene dine er tilgjengelige som verktøy i Canopy, sammen med innebygde verkt�
 
 Dette betyr at du kan aktivere eller deaktivere dem globalt.
 
-```json title="opencode.json" {14}
+```json title="canopy.json.guard" {14}
 {
   "$schema": "https://canopy.dev/config.json",
   "mcp": {
@@ -320,7 +320,7 @@ Dette betyr at du kan aktivere eller deaktivere dem globalt.
 
 Vi kan også bruke et globmønster for å deaktivere alle matchende MCP-er.
 
-```json title="opencode.json" {14}
+```json title="canopy.json.guard" {14}
 {
   "$schema": "https://canopy.dev/config.json",
   "mcp": {
@@ -350,7 +350,7 @@ Hvis du har et stort antall MCP-servere, vil du kanskje bare aktivere dem per ag
 1. Deaktiver det som et verktøy globalt.
 2. Aktiver MCP-serveren som et verktøy i [agent config](/docs/agents#tools).
 
-```json title="opencode.json" {11, 14-18}
+```json title="canopy.json.guard" {11, 14-18}
 {
   "$schema": "https://canopy.dev/config.json",
   "mcp": {
@@ -404,7 +404,7 @@ Nedenfor er eksempler på noen vanlige MCP-servere. Du kan sende inn en PR hvis 
 
 Legg til [Sentry MCP-serveren](https://mcp.sentry.dev) for å samhandle med Sentry-prosjektene og problemene dine.
 
-```json title="opencode.json" {4-8}
+```json title="canopy.json.guard" {4-8}
 {
   "$schema": "https://canopy.dev/config.json",
   "mcp": {
@@ -420,7 +420,7 @@ Legg til [Sentry MCP-serveren](https://mcp.sentry.dev) for å samhandle med Sent
 Etter å ha lagt til konfigurasjonen, autentiser med Sentry:
 
 ```bash
-opencode mcp auth sentry
+Canopy mcp auth sentry
 ```
 
 Dette åpner et nettleservindu for å fullføre OAuth-flyten og koble Canopy til Sentry-kontoen din.
@@ -437,7 +437,7 @@ Show me the latest unresolved issues in my project. use sentry
 
 Legg til [Context7 MCP-serveren](https://github.com/upstash/context7) for å søke gjennom dokumenter.
 
-```json title="opencode.json" {4-7}
+```json title="canopy.json.guard" {4-7}
 {
   "$schema": "https://canopy.dev/config.json",
   "mcp": {
@@ -451,7 +451,7 @@ Legg til [Context7 MCP-serveren](https://github.com/upstash/context7) for å sø
 
 Hvis du har registrert deg for en gratis konto, kan du bruke API-nøkkelen din og få høyere satsgrenser.
 
-```json title="opencode.json" {7-9}
+```json title="canopy.json.guard" {7-9}
 {
   "$schema": "https://canopy.dev/config.json",
   "mcp": {
@@ -486,7 +486,7 @@ When you need to search docs, use `context7` tools.
 
 Legg til [Grep by Vercel](https://grep.app) MCP-serveren for å søke gjennom kodebiter på GitHub.
 
-```json title="opencode.json" {4-7}
+```json title="canopy.json.guard" {4-7}
 {
   "$schema": "https://canopy.dev/config.json",
   "mcp": {
@@ -547,7 +547,7 @@ I tilfelle du ser en funksjon eller modell fra Helicone som ikke konfigureres au
 
 Her er [Helicone's Model Directory](https://helicone.ai/models), du trenger denne for å hente ID-ene til modellene du vil legge til.
 
-```jsonc title="~/.config/opencode/opencode.jsonc"
+```jsonc title="~/.config/Canopy/canopy.json.guardc"
 {
   "$schema": "https://canopy.dev/config.json",
   "provider": {
@@ -575,7 +575,7 @@ Her er [Helicone's Model Directory](https://helicone.ai/models), du trenger denn
 
 Helicone støtter tilpassede headere for funksjoner som bufring, brukersporing og øktadministrasjon. Legg dem til leverandørkonfigurasjonen din ved å bruke `options.headers`:
 
-```jsonc title="~/.config/opencode/opencode.jsonc"
+```jsonc title="~/.config/Canopy/canopy.json.guardc"
 {
   "$schema": "https://canopy.dev/config.json",
   "provider": {
@@ -586,7 +586,7 @@ Helicone støtter tilpassede headere for funksjoner som bufring, brukersporing o
         "baseURL": "https://ai-gateway.helicone.ai",
         "headers": {
           "Helicone-Cache-Enabled": "true",
-          "Helicone-User-Id": "opencode",
+          "Helicone-User-Id": "Canopy",
         },
       },
     },
@@ -596,17 +596,17 @@ Helicone støtter tilpassede headere for funksjoner som bufring, brukersporing o
 
 ##### Sesjonssporing
 
-Helicones [Sessions](https://docs.helicone.ai/features/sessions) funksjon lar deg gruppere relaterte LLM forespørsler sammen. Bruk [opencode-helicone-session](https://github.com/H2Shami/opencode-helicone-session) plugin for automatisk å logge hver Canopy-samtale som en økt i Helicone.
+Helicones [Sessions](https://docs.helicone.ai/features/sessions) funksjon lar deg gruppere relaterte LLM forespørsler sammen. Bruk [Canopy-helicone-session](https://github.com/H2Shami/Canopy-helicone-session) plugin for automatisk å logge hver Canopy-samtale som en økt i Helicone.
 
 ```bash
-npm install -g opencode-helicone-session
+npm install -g Canopy-helicone-session
 ```
 
 Legg den til i konfigurasjonen din.
 
-```json title="opencode.json"
+```json title="canopy.json.guard"
 {
-  "plugin": ["opencode-helicone-session"]
+  "plugin": ["Canopy-helicone-session"]
 }
 ```
 

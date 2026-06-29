@@ -8,13 +8,13 @@ import { Tabs, TabItem } from "@astrojs/starlight/components"
 CLI Canopy domyślnie uruchamia [TUI](/docs/tui), gdy wywołasz je bez argumentów.
 
 ```bash
-opencode
+Canopy
 ```
 
 CLI obsługuje też polecenia opisane na tej stronie, więc możesz używać Canopy programowo.
 
 ```bash
-opencode run "Explain how closures work in JavaScript"
+Canopy run "Explain how closures work in JavaScript"
 ```
 
 ---
@@ -24,7 +24,7 @@ opencode run "Explain how closures work in JavaScript"
 Uruchamia interfejs terminalowy (TUI) Canopy.
 
 ```bash
-opencode [project]
+Canopy [project]
 ```
 
 #### Flagi
@@ -53,7 +53,7 @@ Interfejs CLI Canopy zawiera także dodatkowe polecenia.
 Zarządzaj agentami Canopy.
 
 ```bash
-opencode agent [command]
+Canopy agent [command]
 ```
 
 ---
@@ -63,17 +63,17 @@ opencode agent [command]
 Dołącz terminal do już działającego serwera backendu Canopy uruchomionego za pomocą `serve` lub `web`.
 
 ```bash
-opencode attach [url]
+Canopy attach [url]
 ```
 
 Pozwala to połączyć TUI ze zdalnym backendem Canopy. Na przykład:
 
 ```bash
 # Start the backend server for web/mobile access
-opencode web --port 4096 --hostname 0.0.0.0
+Canopy web --port 4096 --hostname 0.0.0.0
 
 # In another terminal, attach the TUI to the running backend
-opencode attach http://10.20.30.40:4096
+Canopy attach http://10.20.30.40:4096
 ```
 
 #### Flagi
@@ -85,7 +85,7 @@ opencode attach http://10.20.30.40:4096
 | <nobr><code>{"--session"}</code></nobr>  | `-s`  | Identyfikator sesji do kontynuowania                                                                  |
 | <nobr><code>{"--fork"}</code></nobr>     |       | Rozgałęź sesję podczas kontynuowania (użyj z `--continue` lub `--session`)                            |
 | <nobr><code>{"--password"}</code></nobr> | `-p`  | Hasło uwierzytelniania podstawowego (domyślnie `OPENCODE_SERVER_PASSWORD`)                            |
-| <nobr><code>{"--username"}</code></nobr> | `-u`  | Nazwa użytkownika uwierzytelniania podstawowego (domyślnie `OPENCODE_SERVER_USERNAME` lub `opencode`) |
+| <nobr><code>{"--username"}</code></nobr> | `-u`  | Nazwa użytkownika uwierzytelniania podstawowego (domyślnie `OPENCODE_SERVER_USERNAME` lub `Canopy`) |
 
 ---
 
@@ -106,7 +106,7 @@ To polecenie poprowadzi Cię przez proces tworzenia nowego agenta z niestandardo
 Wyświetl listę wszystkich agentów.
 
 ```bash
-opencode agent list
+Canopy agent list
 ```
 
 ---
@@ -116,17 +116,17 @@ opencode agent list
 Zarządzaj danymi uwierzytelniającymi i logowaniem dla dostawców.
 
 ```bash
-opencode auth [command]
+Canopy auth [command]
 ```
 
 ---
 
 #### login
 
-Canopy integruje się z wieloma dostawcami. Możesz użyć `canopy auth login`, aby skonfigurować klucz API dla dowolnego obsługiwanego dostawcy. Klucze są bezpiecznie przechowywane w `~/.local/share/opencode/auth.json`.
+Canopy integruje się z wieloma dostawcami. Możesz użyć `canopy auth login`, aby skonfigurować klucz API dla dowolnego obsługiwanego dostawcy. Klucze są bezpiecznie przechowywane w `~/.local/share/Canopy/auth.json`.
 
 ```bash
-opencode auth login
+Canopy auth login
 ```
 
 Podczas uruchamiania Canopy ładuje dostawców z pliku poświadczeń, a także ze zmiennych środowiskowych lub pliku `.env` w Twoim projekcie.
@@ -138,13 +138,13 @@ Podczas uruchamiania Canopy ładuje dostawców z pliku poświadczeń, a także z
 Wyświetl listę wszystkich uwierzytelnionych dostawców przechowywanych w pliku poświadczeń.
 
 ```bash
-opencode auth list
+Canopy auth list
 ```
 
 Lub skrócona wersja:
 
 ```bash
-opencode auth ls
+Canopy auth ls
 ```
 
 ---
@@ -154,7 +154,7 @@ opencode auth ls
 Wyloguj się z dostawcy, usuwając go z pliku poświadczeń.
 
 ```bash
-opencode auth logout
+Canopy auth logout
 ```
 
 ---
@@ -164,7 +164,7 @@ opencode auth logout
 Zarządzaj agentem GitHub w celu automatyzacji repozytorium.
 
 ```bash
-opencode github [command]
+Canopy github [command]
 ```
 
 ---
@@ -174,7 +174,7 @@ opencode github [command]
 Zainstaluj agenta GitHub w swoim repozytorium.
 
 ```bash
-opencode github install
+Canopy github install
 ```
 
 Spowoduje to utworzenie pliku workflow GitHub Actions i poprowadzi Cię przez proces konfiguracji. [Dowiedz się więcej](/docs/github).
@@ -186,7 +186,7 @@ Spowoduje to utworzenie pliku workflow GitHub Actions i poprowadzi Cię przez pr
 Uruchom agenta na GitHubie. Zwykle używane w GitHub Actions.
 
 ```bash
-opencode github run
+Canopy github run
 ```
 
 ##### Flagi
@@ -203,7 +203,7 @@ opencode github run
 Zarządzaj serwerami Model Context Protocol (MCP).
 
 ```bash
-opencode mcp [command]
+Canopy mcp [command]
 ```
 
 ---
@@ -213,7 +213,7 @@ opencode mcp [command]
 Dodaj serwer MCP do swojej konfiguracji.
 
 ```bash
-opencode mcp add
+Canopy mcp add
 ```
 
 To polecenie poprowadzi Cię przez proces dodawania lokalnego lub zdalnego serwera MCP.
@@ -225,13 +225,13 @@ To polecenie poprowadzi Cię przez proces dodawania lokalnego lub zdalnego serwe
 Wyświetl listę wszystkich skonfigurowanych serwerów MCP i ich status.
 
 ```bash
-opencode mcp list
+Canopy mcp list
 ```
 
 Lub skrócona wersja:
 
 ```bash
-opencode mcp ls
+Canopy mcp ls
 ```
 
 ---
@@ -241,7 +241,7 @@ opencode mcp ls
 Uwierzytelnij się w serwerze MCP z włączoną funkcją OAuth.
 
 ```bash
-opencode mcp auth [name]
+Canopy mcp auth [name]
 ```
 
 Jeśli nie podasz nazwy serwera, zostaniesz poproszony o wybranie jednego z serwerów wymagających uwierzytelnienia.
@@ -249,13 +249,13 @@ Jeśli nie podasz nazwy serwera, zostaniesz poproszony o wybranie jednego z serw
 Możesz także wyświetlić listę serwerów obsługujących OAuth i ich status uwierzytelnienia.
 
 ```bash
-opencode mcp auth list
+Canopy mcp auth list
 ```
 
 Lub skrócona wersja:
 
 ```bash
-opencode mcp auth ls
+Canopy mcp auth ls
 ```
 
 ---
@@ -265,7 +265,7 @@ opencode mcp auth ls
 Usuń tokeny OAuth dla serwera MCP.
 
 ```bash
-opencode mcp logout [name]
+Canopy mcp logout [name]
 ```
 
 ---
@@ -275,7 +275,7 @@ opencode mcp logout [name]
 Debuguj problemy z połączeniem OAuth dla serwera MCP.
 
 ```bash
-opencode mcp debug <name>
+Canopy mcp debug <name>
 ```
 
 ---
@@ -285,7 +285,7 @@ opencode mcp debug <name>
 Wyświetl listę modeli ze wszystkich skonfigurowanych dostawców.
 
 ```bash
-opencode models [provider]
+Canopy models [provider]
 ```
 
 Pokazuje modele dostępne do użycia w `provider/model`.
@@ -295,7 +295,7 @@ Jest to identyfikator modelu, którego używasz w [konfiguracji](/docs/config).
 Opcjonalnie możesz podać identyfikator dostawcy, aby filtrować modele według tego dostawcy.
 
 ```bash
-opencode models anthropic
+Canopy models anthropic
 ```
 
 #### Flagi
@@ -308,7 +308,7 @@ opencode models anthropic
 Użyj flagi `--refresh`, aby zaktualizować listę modeli w pamięci podręcznej. Jest to przydatne, gdy dostawca dodał nowe modele, które chcesz zobaczyć w Canopy.
 
 ```bash
-opencode models --refresh
+Canopy models --refresh
 ```
 
 ---
@@ -318,23 +318,23 @@ opencode models --refresh
 Uruchom Canopy w trybie nieinteraktywnym, przekazując bezpośrednio prompt.
 
 ```bash
-opencode run [message..]
+Canopy run [message..]
 ```
 
 Jest to przydatne do tworzenia skryptów, automatyzacji lub gdy chcesz wysłać szybkie zapytanie bez uruchamiania TUI. Na przykład:
 
-```bash "opencode run"
-opencode run Explain the use of context in Go
+```bash "Canopy run"
+Canopy run Explain the use of context in Go
 ```
 
 Można również użyć tego z działającym `canopy serve`, aby uniknąć zimnego startu serwera MCP przy każdym uruchomieniu:
 
 ```bash
 # Start a headless server in one terminal
-opencode serve
+Canopy serve
 
 # In another terminal, run commands that attach to it
-opencode run --attach http://localhost:4096 "Explain async/await in JavaScript"
+Canopy run --attach http://localhost:4096 "Explain async/await in JavaScript"
 ```
 
 #### Flagi
@@ -353,7 +353,7 @@ opencode run --attach http://localhost:4096 "Explain async/await in JavaScript"
 | <nobr><code>{"--title"}</code></nobr>    |       | Tytuł sesji (jeśli nie podano, zostanie wygenerowany z promptu)                                       |
 | <nobr><code>{"--attach"}</code></nobr>   |       | Dołącz do działającego serwera Canopy (np. http://localhost:4096)                                   |
 | <nobr><code>{"--password"}</code></nobr> | `-p`  | Hasło uwierzytelniania podstawowego (domyślnie `OPENCODE_SERVER_PASSWORD`)                            |
-| <nobr><code>{"--username"}</code></nobr> | `-u`  | Nazwa użytkownika uwierzytelniania podstawowego (domyślnie `OPENCODE_SERVER_USERNAME` lub `opencode`) |
+| <nobr><code>{"--username"}</code></nobr> | `-u`  | Nazwa użytkownika uwierzytelniania podstawowego (domyślnie `OPENCODE_SERVER_USERNAME` lub `Canopy`) |
 | <nobr><code>{"--dir"}</code></nobr>      |       | Katalog do uruchomienia lub ścieżka na zdalnym serwerze podczas dołączania                            |
 | <nobr><code>{"--variant"}</code></nobr>  |       | Wariant modelu (poziom wnioskowania specyficzny dla dostawcy)                                         |
 | <nobr><code>{"--thinking"}</code></nobr> |       | Pokaż bloki myślenia                                                                                  |
@@ -366,10 +366,10 @@ opencode run --attach http://localhost:4096 "Explain async/await in JavaScript"
 Uruchom serwer Canopy (bez interfejsu) w celu uzyskania dostępu do API. Pełny opis API HTTP znajduje się w [dokumentacji serwera](/docs/server).
 
 ```bash
-opencode serve
+Canopy serve
 ```
 
-Uruchamia to serwer HTTP, który zapewnia dostęp do API Canopy bez interfejsu TUI. Ustaw `OPENCODE_SERVER_PASSWORD`, aby włączyć podstawowe uwierzytelnianie HTTP (domyślna nazwa użytkownika to `opencode`).
+Uruchamia to serwer HTTP, który zapewnia dostęp do API Canopy bez interfejsu TUI. Ustaw `OPENCODE_SERVER_PASSWORD`, aby włączyć podstawowe uwierzytelnianie HTTP (domyślna nazwa użytkownika to `Canopy`).
 
 #### Flagi
 
@@ -387,7 +387,7 @@ Uruchamia to serwer HTTP, który zapewnia dostęp do API Canopy bez interfejsu T
 Zarządzaj sesjami Canopy.
 
 ```bash
-opencode session [command]
+Canopy session [command]
 ```
 
 ---
@@ -397,7 +397,7 @@ opencode session [command]
 Lista wszystkich sesji Canopy.
 
 ```bash
-opencode session list
+Canopy session list
 ```
 
 ##### Flagi
@@ -414,7 +414,7 @@ opencode session list
 Pokaż statystyki wykorzystania tokenów i sesji Canopy.
 
 ```bash
-opencode stats
+Canopy stats
 ```
 
 #### Flagi
@@ -433,7 +433,7 @@ opencode stats
 Eksportuj dane sesji jako JSON.
 
 ```bash
-opencode export [sessionID]
+Canopy export [sessionID]
 ```
 
 Jeśli nie podasz identyfikatora sesji, zostaniesz poproszony o wybranie jednej z ostatnich sesji.
@@ -445,14 +445,14 @@ Jeśli nie podasz identyfikatora sesji, zostaniesz poproszony o wybranie jednej 
 Importuj dane sesji z pliku JSON lub adresu URL udostępniania Canopy.
 
 ```bash
-opencode import <file>
+Canopy import <file>
 ```
 
 Możesz importować z pliku lokalnego lub adresu URL.
 
 ```bash
-opencode import session.json
-opencode import https://opncd.ai/s/abc123
+Canopy import session.json
+Canopy import https://opncd.ai/s/abc123
 ```
 
 ---
@@ -462,10 +462,10 @@ opencode import https://opncd.ai/s/abc123
 Uruchom serwer Canopy z interfejsem internetowym.
 
 ```bash
-opencode web
+Canopy web
 ```
 
-Uruchamia to serwer HTTP i udostępnia Canopy przez interfejs przeglądarkowy. Ustaw `OPENCODE_SERVER_PASSWORD`, aby włączyć podstawowe uwierzytelnianie HTTP (domyślna nazwa użytkownika to `opencode`).
+Uruchamia to serwer HTTP i udostępnia Canopy przez interfejs przeglądarkowy. Ustaw `OPENCODE_SERVER_PASSWORD`, aby włączyć podstawowe uwierzytelnianie HTTP (domyślna nazwa użytkownika to `Canopy`).
 
 #### Flagi
 
@@ -483,7 +483,7 @@ Uruchamia to serwer HTTP i udostępnia Canopy przez interfejs przeglądarkowy. U
 Uruchom serwer ACP (Agent Client Protocol).
 
 ```bash
-opencode acp
+Canopy acp
 ```
 
 Uruchamia serwer ACP, który komunikuje się przez stdin/stdout przy użyciu JSON-RPC.
@@ -503,7 +503,7 @@ Uruchamia serwer ACP, który komunikuje się przez stdin/stdout przy użyciu JSO
 Odinstaluj Canopy i usuń wszystkie powiązane pliki.
 
 ```bash
-opencode uninstall
+Canopy uninstall
 ```
 
 #### Flagi
@@ -522,19 +522,19 @@ opencode uninstall
 Aktualizuj Canopy do najnowszej lub określonej wersji.
 
 ```bash
-opencode upgrade [target]
+Canopy upgrade [target]
 ```
 
 Aby zaktualizować do najnowszej wersji:
 
 ```bash
-opencode upgrade
+Canopy upgrade
 ```
 
 Aby zaktualizować do konkretnej wersji:
 
 ```bash
-opencode upgrade v0.1.48
+Canopy upgrade v0.1.48
 ```
 
 #### Flagi
@@ -586,7 +586,7 @@ Canopy można skonfigurować za pomocą zmiennych środowiskowych.
 | `OPENCODE_CLIENT`                     | string  | Identyfikator klienta (domyślnie `cli`)                    |
 | `OPENCODE_ENABLE_EXA`                 | boolean | Włącz narzędzie wyszukiwania internetowego Exa             |
 | `OPENCODE_SERVER_PASSWORD`            | string  | Włącz uwierzytelnianie podstawowe dla `serve`/`web`        |
-| `OPENCODE_SERVER_USERNAME`            | string  | Nazwa użytkownika do autoryzacji (domyślnie `opencode`)    |
+| `OPENCODE_SERVER_USERNAME`            | string  | Nazwa użytkownika do autoryzacji (domyślnie `Canopy`)    |
 | `OPENCODE_MODELS_URL`                 | string  | Niestandardowy adres URL do pobierania konfiguracji modeli |
 
 ---

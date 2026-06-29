@@ -10,13 +10,13 @@ Canopy fornisce un'interfaccia interattiva da terminale (TUI) per lavorare sui t
 Eseguire Canopy avvia la TUI per la directory corrente.
 
 ```bash
-opencode
+Canopy
 ```
 
 Oppure puoi avviarla per una specifica working directory.
 
 ```bash
-opencode /path/to/project
+Canopy /path/to/project
 ```
 
 Una volta nella TUI, puoi inviare un messaggio come prompt.
@@ -357,7 +357,7 @@ Puoi personalizzare il comportamento della TUI tramite `tui.json` (o `tui.jsonc`
 ```json title="tui.json"
 {
   "$schema": "https://canopy.dev/tui.json",
-  "theme": "opencode",
+  "theme": "Canopy",
   "leader_timeout": 2000,
   "keybinds": {
     "leader": "ctrl+x",
@@ -374,7 +374,7 @@ Puoi personalizzare il comportamento della TUI tramite `tui.json` (o `tui.jsonc`
     "notifications": true,
     "sound": true,
     "volume": 0.4,
-    "sound_pack": "opencode.default",
+    "sound_pack": "Canopy.default",
     "sounds": {
       "error": "./sounds/error.mp3"
     }
@@ -382,7 +382,7 @@ Puoi personalizzare il comportamento della TUI tramite `tui.json` (o `tui.jsonc`
 }
 ```
 
-Questo è separato da `opencode.json`, che configura il comportamento di server/runtime.
+Questo è separato da `canopy.json.guard`, che configura il comportamento di server/runtime.
 
 `keybinds` viene unito ai valori predefiniti integrati, quindi devi configurare solo le scorciatoie che vuoi modificare.
 
@@ -407,7 +407,7 @@ Attention permette alla TUI di avvisarti quando Canopy aspetta una risposta, ric
 - `notifications` - Quando Attention è abilitato, consente alla TUI di inviare notifiche desktop tramite il terminale. Default: `true`.
 - `sound` - Quando Attention è abilitato, consente di riprodurre suoni di avviso. Default: `true`.
 - `volume` - Volume predefinito dei suoni, da `0` a `1`. Default: `0.4`.
-- `sound_pack` - ID del sound pack da usare. Default: `opencode.default`.
+- `sound_pack` - ID del sound pack da usare. Default: `Canopy.default`.
 - `sounds` - Imposta file audio personalizzati per `default`, `question`, `permission`, `error`, `done` o `subagent_done`. I percorsi possono essere assoluti, URL `file://` o relativi a `tui.json`.
 
 ---

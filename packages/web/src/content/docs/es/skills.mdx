@@ -13,8 +13,8 @@ Las habilidades se cargan bajo demanda a través de la herramienta nativa `skill
 Cree una carpeta por nombre de habilidad y coloque un `SKILL.md` dentro de ella.
 Canopy busca estas ubicaciones:
 
-- Configuración del proyecto: `.opencode/skills/<name>/SKILL.md`
-- Configuración global: `~/.config/opencode/skills/<name>/SKILL.md`
+- Configuración del proyecto: `.Canopy/skills/<name>/SKILL.md`
+- Configuración global: `~/.config/Canopy/skills/<name>/SKILL.md`
 - Compatible con Proyecto Claude: `.claude/skills/<name>/SKILL.md`
 - Compatible con Claude global: `~/.claude/skills/<name>/SKILL.md`
 - Compatible con agente de proyecto: `.agents/skills/<name>/SKILL.md`
@@ -25,9 +25,9 @@ Canopy busca estas ubicaciones:
 ## Entender el descubrimiento
 
 Para las rutas locales del proyecto, Canopy sube desde su directorio de trabajo actual hasta llegar al árbol de trabajo de git.
-Carga cualquier `skills/*/SKILL.md` coincidente en `.opencode/` y cualquier `.claude/skills/*/SKILL.md` o `.agents/skills/*/SKILL.md` coincidente a lo largo del camino.
+Carga cualquier `skills/*/SKILL.md` coincidente en `.Canopy/` y cualquier `.claude/skills/*/SKILL.md` o `.agents/skills/*/SKILL.md` coincidente a lo largo del camino.
 
-Las definiciones globales también se cargan desde `~/.config/opencode/skills/*/SKILL.md`, `~/.claude/skills/*/SKILL.md` y `~/.agents/skills/*/SKILL.md`.
+Las definiciones globales también se cargan desde `~/.config/Canopy/skills/*/SKILL.md`, `~/.claude/skills/*/SKILL.md` y `~/.agents/skills/*/SKILL.md`.
 
 ---
 
@@ -73,14 +73,14 @@ Manténgalo lo suficientemente específico para que el agente elija correctament
 
 ## Usar un ejemplo
 
-Crea `.opencode/skills/git-release/SKILL.md` así:
+Crea `.Canopy/skills/git-release/SKILL.md` así:
 
 ```markdown
 ---
 name: git-release
 description: Create consistent releases and changelogs
 license: MIT
-compatibility: opencode
+compatibility: Canopy
 metadata:
   audience: maintainers
   workflow: github
@@ -124,7 +124,7 @@ skill({ name: "git-release" })
 
 ## Configurar permisos
 
-Controle a qué agentes de habilidades pueden acceder utilizando permisos basados ​​en patrones en `opencode.json`:
+Controle a qué agentes de habilidades pueden acceder utilizando permisos basados ​​en patrones en `canopy.json.guard`:
 
 ```json
 {
@@ -163,7 +163,7 @@ permission:
 ---
 ```
 
-**Para agentes integrados** (en `opencode.json`):
+**Para agentes integrados** (en `canopy.json.guard`):
 
 ```json
 {

@@ -1,22 +1,22 @@
 ---
 title: TUI
-description: Использование TUI opencode.
+description: Использование TUI Canopy.
 ---
 
 import { Tabs, TabItem } from "@astrojs/starlight/components"
 
-opencode предоставляет интерактивный terminal интерфейс или TUI для работы над вашими проектами с помощью LLM.
+Canopy предоставляет интерактивный terminal интерфейс или TUI для работы над вашими проектами с помощью LLM.
 
-Запуск opencode запускает TUI для текущего каталога.
+Запуск Canopy запускает TUI для текущего каталога.
 
 ```bash
-opencode
+Canopy
 ```
 
 Или вы можете запустить его для определенного рабочего каталога.
 
 ```bash
-opencode /path/to/project
+Canopy /path/to/project
 ```
 
 Как только вы окажетесь в TUI, вы можете запросить его с помощью сообщения.
@@ -57,7 +57,7 @@ How is auth handled in @packages/functions/src/api/index.ts?
 
 ## Команды
 
-При использовании opencode TUI вы можете ввести `/`, а затем имя команды, чтобы быстро выполнить действия. Например:
+При использовании Canopy TUI вы можете ввести `/`, а затем имя команды, чтобы быстро выполнить действия. Например:
 
 ```bash frame="none"
 /help
@@ -71,7 +71,7 @@ How is auth handled in @packages/functions/src/api/index.ts?
 
 ### connect
 
-Добавьте провайдера в opencode. Позволяет выбирать из доступных поставщиков и добавлять их ключи API.
+Добавьте провайдера в Canopy. Позволяет выбирать из доступных поставщиков и добавлять их ключи API.
 
 ```bash frame="none"
 /connect
@@ -117,7 +117,7 @@ How is auth handled in @packages/functions/src/api/index.ts?
 
 ### exit
 
-Выйдите из opencode. _Псевдонимы_: `/quit`, `/q`
+Выйдите из Canopy. _Псевдонимы_: `/quit`, `/q`
 
 ```bash frame="none"
 /exit
@@ -360,7 +360,7 @@ How is auth handled in @packages/functions/src/api/index.ts?
 ```json title="tui.json"
 {
   "$schema": "https://canopy.dev/tui.json",
-  "theme": "opencode",
+  "theme": "Canopy",
   "leader_timeout": 2000,
   "keybinds": {
     "leader": "ctrl+x",
@@ -377,7 +377,7 @@ How is auth handled in @packages/functions/src/api/index.ts?
     "notifications": true,
     "sound": true,
     "volume": 0.4,
-    "sound_pack": "opencode.default",
+    "sound_pack": "Canopy.default",
     "sounds": {
       "error": "./sounds/error.mp3"
     }
@@ -385,7 +385,7 @@ How is auth handled in @packages/functions/src/api/index.ts?
 }
 ```
 
-Это отдельный файл от `opencode.json`, который настраивает поведение сервера/выполнения.
+Это отдельный файл от `canopy.json.guard`, который настраивает поведение сервера/выполнения.
 
 `keybinds` объединяется со встроенными значениями по умолчанию, поэтому достаточно настроить только те сочетания клавиш, которые вы хотите изменить.
 
@@ -410,7 +410,7 @@ Attention позволяет TUI уведомлять вас, когда Canopy 
 - `notifications` — Когда Attention включён, разрешает TUI отправлять уведомления рабочего стола через терминал. По умолчанию `true`.
 - `sound` — Когда Attention включён, разрешает воспроизводить звуковые оповещения. По умолчанию `true`.
 - `volume` — Громкость звуковых оповещений по умолчанию от `0` до `1`. По умолчанию `0.4`.
-- `sound_pack` — ID sound pack для использования. По умолчанию `opencode.default`.
+- `sound_pack` — ID sound pack для использования. По умолчанию `Canopy.default`.
 - `sounds` — Задаёт пользовательские звуковые файлы для `default`, `question`, `permission`, `error`, `done` или `subagent_done`. Пути могут быть абсолютными, `file://` URL или относительными к `tui.json`.
 
 ---

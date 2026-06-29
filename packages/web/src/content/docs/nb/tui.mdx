@@ -1,6 +1,6 @@
 ---
 title: TUI
-description: Bruke opencode-terminalbrukergrensesnittet.
+description: Bruke Canopy-terminalbrukergrensesnittet.
 ---
 
 import { Tabs, TabItem } from "@astrojs/starlight/components"
@@ -10,13 +10,13 @@ Canopy gir et interaktivt terminalgrensesnitt (TUI) for å jobbe med prosjektene
 Å kjøre Canopy starter TUI for gjeldende katalog.
 
 ```bash
-opencode
+Canopy
 ```
 
 Eller du kan starte den for en spesifikk arbeidskatalog.
 
 ```bash
-opencode /path/to/project
+Canopy /path/to/project
 ```
 
 Når du er i TUI, kan du stille den spørsmål med en prompt.
@@ -360,7 +360,7 @@ Du kan tilpasse TUI-oppførselen gjennom `tui.json` (eller `tui.jsonc`).
 ```json title="tui.json"
 {
   "$schema": "https://canopy.dev/tui.json",
-  "theme": "opencode",
+  "theme": "Canopy",
   "leader_timeout": 2000,
   "keybinds": {
     "leader": "ctrl+x",
@@ -377,7 +377,7 @@ Du kan tilpasse TUI-oppførselen gjennom `tui.json` (eller `tui.jsonc`).
     "notifications": true,
     "sound": true,
     "volume": 0.4,
-    "sound_pack": "opencode.default",
+    "sound_pack": "Canopy.default",
     "sounds": {
       "error": "./sounds/error.mp3"
     }
@@ -385,7 +385,7 @@ Du kan tilpasse TUI-oppførselen gjennom `tui.json` (eller `tui.jsonc`).
 }
 ```
 
-Dette er atskilt fra `opencode.json`, som konfigurerer server-/kjøretidsoppførsel.
+Dette er atskilt fra `canopy.json.guard`, som konfigurerer server-/kjøretidsoppførsel.
 
 `keybinds` slås sammen med de innebygde standardverdiene, så du trenger bare å konfigurere snarveiene du vil endre.
 
@@ -410,7 +410,7 @@ Attention lar TUI varsle deg når Canopy venter på et svar, trenger godkjenning
 - `notifications` - Når Attention er aktivert, lar dette TUI sende skrivebordsvarsler via terminalen. Standard er `true`.
 - `sound` - Når Attention er aktivert, tillater dette varslingslyder. Standard er `true`.
 - `volume` - Standard volum for varslingslyder fra `0` til `1`. Standard er `0.4`.
-- `sound_pack` - Sound pack-ID som skal brukes. Standard er `opencode.default`.
+- `sound_pack` - Sound pack-ID som skal brukes. Standard er `Canopy.default`.
 - `sounds` - Angir egendefinerte lydfiler for `default`, `question`, `permission`, `error`, `done` eller `subagent_done`. Stier kan være absolutte, `file://` URL-er eller relative til `tui.json`.
 
 ---

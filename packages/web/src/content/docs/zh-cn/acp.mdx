@@ -75,7 +75,7 @@ ACP 是一个开放协议，用于标准化代码编辑器与 AI 编码代理之
 {
   "agent_servers": {
     "Canopy": {
-      "command": "/absolute/path/bin/opencode",
+      "command": "/absolute/path/bin/Canopy",
       "args": ["acp"]
     }
   }
@@ -93,8 +93,8 @@ ACP 是一个开放协议，用于标准化代码编辑器与 AI 编码代理之
 ```lua
 {
   acp_providers = {
-    ["opencode"] = {
-      command = "opencode",
+    ["Canopy"] = {
+      command = "Canopy",
       args = { "acp" }
     }
   }
@@ -106,8 +106,8 @@ ACP 是一个开放协议，用于标准化代码编辑器与 AI 编码代理之
 ```lua {6-8}
 {
   acp_providers = {
-    ["opencode"] = {
-      command = "opencode",
+    ["Canopy"] = {
+      command = "Canopy",
       args = { "acp" },
       env = {
         OPENCODE_API_KEY = os.getenv("OPENCODE_API_KEY")
@@ -128,7 +128,7 @@ require("codecompanion").setup({
   interactions = {
     chat = {
       adapter = {
-        name = "opencode",
+        name = "Canopy",
         model = "claude-sonnet-4",
       },
     },

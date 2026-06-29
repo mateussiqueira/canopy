@@ -74,7 +74,7 @@ ACP 経由で Canopy を使用するには、`canopy acp` コマンドを実行�
 {
   "agent_servers": {
     "Canopy": {
-      "command": "/absolute/path/bin/opencode",
+      "command": "/absolute/path/bin/Canopy",
       "args": ["acp"]
     }
   }
@@ -92,8 +92,8 @@ ACP 経由で Canopy を使用するには、`canopy acp` コマンドを実行�
 ```lua
 {
   acp_providers = {
-    ["opencode"] = {
-      command = "opencode",
+    ["Canopy"] = {
+      command = "Canopy",
       args = { "acp" }
     }
   }
@@ -105,8 +105,8 @@ ACP 経由で Canopy を使用するには、`canopy acp` コマンドを実行�
 ```lua {6-8}
 {
   acp_providers = {
-    ["opencode"] = {
-      command = "opencode",
+    ["Canopy"] = {
+      command = "Canopy",
       args = { "acp" },
       env = {
         OPENCODE_API_KEY = os.getenv("OPENCODE_API_KEY")
@@ -127,7 +127,7 @@ require("codecompanion").setup({
   interactions = {
     chat = {
       adapter = {
-        name = "opencode",
+        name = "Canopy",
         model = "claude-sonnet-4",
       },
     },

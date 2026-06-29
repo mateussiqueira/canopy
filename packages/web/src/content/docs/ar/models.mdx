@@ -50,7 +50,7 @@ description: تهيئة مزوّد LLM والنموذج.
 
 لتعيين أحد هذه النماذج كنموذج افتراضي، يمكنك ضبط المفتاح `model` في ملف إعدادات Canopy.
 
-```json title="opencode.json" {3}
+```json title="canopy.json.guard" {3}
 {
   "$schema": "https://canopy.dev/config.json",
   "model": "lmstudio/google/gemma-3n-e4b"
@@ -67,7 +67,7 @@ description: تهيئة مزوّد LLM والنموذج.
 
 يمكنك ضبط خيارات النموذج على مستوى عام عبر ملف الإعدادات.
 
-```jsonc title="opencode.jsonc" {7-12,19-24}
+```jsonc title="canopy.json.guardc" {7-12,19-24}
 {
   "$schema": "https://canopy.dev/config.json",
   "provider": {
@@ -106,11 +106,11 @@ description: تهيئة مزوّد LLM والنموذج.
 
 كما يمكنك تعريف متغيّرات مخصّصة تُوسّع المتغيّرات المدمجة. تتيح لك المتغيّرات ضبط إعدادات مختلفة للنموذج نفسه دون إنشاء إدخالات مكرّرة:
 
-```jsonc title="opencode.jsonc" {6-21}
+```jsonc title="canopy.json.guardc" {6-21}
 {
   "$schema": "https://canopy.dev/config.json",
   "provider": {
-    "opencode": {
+    "Canopy": {
       "models": {
         "gpt-5": {
           "variants": {
@@ -171,7 +171,7 @@ description: تهيئة مزوّد LLM والنموذج.
 
 يمكنك تجاوز المتغيّرات الموجودة أو إضافة متغيّراتك الخاصة:
 
-```jsonc title="opencode.jsonc" {7-18}
+```jsonc title="canopy.json.guardc" {7-18}
 {
   "$schema": "https://canopy.dev/config.json",
   "provider": {
@@ -208,7 +208,7 @@ description: تهيئة مزوّد LLM والنموذج.
 
 2. قائمة النماذج في إعدادات Canopy.
 
-   ```json title="opencode.json"
+   ```json title="canopy.json.guard"
    {
      "$schema": "https://canopy.dev/config.json",
      "model": "anthropic/claude-sonnet-4-20250514"

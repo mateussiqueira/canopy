@@ -1,19 +1,19 @@
 ---
 title: الخادم
-description: تفاعل مع خادم opencode عبر HTTP.
+description: تفاعل مع خادم Canopy عبر HTTP.
 ---
 
 import config from "../../../../config.mjs"
 export const typesUrl = `${config.github}/blob/dev/packages/sdk/js/src/gen/types.gen.ts`
 
-يشغّل الأمر `canopy serve` خادما HTTP دون واجهة ويعرض نقطة نهاية OpenAPI يمكن لعميل opencode استخدامها.
+يشغّل الأمر `canopy serve` خادما HTTP دون واجهة ويعرض نقطة نهاية OpenAPI يمكن لعميل Canopy استخدامها.
 
 ---
 
 ### الاستخدام
 
 ```bash
-opencode serve [--port <number>] [--hostname <string>] [--cors <origin>]
+Canopy serve [--port <number>] [--hostname <string>] [--cors <origin>]
 ```
 
 #### الخيارات
@@ -23,40 +23,40 @@ opencode serve [--port <number>] [--hostname <string>] [--cors <origin>]
 | `--port`        | المنفذ الذي يستمع عليه                | `4096`           |
 | `--hostname`    | اسم المضيف الذي يستمع عليه            | `127.0.0.1`      |
 | `--mdns`        | تفعيل اكتشاف mDNS                     | `false`          |
-| `--mdns-domain` | اسم نطاق مخصص لخدمة mDNS              | `opencode.local` |
+| `--mdns-domain` | اسم نطاق مخصص لخدمة mDNS              | `Canopy.local` |
 | `--cors`        | أصول (Origins) متصفح إضافية مسموح بها | `[]`             |
 
 يمكن تمرير `--cors` عدة مرات:
 
 ```bash
-opencode serve --cors http://localhost:5173 --cors https://app.example.com
+Canopy serve --cors http://localhost:5173 --cors https://app.example.com
 ```
 
 ---
 
 ### المصادقة
 
-عيّن `OPENCODE_SERVER_PASSWORD` لحماية الخادم باستخدام مصادقة HTTP الأساسية. اسم المستخدم افتراضيا هو `opencode`، أو عيّن `OPENCODE_SERVER_USERNAME` لتغييره. ينطبق ذلك على كل من `canopy serve` و `canopy web`.
+عيّن `OPENCODE_SERVER_PASSWORD` لحماية الخادم باستخدام مصادقة HTTP الأساسية. اسم المستخدم افتراضيا هو `Canopy`، أو عيّن `OPENCODE_SERVER_USERNAME` لتغييره. ينطبق ذلك على كل من `canopy serve` و `canopy web`.
 
 ```bash
-OPENCODE_SERVER_PASSWORD=your-password opencode serve
+OPENCODE_SERVER_PASSWORD=your-password Canopy serve
 ```
 
 ---
 
 ### كيف يعمل
 
-عند تشغيل `opencode` يبدأ تشغيل واجهة terminal تفاعلية (TUI) وخادما. تكون الـ TUI هي
+عند تشغيل `Canopy` يبدأ تشغيل واجهة terminal تفاعلية (TUI) وخادما. تكون الـ TUI هي
 العميل الذي يتحدث إلى الخادم. يوفّر الخادم نقطة نهاية لمواصفة OpenAPI 3.1.
 وتُستخدم هذه النقطة أيضا لتوليد [SDK](/docs/sdk).
 
 :::tip
-استخدم خادم opencode للتفاعل مع opencode برمجيا.
+استخدم خادم Canopy للتفاعل مع Canopy برمجيا.
 :::
 
-تتيح هذه البنية لـ opencode دعم عدة عملاء وتمكّنك من التفاعل مع opencode برمجيا.
+تتيح هذه البنية لـ Canopy دعم عدة عملاء وتمكّنك من التفاعل مع Canopy برمجيا.
 
-يمكنك تشغيل `canopy serve` لبدء خادم مستقل. إذا كانت واجهة opencode في terminal (TUI)
+يمكنك تشغيل `canopy serve` لبدء خادم مستقل. إذا كانت واجهة Canopy في terminal (TUI)
 قيد التشغيل، فسيبدأ `canopy serve` خادما جديدا.
 
 ---
@@ -83,7 +83,7 @@ http://<hostname>:<port>/doc
 
 ## واجهات API
 
-يعرض خادم opencode واجهات API التالية.
+يعرض خادم Canopy واجهات API التالية.
 
 ---
 

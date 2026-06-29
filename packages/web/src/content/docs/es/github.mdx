@@ -3,7 +3,7 @@ title: GitHub
 description: Utilice Canopy en problemas y solicitudes de extracción de GitHub.
 ---
 
-Canopy se integra con su flujo de trabajo GitHub. Mencione `/opencode` o `/oc` en su comentario y Canopy ejecutará tareas dentro de su corredor de acciones GitHub.
+Canopy se integra con su flujo de trabajo GitHub. Mencione `/Canopy` o `/oc` en su comentario y Canopy ejecutará tareas dentro de su corredor de acciones GitHub.
 
 ---
 
@@ -20,7 +20,7 @@ Canopy se integra con su flujo de trabajo GitHub. Mencione `/opencode` o `/oc` e
 Ejecute el siguiente comando en un proyecto que se encuentra en un repositorio GitHub:
 
 ```bash
-opencode github install
+Canopy github install
 ```
 
 Esto lo guiará a través de la instalación de la aplicación GitHub, la creación del flujo de trabajo y la configuración de secretos.
@@ -33,14 +33,14 @@ O puede configurarlo manualmente.
 
 1. **Instale la aplicación GitHub**
 
-   Dirígete a [**github.com/apps/opencode-agent**](https://github.com/apps/opencode-agent). Asegúrese de que esté instalado en el repositorio de destino.
+   Dirígete a [**github.com/apps/Canopy-agent**](https://github.com/apps/Canopy-agent). Asegúrese de que esté instalado en el repositorio de destino.
 
 2. **Agregar el flujo de trabajo**
 
-   Agregue el siguiente archivo de flujo de trabajo a `.github/workflows/opencode.yml` en su repositorio. Asegúrese de configurar las claves `model` apropiadas y API requeridas en `env`.
+   Agregue el siguiente archivo de flujo de trabajo a `.github/workflows/Canopy.yml` en su repositorio. Asegúrese de configurar las claves `model` apropiadas y API requeridas en `env`.
 
-   ```yml title=".github/workflows/opencode.yml" {24,26}
-   name: opencode
+   ```yml title=".github/workflows/Canopy.yml" {24,26}
+   name: Canopy
 
    on:
      issue_comment:
@@ -49,10 +49,10 @@ O puede configurarlo manualmente.
        types: [created]
 
    jobs:
-     opencode:
+     Canopy:
        if: |
          contains(github.event.comment.body, '/oc') ||
-         contains(github.event.comment.body, '/opencode')
+         contains(github.event.comment.body, '/Canopy')
        runs-on: ubuntu-latest
        permissions:
          id-token: write
@@ -107,8 +107,8 @@ Canopy puede desencadenarse por los siguientes eventos GitHub:
 
 | Tipo de evento                | Activado por                                  | Detalles                                                                                                                                        |
 | ----------------------------- | --------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
-| `issue_comment`               | Comentar sobre un tema o PR                   | Mencione `/opencode` o `/oc` en su comentario. Canopy lee el contexto y puede crear ramas, abrir relaciones públicas o responder.             |
-| `pull_request_review_comment` | Comente líneas de código específicas en un PR | Mencione `/opencode` o `/oc` mientras revisa el código. Canopy recibe la ruta del archivo, los números de línea y el contexto de diferencias. |
+| `issue_comment`               | Comentar sobre un tema o PR                   | Mencione `/Canopy` o `/oc` en su comentario. Canopy lee el contexto y puede crear ramas, abrir relaciones públicas o responder.             |
+| `pull_request_review_comment` | Comente líneas de código específicas en un PR | Mencione `/Canopy` o `/oc` mientras revisa el código. Canopy recibe la ruta del archivo, los números de línea y el contexto de diferencias. |
 | `issues`                      | Número abierto o editado                      | Activa automáticamente Canopy cuando se crean o modifican problemas. Requiere entrada `prompt`.                                               |
 | `pull_request`                | PR abierto o actualizado                      | Activa automáticamente Canopy cuando los PR se abren, sincronizan o vuelven a abrir. Útil para revisiones automatizadas.                      |
 | `schedule`                    | Programación basada en cron                   | Ejecute Canopy según una programación. Requiere entrada `prompt`. La salida va a registros y relaciones públicas (no hay temas que comentar). |
@@ -118,7 +118,7 @@ Canopy puede desencadenarse por los siguientes eventos GitHub:
 
 Ejecute Canopy según una programación para realizar tareas automatizadas:
 
-```yaml title=".github/workflows/opencode-scheduled.yml"
+```yaml title=".github/workflows/Canopy-scheduled.yml"
 name: Scheduled Canopy Task
 
 on:
@@ -126,7 +126,7 @@ on:
     - cron: "0 9 * * 1" # Every Monday at 9am UTC
 
 jobs:
-  opencode:
+  Canopy:
     runs-on: ubuntu-latest
     permissions:
       id-token: write
@@ -158,8 +158,8 @@ Para eventos programados, la entrada `prompt` es **obligatoria** ya que no hay c
 
 Revisar automáticamente los PR cuando se abren o actualizan:
 
-```yaml title=".github/workflows/opencode-review.yml"
-name: opencode-review
+```yaml title=".github/workflows/Canopy-review.yml"
+name: Canopy-review
 
 on:
   pull_request:
@@ -199,7 +199,7 @@ Para los eventos `pull_request`, si no se proporciona `prompt`, Canopy revisa de
 
 Clasifique automáticamente nuevos problemas. Este ejemplo filtra cuentas con más de 30 días para reducir el spam:
 
-```yaml title=".github/workflows/opencode-triage.yml"
+```yaml title=".github/workflows/Canopy-triage.yml"
 name: Issue Triage
 
 on:
@@ -254,7 +254,7 @@ Para eventos `issues`, la entrada `prompt` es **obligatoria** ya que no hay ning
 
 Anule el mensaje predeterminado para personalizar el comportamiento de Canopy para su flujo de trabajo.
 
-```yaml title=".github/workflows/opencode.yml"
+```yaml title=".github/workflows/Canopy.yml"
 - uses: mateussiqueira/canopy/github@latest
   with:
     model: anthropic/claude-sonnet-4-5
@@ -278,7 +278,7 @@ A continuación se muestran algunos ejemplos de cómo puede utilizar Canopy en G
   Agregue este comentario en una edición GitHub.
 
   ```
-  /opencode explain this issue
+  /Canopy explain this issue
   ```
 
   Canopy leerá el hilo completo, incluidos todos los comentarios, y responderá con una explicación clara.
@@ -288,7 +288,7 @@ A continuación se muestran algunos ejemplos de cómo puede utilizar Canopy en G
   En un problema GitHub, diga:
 
   ```
-  /opencode fix this
+  /Canopy fix this
   ```
 
   Y Canopy creará una nueva rama, implementará los cambios y abrirá un PR con los cambios.

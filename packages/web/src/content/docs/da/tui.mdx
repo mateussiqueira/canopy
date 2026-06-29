@@ -10,13 +10,13 @@ Canopy giver en interaktiv terminalgrænseflade eller TUI til at arbejde med din
 At køre Canopy starter TUI for den nuværende mappe.
 
 ```bash
-opencode
+Canopy
 ```
 
 Eller du kan starte den for en bestemt arbejdsmappe.
 
 ```bash
-opencode /path/to/project
+Canopy /path/to/project
 ```
 
 Når du er i TUI, kan du spørge den med en besked.
@@ -357,7 +357,7 @@ Du kan tilpasse TUI-adfærd gennem `tui.json` (eller `tui.jsonc`).
 ```json title="tui.json"
 {
   "$schema": "https://canopy.dev/tui.json",
-  "theme": "opencode",
+  "theme": "Canopy",
   "leader_timeout": 2000,
   "keybinds": {
     "leader": "ctrl+x",
@@ -374,7 +374,7 @@ Du kan tilpasse TUI-adfærd gennem `tui.json` (eller `tui.jsonc`).
     "notifications": true,
     "sound": true,
     "volume": 0.4,
-    "sound_pack": "opencode.default",
+    "sound_pack": "Canopy.default",
     "sounds": {
       "error": "./sounds/error.mp3"
     }
@@ -382,7 +382,7 @@ Du kan tilpasse TUI-adfærd gennem `tui.json` (eller `tui.jsonc`).
 }
 ```
 
-Dette er adskilt fra `opencode.json`, som konfigurerer server-/kørselstidsadfærd.
+Dette er adskilt fra `canopy.json.guard`, som konfigurerer server-/kørselstidsadfærd.
 
 `keybinds` flettes sammen med de indbyggede standarder, så du behøver kun at konfigurere de genveje, du vil ændre.
 
@@ -407,7 +407,7 @@ Attention lader TUI give dig besked, når Canopy venter på et svar, kræver god
 - `notifications` - Når Attention er aktiveret, lader dette TUI sende skrivebordsnotifikationer via terminalen. Standard er `true`.
 - `sound` - Når Attention er aktiveret, tillader dette advarselslyde. Standard er `true`.
 - `volume` - Standard lydstyrke for advarselslyde fra `0` til `1`. Standard er `0.4`.
-- `sound_pack` - Sound pack-ID der skal bruges. Standard er `opencode.default`.
+- `sound_pack` - Sound pack-ID der skal bruges. Standard er `Canopy.default`.
 - `sounds` - Angiver brugerdefinerede lydfiler for `default`, `question`, `permission`, `error`, `done` eller `subagent_done`. Stier kan være absolutte, `file://` URL'er eller relative til `tui.json`.
 
 ---

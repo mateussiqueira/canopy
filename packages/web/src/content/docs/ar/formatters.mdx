@@ -59,7 +59,7 @@ description: يستخدم Canopy مُنسِّقات خاصة بكل لغة.
 
 يمكنك تخصيص المُنسِّقات عبر قسم `formatter` في إعدادات Canopy.
 
-```json title="opencode.json"
+```json title="canopy.json.guard"
 {
   "$schema": "https://canopy.dev/config.json",
   "formatter": {}
@@ -83,7 +83,7 @@ description: يستخدم Canopy مُنسِّقات خاصة بكل لغة.
 
 لتعطيل **جميع** المُنسِّقات على مستوى عام، اضبط `formatter` على `false`:
 
-```json title="opencode.json" {3}
+```json title="canopy.json.guard" {3}
 {
   "$schema": "https://canopy.dev/config.json",
   "formatter": false
@@ -92,7 +92,7 @@ description: يستخدم Canopy مُنسِّقات خاصة بكل لغة.
 
 لتعطيل مُنسِّق **محدد**، اضبط `disabled` على `true`:
 
-```json title="opencode.json" {5}
+```json title="canopy.json.guard" {5}
 {
   "$schema": "https://canopy.dev/config.json",
   "formatter": {
@@ -109,7 +109,7 @@ description: يستخدم Canopy مُنسِّقات خاصة بكل لغة.
 
 يمكنك تجاوز المُنسِّقات المُضمَّنة أو إضافة مُنسِّقات جديدة عبر تحديد الأمر ومتغيرات البيئة وامتدادات الملفات:
 
-```json title="opencode.json" {4-14}
+```json title="canopy.json.guard" {4-14}
 {
   "$schema": "https://canopy.dev/config.json",
   "formatter": {

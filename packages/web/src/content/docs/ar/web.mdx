@@ -12,7 +12,7 @@ description: استخدام Canopy في متصفحك.
 ابدأ تشغيل واجهة الويب عبر تنفيذ:
 
 ```bash
-opencode web
+Canopy web
 ```
 
 يؤدي ذلك إلى تشغيل خادم محلي على `127.0.0.1` بمنفذ عشوائي متاح، ويفتح Canopy تلقائيا في المتصفح الافتراضي لديك.
@@ -36,7 +36,7 @@ opencode web
 افتراضيا، يختار Canopy منفذا متاحا. يمكنك تحديد منفذ:
 
 ```bash
-opencode web --port 4096
+Canopy web --port 4096
 ```
 
 ### اسم المضيف
@@ -44,7 +44,7 @@ opencode web --port 4096
 افتراضيا، يرتبط الخادم بـ `127.0.0.1` (للاستخدام المحلي فقط). لجعل Canopy متاحا على شبكتك:
 
 ```bash
-opencode web --hostname 0.0.0.0
+Canopy web --hostname 0.0.0.0
 ```
 
 عند استخدام `0.0.0.0` سيعرض Canopy كلا من عناوين الوصول المحلي وعناوين الشبكة:
@@ -59,15 +59,15 @@ opencode web --hostname 0.0.0.0
 فعّل mDNS لجعل خادمك قابلا للاكتشاف على الشبكة المحلية:
 
 ```bash
-opencode web --mdns
+Canopy web --mdns
 ```
 
-يضبط ذلك تلقائيا اسم المضيف إلى `0.0.0.0` ويعلن عن الخادم باسم `opencode.local`.
+يضبط ذلك تلقائيا اسم المضيف إلى `0.0.0.0` ويعلن عن الخادم باسم `Canopy.local`.
 
 يمكنك تخصيص اسم نطاق mDNS لتشغيل عدة نسخ على الشبكة نفسها:
 
 ```bash
-opencode web --mdns --mdns-domain myproject.local
+Canopy web --mdns --mdns-domain myproject.local
 ```
 
 ### CORS
@@ -75,7 +75,7 @@ opencode web --mdns --mdns-domain myproject.local
 للسماح بنطاقات إضافية عبر CORS (مفيد للواجهات الأمامية المخصصة):
 
 ```bash
-opencode web --cors https://example.com
+Canopy web --cors https://example.com
 ```
 
 ### المصادقة
@@ -83,10 +83,10 @@ opencode web --cors https://example.com
 لحماية الوصول، عيّن كلمة مرور عبر متغير البيئة `OPENCODE_SERVER_PASSWORD`:
 
 ```bash
-OPENCODE_SERVER_PASSWORD=secret opencode web
+OPENCODE_SERVER_PASSWORD=secret Canopy web
 ```
 
-اسم المستخدم الافتراضي هو `opencode`، ويمكن تغييره عبر `OPENCODE_SERVER_USERNAME`.
+اسم المستخدم الافتراضي هو `Canopy`، ويمكن تغييره عبر `OPENCODE_SERVER_USERNAME`.
 
 ---
 
@@ -114,10 +114,10 @@ OPENCODE_SERVER_PASSWORD=secret opencode web
 
 ```bash
 # ابدأ خادم الويب
-opencode web --port 4096
+Canopy web --port 4096
 
 # في محطة طرفية أخرى، اربط TUI
-opencode attach http://localhost:4096
+Canopy attach http://localhost:4096
 ```
 
 يتيح لك ذلك استخدام واجهة الويب وterminal في الوقت نفسه، مع مشاركة الجلسات والحالة نفسها.
@@ -126,7 +126,7 @@ opencode attach http://localhost:4096
 
 ## ملف الإعدادات
 
-يمكنك أيضا ضبط إعدادات الخادم داخل ملف الإعدادات `opencode.json`:
+يمكنك أيضا ضبط إعدادات الخادم داخل ملف الإعدادات `canopy.json.guard`:
 
 ```json
 {

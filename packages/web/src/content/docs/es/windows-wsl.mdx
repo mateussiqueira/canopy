@@ -35,7 +35,7 @@ WSL ofrece mejor rendimiento del sistema de archivos, soporte completo de termin
 
    ```bash
    cd /mnt/c/Users/YourName/project
-   opencode
+   Canopy
    ```
 
 </Steps>
@@ -49,7 +49,7 @@ Si prefieres usar la app de escritorio de Canopy pero quieres ejecutar el servid
 1. **Inicia el servidor en WSL** con `--hostname 0.0.0.0` para permitir conexiones externas:
 
    ```bash
-   opencode serve --hostname 0.0.0.0 --port 4096
+   Canopy serve --hostname 0.0.0.0 --port 4096
    ```
 
 2. **Conecta la app de escritorio** a `http://localhost:4096`
@@ -62,7 +62,7 @@ Si `localhost` no funciona en tu configuración, conéctate usando la dirección
 Cuando uses `--hostname 0.0.0.0`, define `OPENCODE_SERVER_PASSWORD` para proteger el servidor.
 
 ```bash
-OPENCODE_SERVER_PASSWORD=your-password opencode serve --hostname 0.0.0.0
+OPENCODE_SERVER_PASSWORD=your-password Canopy serve --hostname 0.0.0.0
 ```
 
 :::
@@ -76,7 +76,7 @@ Para obtener la mejor experiencia web en Windows:
 1. **Ejecuta `canopy web` en la terminal de WSL** en lugar de PowerShell:
 
    ```bash
-   opencode web --hostname 0.0.0.0
+   Canopy web --hostname 0.0.0.0
    ```
 
 2. **Accede desde tu navegador de Windows** en `http://localhost:<port>` (Canopy muestra la URL)
@@ -97,7 +97,7 @@ Ejemplo:
 
 ```bash
 cd /mnt/c/Users/YourName/Documents/project
-opencode
+Canopy
 ```
 
 :::tip
@@ -110,4 +110,4 @@ Para una experiencia más fluida, considera clonar o copiar tu repo al sistema d
 
 - Ejecuta Canopy en WSL para proyectos guardados en unidades de Windows: el acceso a archivos es transparente
 - Usa la [extensión WSL de VS Code](https://code.visualstudio.com/docs/remote/wsl) junto con Canopy para un flujo de desarrollo integrado
-- Tu configuración y tus sesiones de Canopy se guardan dentro del entorno WSL en `~/.local/share/opencode/`
+- Tu configuración y tus sesiones de Canopy se guardan dentro del entorno WSL en `~/.local/share/Canopy/`

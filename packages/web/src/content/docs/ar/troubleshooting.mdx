@@ -11,8 +11,8 @@ description: المشكلات الشائعة وكيفية حلها.
 
 يتم حفظ ملفات السجل في:
 
-- **macOS/Linux**: `~/.local/share/opencode/log/`
-- **Windows**: اضغط `WIN+R` والصق `%USERPROFILE%\.local\share\opencode\log`
+- **macOS/Linux**: `~/.local/share/Canopy/log/`
+- **Windows**: اضغط `WIN+R` والصق `%USERPROFILE%\.local\share\Canopy\log`
 
 تتم تسمية ملفات السجل بطوابع زمنية (مثل `2025-01-09T123456.log`) ويتم الاحتفاظ بأحدث 10 ملفات سجل.
 
@@ -22,10 +22,10 @@ description: المشكلات الشائعة وكيفية حلها.
 
 ## التخزين
 
-يخزن opencode بيانات الجلسات وبيانات التطبيق الأخرى على القرص في:
+يخزن Canopy بيانات الجلسات وبيانات التطبيق الأخرى على القرص في:
 
-- **macOS/Linux**: `~/.local/share/opencode/`
-- **Windows**: اضغط `WIN+R` والصق `%USERPROFILE%\.local\share\opencode`
+- **macOS/Linux**: `~/.local/share/Canopy/`
+- **Windows**: اضغط `WIN+R` والصق `%USERPROFILE%\.local\share\Canopy`
 
 يحتوي هذا الدليل على:
 
@@ -39,7 +39,7 @@ description: المشكلات الشائعة وكيفية حلها.
 
 ## تطبيق سطح المكتب
 
-يشغل Canopy Desktop خادما محليا لـ Canopy (العملية الجانبية `opencode-cli`) في الخلفية. معظم المشكلات سببها إضافة لا تعمل بشكل صحيح، أو ذاكرة تخزين مؤقت تالفة، أو إعداد خادم غير صحيح.
+يشغل Canopy Desktop خادما محليا لـ Canopy (العملية الجانبية `Canopy-cli`) في الخلفية. معظم المشكلات سببها إضافة لا تعمل بشكل صحيح، أو ذاكرة تخزين مؤقت تالفة، أو إعداد خادم غير صحيح.
 
 ### فحوصات سريعة
 
@@ -57,9 +57,9 @@ description: المشكلات الشائعة وكيفية حلها.
 
 افتح ملف الإعدادات العام وابحث عن المفتاح `plugin`.
 
-- **macOS/Linux**: `~/.config/opencode/opencode.jsonc` (أو `~/.config/opencode/opencode.json`)
-- **macOS/Linux** (عمليات تثبيت أقدم): `~/.local/share/opencode/opencode.jsonc`
-- **Windows**: اضغط `WIN+R` والصق `%USERPROFILE%\.config\opencode\opencode.jsonc`
+- **macOS/Linux**: `~/.config/Canopy/canopy.json.guardc` (أو `~/.config/Canopy/canopy.json.guard`)
+- **macOS/Linux** (عمليات تثبيت أقدم): `~/.local/share/Canopy/canopy.json.guardc`
+- **Windows**: اضغط `WIN+R` والصق `%USERPROFILE%\.config\Canopy\canopy.json.guardc`
 
 إذا كانت لديك إضافات مضبوطة، فقم بتعطيلها مؤقتا بإزالة المفتاح أو ضبطه على مصفوفة فارغة:
 
@@ -75,10 +75,10 @@ description: المشكلات الشائعة وكيفية حلها.
 يمكن لـ Canopy أيضا تحميل إضافات محلية من القرص. انقلها مؤقتا إلى مكان آخر (أو أعد تسمية المجلد) ثم أعد تشغيل تطبيق سطح المكتب:
 
 - **إضافات عامة**
-  - **macOS/Linux**: `~/.config/opencode/plugins/`
-  - **Windows**: اضغط `WIN+R` والصق `%USERPROFILE%\.config\opencode\plugins`
+  - **macOS/Linux**: `~/.config/Canopy/plugins/`
+  - **Windows**: اضغط `WIN+R` والصق `%USERPROFILE%\.config\Canopy\plugins`
 - **إضافات المشروع** (فقط إذا كنت تستخدم إعدادات لكل مشروع)
-  - `<your-project>/.opencode/plugins/`
+  - `<your-project>/.Canopy/plugins/`
 
 إذا عاد التطبيق للعمل، فأعد تفعيل الإضافات واحدة تلو الأخرى لمعرفة أيها يسبب المشكلة.
 
@@ -91,9 +91,9 @@ description: المشكلات الشائعة وكيفية حلها.
 1. أغلق Canopy Desktop تماما.
 2. احذف دليل ذاكرة التخزين المؤقت:
 
-- **macOS**: Finder -> `Cmd+Shift+G` -> الصق `~/.cache/opencode`
-- **Linux**: احذف `~/.cache/opencode` (أو شغّل `rm -rf ~/.cache/opencode`)
-- **Windows**: اضغط `WIN+R` والصق `%USERPROFILE%\.cache\opencode`
+- **macOS**: Finder -> `Cmd+Shift+G` -> الصق `~/.cache/Canopy`
+- **Linux**: احذف `~/.cache/Canopy` (أو شغّل `rm -rf ~/.cache/Canopy`)
+- **Windows**: اضغط `WIN+R` والصق `%USERPROFILE%\.cache\Canopy`
 
 3. أعد تشغيل Canopy Desktop.
 
@@ -111,7 +111,7 @@ description: المشكلات الشائعة وكيفية حلها.
 
 #### إزالة `server.port` / `server.hostname` من الإعدادات
 
-إذا كان `opencode.json(c)` يحتوي على قسم `server`، فأزله مؤقتا ثم أعد تشغيل تطبيق سطح المكتب.
+إذا كان `canopy.json.guard(c)` يحتوي على قسم `server`، فأزله مؤقتا ثم أعد تشغيل تطبيق سطح المكتب.
 
 #### تحقق من متغيرات البيئة
 
@@ -158,8 +158,8 @@ description: المشكلات الشائعة وكيفية حلها.
 1. أغلق Canopy Desktop.
 2. اعثر على هذه الملفات واحذفها (توجد في دليل بيانات تطبيق Canopy Desktop):
 
-- `opencode.settings.dat` (عنوان URL الافتراضي لخادم سطح المكتب)
-- `opencode.global.dat` و `opencode.workspace.*.dat` (حالة الواجهة مثل الخوادم/المشاريع الأخيرة)
+- `Canopy.settings.dat` (عنوان URL الافتراضي لخادم سطح المكتب)
+- `Canopy.global.dat` و `Canopy.workspace.*.dat` (حالة الواجهة مثل الخوادم/المشاريع الأخيرة)
 
 للعثور على الدليل بسرعة:
 
@@ -224,7 +224,7 @@ description: المشكلات الشائعة وكيفية حلها.
 
 - `openai/gpt-4.1`
 - `openrouter/google/gemini-2.5-flash`
-- `opencode/kimi-k2`
+- `Canopy/kimi-k2`
 
 لمعرفة النماذج التي لديك صلاحية الوصول إليها، شغّل `canopy models`
 
@@ -240,10 +240,10 @@ description: المشكلات الشائعة وكيفية حلها.
 2. إذا استمرت المشكلة، فجرّب مسح الإعدادات المخزنة لديك:
 
    ```bash
-   rm -rf ~/.local/share/opencode
+   rm -rf ~/.local/share/Canopy
    ```
 
-   على Windows، اضغط `WIN+R` واحذف: `%USERPROFILE%\.local\share\opencode`
+   على Windows، اضغط `WIN+R` واحذف: `%USERPROFILE%\.local\share\Canopy`
 
 3. أعد المصادقة مع المزوّد باستخدام الأمر `/connect` في واجهة TUI.
 
@@ -251,21 +251,21 @@ description: المشكلات الشائعة وكيفية حلها.
 
 ### AI_APICallError ومشكلات حزم المزوّد
 
-إذا واجهت أخطاء في استدعاءات API، فقد يكون السبب حزم مزوّد قديمة. يقوم opencode بتثبيت حزم المزوّد (OpenAI و Anthropic و Google وغير ذلك) ديناميكيا عند الحاجة ويقوم بتخزينها مؤقتا محليا.
+إذا واجهت أخطاء في استدعاءات API، فقد يكون السبب حزم مزوّد قديمة. يقوم Canopy بتثبيت حزم المزوّد (OpenAI و Anthropic و Google وغير ذلك) ديناميكيا عند الحاجة ويقوم بتخزينها مؤقتا محليا.
 
 لحل مشكلات حزم المزوّد:
 
 1. امسح ذاكرة التخزين المؤقت لحزم المزوّد:
 
    ```bash
-   rm -rf ~/.cache/opencode
+   rm -rf ~/.cache/Canopy
    ```
 
-   على Windows، اضغط `WIN+R` واحذف: `%USERPROFILE%\.cache\opencode`
+   على Windows، اضغط `WIN+R` واحذف: `%USERPROFILE%\.cache\Canopy`
 
-2. أعد تشغيل opencode لإعادة تثبيت أحدث حزم المزوّد
+2. أعد تشغيل Canopy لإعادة تثبيت أحدث حزم المزوّد
 
-سيجبر ذلك opencode على تنزيل أحدث إصدارات حزم المزوّد، وهو ما يحل غالبا مشكلات التوافق مع معاملات النماذج وتغييرات API.
+سيجبر ذلك Canopy على تنزيل أحدث إصدارات حزم المزوّد، وهو ما يحل غالبا مشكلات التوافق مع معاملات النماذج وتغييرات API.
 
 ---
 
@@ -296,4 +296,4 @@ Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &
 export DISPLAY=:99.0
 ```
 
-سيكتشف opencode ما إذا كنت تستخدم Wayland ويفضل `wl-clipboard`، وإلا فسيحاول العثور على أدوات الحافظة بالترتيب التالي: `xclip` ثم `xsel`.
+سيكتشف Canopy ما إذا كنت تستخدم Wayland ويفضل `wl-clipboard`، وإلا فسيحاول العثور على أدوات الحافظة بالترتيب التالي: `xclip` ثم `xsel`.

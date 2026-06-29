@@ -3,7 +3,7 @@ title: Ferramentas
 description: Gerencie as ferramentas que um LLM pode usar.
 ---
 
-As ferramentas permitem que o LLM execute ações em sua base de código. O opencode vem com um conjunto de ferramentas integradas, mas você pode estendê-lo com [ferramentas personalizadas](/docs/custom-tools) ou [servidores MCP](/docs/mcp-servers).
+As ferramentas permitem que o LLM execute ações em sua base de código. O Canopy vem com um conjunto de ferramentas integradas, mas você pode estendê-lo com [ferramentas personalizadas](/docs/custom-tools) ou [servidores MCP](/docs/mcp-servers).
 
 Por padrão, todas as ferramentas estão **ativadas** e não precisam de permissão para serem executadas. Você pode controlar o comportamento das ferramentas através de [permissões](/docs/permissions).
 
@@ -13,7 +13,7 @@ Por padrão, todas as ferramentas estão **ativadas** e não precisam de permiss
 
 Use o campo `permission` para controlar o comportamento das ferramentas. Você pode permitir, negar ou exigir aprovação para cada ferramenta.
 
-```json title="opencode.json"
+```json title="canopy.json.guard"
 {
   "$schema": "https://canopy.dev/config.json",
   "permission": {
@@ -26,7 +26,7 @@ Use o campo `permission` para controlar o comportamento das ferramentas. Você p
 
 Você também pode usar curingas para controlar várias ferramentas ao mesmo tempo. Por exemplo, para exigir aprovação para todas as ferramentas de um servidor MCP:
 
-```json title="opencode.json"
+```json title="canopy.json.guard"
 {
   "$schema": "https://canopy.dev/config.json",
   "permission": {
@@ -41,7 +41,7 @@ Você também pode usar curingas para controlar várias ferramentas ao mesmo tem
 
 ## Integradas
 
-Aqui estão todas as ferramentas integradas disponíveis no opencode.
+Aqui estão todas as ferramentas integradas disponíveis no Canopy.
 
 ---
 
@@ -49,7 +49,7 @@ Aqui estão todas as ferramentas integradas disponíveis no opencode.
 
 Execute comandos de shell no ambiente do seu projeto.
 
-```json title="opencode.json" {4}
+```json title="canopy.json.guard" {4}
 {
   "$schema": "https://canopy.dev/config.json",
   "permission": {
@@ -66,7 +66,7 @@ Esta ferramenta permite que o LLM execute comandos de terminal como `npm install
 
 Modifique arquivos existentes usando substituições de string exatas.
 
-```json title="opencode.json" {4}
+```json title="canopy.json.guard" {4}
 {
   "$schema": "https://canopy.dev/config.json",
   "permission": {
@@ -83,7 +83,7 @@ Esta ferramenta realiza edições precisas em arquivos substituindo correspondê
 
 Crie novos arquivos ou sobrescreva os existentes.
 
-```json title="opencode.json" {4}
+```json title="canopy.json.guard" {4}
 {
   "$schema": "https://canopy.dev/config.json",
   "permission": {
@@ -104,7 +104,7 @@ A ferramenta `write` é controlada pela permissão `edit`, que cobre todas as mo
 
 Leia o conteúdo dos arquivos da sua base de código.
 
-```json title="opencode.json" {4}
+```json title="canopy.json.guard" {4}
 {
   "$schema": "https://canopy.dev/config.json",
   "permission": {
@@ -121,7 +121,7 @@ Esta ferramenta lê arquivos e retorna seus conteúdos. Suporta a leitura de int
 
 Pesquise o conteúdo dos arquivos usando expressões regulares.
 
-```json title="opencode.json" {4}
+```json title="canopy.json.guard" {4}
 {
   "$schema": "https://canopy.dev/config.json",
   "permission": {
@@ -138,7 +138,7 @@ Busca rápida de conteúdo em sua base de código. Suporta a sintaxe completa de
 
 Encontre arquivos por correspondência de padrões.
 
-```json title="opencode.json" {4}
+```json title="canopy.json.guard" {4}
 {
   "$schema": "https://canopy.dev/config.json",
   "permission": {
@@ -159,7 +159,7 @@ Interaja com seus servidores LSP configurados para obter recursos de inteligênc
 Esta ferramenta está disponível apenas quando `OPENCODE_EXPERIMENTAL_LSP_TOOL=true` (ou `OPENCODE_EXPERIMENTAL=true`).
 :::
 
-```json title="opencode.json" {4}
+```json title="canopy.json.guard" {4}
 {
   "$schema": "https://canopy.dev/config.json",
   "permission": {
@@ -178,7 +178,7 @@ Para configurar quais servidores LSP estão disponíveis para seu projeto, veja 
 
 Aplique patches a arquivos.
 
-```json title="opencode.json" {4}
+```json title="canopy.json.guard" {4}
 {
   "$schema": "https://canopy.dev/config.json",
   "permission": {
@@ -199,7 +199,7 @@ A ferramenta `patch` é controlada pela permissão `edit`, que cobre todas as mo
 
 Carregue uma [skill](/docs/skills) (um arquivo `SKILL.md`) e retorne seu conteúdo na conversa.
 
-```json title="opencode.json" {4}
+```json title="canopy.json.guard" {4}
 {
   "$schema": "https://canopy.dev/config.json",
   "permission": {
@@ -214,7 +214,7 @@ Carregue uma [skill](/docs/skills) (um arquivo `SKILL.md`) e retorne seu conteú
 
 Gerencie listas de tarefas durante sessões de codificação.
 
-```json title="opencode.json" {4}
+```json title="canopy.json.guard" {4}
 {
   "$schema": "https://canopy.dev/config.json",
   "permission": {
@@ -235,7 +235,7 @@ Esta ferramenta está desativada para subagentes por padrão, mas você pode ati
 
 Busque conteúdo da web.
 
-```json title="opencode.json" {4}
+```json title="canopy.json.guard" {4}
 {
   "$schema": "https://canopy.dev/config.json",
   "permission": {
@@ -253,17 +253,17 @@ Permite que o LLM busque e leia páginas da web. Útil para consultar documenta�
 Pesquise na web por informações.
 
 :::note
-Esta ferramenta está disponível apenas ao usar o provedor opencode ou quando a variável de ambiente `OPENCODE_ENABLE_EXA` está definida como qualquer valor verdadeiro (por exemplo, `true` ou `1`).
+Esta ferramenta está disponível apenas ao usar o provedor Canopy ou quando a variável de ambiente `OPENCODE_ENABLE_EXA` está definida como qualquer valor verdadeiro (por exemplo, `true` ou `1`).
 
-Para habilitar ao iniciar o opencode:
+Para habilitar ao iniciar o Canopy:
 
 ```bash
-OPENCODE_ENABLE_EXA=1 opencode
+OPENCODE_ENABLE_EXA=1 Canopy
 ```
 
 :::
 
-```json title="opencode.json" {4}
+```json title="canopy.json.guard" {4}
 {
   "$schema": "https://canopy.dev/config.json",
   "permission": {
@@ -286,7 +286,7 @@ Use `websearch` quando precisar encontrar informações (descoberta) e `webfetch
 
 Faça perguntas ao usuário durante a execução.
 
-```json title="opencode.json" {4}
+```json title="canopy.json.guard" {4}
 {
   "$schema": "https://canopy.dev/config.json",
   "permission": {

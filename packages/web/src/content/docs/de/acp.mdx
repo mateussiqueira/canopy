@@ -75,7 +75,7 @@ Fügen Sie zu Ihrem [JetBrains IDE](https://www.jetbrains.com/) acp.json gemäß
 {
   "agent_servers": {
     "Canopy": {
-      "command": "/absolute/path/bin/opencode",
+      "command": "/absolute/path/bin/Canopy",
       "args": ["acp"]
     }
   }
@@ -93,8 +93,8 @@ Fügen Sie Ihrer [Avante.nvim](https://github.com/yetone/avante.nvim)-Konfigurat
 ```lua
 {
   acp_providers = {
-    ["opencode"] = {
-      command = "opencode",
+    ["Canopy"] = {
+      command = "Canopy",
       args = { "acp" }
     }
   }
@@ -106,8 +106,8 @@ Wenn Sie Umgebungsvariablen übergeben müssen:
 ```lua {6-8}
 {
   acp_providers = {
-    ["opencode"] = {
-      command = "opencode",
+    ["Canopy"] = {
+      command = "Canopy",
       args = { "acp" },
       env = {
         OPENCODE_API_KEY = os.getenv("OPENCODE_API_KEY")
@@ -128,7 +128,7 @@ require("codecompanion").setup({
   interactions = {
     chat = {
       adapter = {
-        name = "opencode",
+        name = "Canopy",
         model = "claude-sonnet-4",
       },
     },

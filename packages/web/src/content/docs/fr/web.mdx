@@ -12,7 +12,7 @@ Canopy peut s'exécuter comme une application Web dans votre navigateur, offrant
 Démarrez l'interface Web en exécutant :
 
 ```bash
-opencode web
+Canopy web
 ```
 
 Cela démarre un serveur local sur `127.0.0.1` avec un port disponible aléatoire et ouvre automatiquement Canopy dans votre navigateur par défaut.
@@ -36,7 +36,7 @@ Vous pouvez configurer le serveur Web à l'aide d'indicateurs de ligne de comman
 Par défaut, Canopy sélectionne un port disponible. Vous pouvez spécifier un port :
 
 ```bash
-opencode web --port 4096
+Canopy web --port 4096
 ```
 
 ### Nom d'hôte
@@ -44,7 +44,7 @@ opencode web --port 4096
 Par défaut, le serveur se lie à `127.0.0.1` (localhost uniquement). Pour rendre Canopy accessible sur votre réseau :
 
 ```bash
-opencode web --hostname 0.0.0.0
+Canopy web --hostname 0.0.0.0
 ```
 
 Lorsque vous utilisez `0.0.0.0`, Canopy affichera les adresses locales et réseau :
@@ -59,15 +59,15 @@ Lorsque vous utilisez `0.0.0.0`, Canopy affichera les adresses locales et résea
 Activez mDNS pour rendre votre serveur visible sur le réseau local :
 
 ```bash
-opencode web --mdns
+Canopy web --mdns
 ```
 
-Cela définit automatiquement le nom d'hôte sur `0.0.0.0` et annonce le serveur comme `opencode.local`.
+Cela définit automatiquement le nom d'hôte sur `0.0.0.0` et annonce le serveur comme `Canopy.local`.
 
 Vous pouvez personnaliser le nom de domaine mDNS pour exécuter plusieurs instances sur le même réseau :
 
 ```bash
-opencode web --mdns --mdns-domain myproject.local
+Canopy web --mdns --mdns-domain myproject.local
 ```
 
 ### CORS
@@ -75,7 +75,7 @@ opencode web --mdns --mdns-domain myproject.local
 Pour autoriser des domaines supplémentaires pour CORS (utile pour les frontends personnalisés) :
 
 ```bash
-opencode web --cors https://example.com
+Canopy web --cors https://example.com
 ```
 
 ### Authentification
@@ -83,10 +83,10 @@ opencode web --cors https://example.com
 Pour protéger l'accès, définissez un mot de passe à l'aide de la variable d'environnement `OPENCODE_SERVER_PASSWORD` :
 
 ```bash
-OPENCODE_SERVER_PASSWORD=secret opencode web
+OPENCODE_SERVER_PASSWORD=secret Canopy web
 ```
 
-Le nom d'utilisateur par défaut est `opencode` mais peut être modifié avec `OPENCODE_SERVER_USERNAME`.
+Le nom d'utilisateur par défaut est `Canopy` mais peut être modifié avec `OPENCODE_SERVER_USERNAME`.
 
 ---
 
@@ -114,10 +114,10 @@ Vous pouvez connecter un terminal TUI à un serveur Web en cours d'exécution :
 
 ```bash
 # Start the web server
-opencode web --port 4096
+Canopy web --port 4096
 
 # In another terminal, attach the TUI
-opencode attach http://localhost:4096
+Canopy attach http://localhost:4096
 ```
 
 Cela vous permet d'utiliser simultanément l'interface Web et le terminal, en partageant les mêmes sessions et le même état.
@@ -126,7 +126,7 @@ Cela vous permet d'utiliser simultanément l'interface Web et le terminal, en pa
 
 ## Fichier de configuration
 
-Vous pouvez également configurer les paramètres du serveur dans votre fichier de configuration `opencode.json` :
+Vous pouvez également configurer les paramètres du serveur dans votre fichier de configuration `canopy.json.guard` :
 
 ```json
 {

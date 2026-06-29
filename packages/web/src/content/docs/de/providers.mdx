@@ -18,7 +18,7 @@ Um einen Anbieter hinzuzufügen, müssen Sie:
 ### Anmeldeinformationen
 
 Wenn Sie die API-Schlüssel eines Anbieters mit dem Befehl `/connect` hinzufügen, werden diese gespeichert
-in `~/.local/share/opencode/auth.json`.
+in `~/.local/share/Canopy/auth.json`.
 
 ---
 
@@ -33,7 +33,7 @@ config.
 
 Sie können die Base URL für jeden Anbieter anpassen, indem Sie die Option `baseURL` festlegen. Das ist nuetzlich, wenn Sie Proxy-Dienste oder benutzerdefinierte Endpunkte verwenden.
 
-```json title="opencode.json" {6}
+```json title="canopy.json.guard" {6}
 {
   "$schema": "https://canopy.dev/config.json",
   "provider": {
@@ -172,13 +172,13 @@ So verwenden Sie Amazon Bedrock mit Canopy:
 
    ```bash
    # Option 1: Using AWS access keys
-   AWS_ACCESS_KEY_ID=XXX AWS_SECRET_ACCESS_KEY=YYY opencode
+   AWS_ACCESS_KEY_ID=XXX AWS_SECRET_ACCESS_KEY=YYY Canopy
 
    # Option 2: Using named AWS profile
-   AWS_PROFILE=my-profile opencode
+   AWS_PROFILE=my-profile Canopy
 
    # Option 3: Using Bedrock bearer token
-   AWS_BEARER_TOKEN_BEDROCK=XXX opencode
+   AWS_BEARER_TOKEN_BEDROCK=XXX Canopy
    ```
 
    Oder fügen Sie sie Ihrem Bash-Profil hinzu:
@@ -190,9 +190,9 @@ So verwenden Sie Amazon Bedrock mit Canopy:
 
    #### Konfigurationsdatei (empfohlen)
 
-   Für eine projektspezifische oder dauerhafte Konfiguration verwenden Sie `opencode.json`:
+   Für eine projektspezifische oder dauerhafte Konfiguration verwenden Sie `canopy.json.guard`:
 
-   ```json title="opencode.json"
+   ```json title="canopy.json.guard"
    {
      "$schema": "https://canopy.dev/config.json",
      "provider": {
@@ -219,7 +219,7 @@ So verwenden Sie Amazon Bedrock mit Canopy:
 
    Wenn Sie VPC-Endpunkte für Bedrock verwenden:
 
-   ```json title="opencode.json"
+   ```json title="canopy.json.guard"
    {
      "$schema": "https://canopy.dev/config.json",
      "provider": {
@@ -263,7 +263,7 @@ So verwenden Sie Amazon Bedrock mit Canopy:
 :::note
 Verwenden Sie für benutzerdefinierte Inferenzprofile den Modell- und Anbieternamen im Schlüssel und legen Sie die Eigenschaft `id` auf den Arn fest. Dadurch wird ein korrektes Caching sichergestellt:
 
-```json title="opencode.json"
+```json title="canopy.json.guard"
 {
   "$schema": "https://canopy.dev/config.json",
   "provider": {
@@ -323,9 +323,9 @@ Wenn Sie bereits über einen API-Schlüssel verfügen, können Sie **API-Schlüs
 
 ### Atomic Chat
 
-Sie können opencode so konfigurieren, dass es lokale Modelle über [Atomic Chat](https://atomic.chat) verwendet — eine Desktop-Anwendung, die lokale LLMs hinter einem OpenAI-kompatiblen API-Server bereitstellt (Standard-Endpunkt `http://127.0.0.1:1337/v1`).
+Sie können Canopy so konfigurieren, dass es lokale Modelle über [Atomic Chat](https://atomic.chat) verwendet — eine Desktop-Anwendung, die lokale LLMs hinter einem OpenAI-kompatiblen API-Server bereitstellt (Standard-Endpunkt `http://127.0.0.1:1337/v1`).
 
-```json title="opencode.json" "atomic-chat" {5, 6, 8, 10-14}
+```json title="canopy.json.guard" "atomic-chat" {5, 6, 8, 10-14}
 {
   "$schema": "https://canopy.dev/config.json",
   "provider": {
@@ -393,7 +393,7 @@ Wenn Sie auf die Fehlermeldung „Es tut mir leid, aber ich kann Ihnen bei diese
 5. Legen Sie Ihren Ressourcennamen als Umgebungsvariable fest:
 
    ```bash
-   AZURE_RESOURCE_NAME=XXX opencode
+   AZURE_RESOURCE_NAME=XXX Canopy
    ```
 
    Oder fügen Sie es Ihrem Bash-Profil hinzu:
@@ -440,7 +440,7 @@ Wenn Sie auf die Fehlermeldung „Es tut mir leid, aber ich kann Ihnen bei diese
 5. Legen Sie Ihren Ressourcennamen als Umgebungsvariable fest:
 
    ```bash
-   AZURE_COGNITIVE_SERVICES_RESOURCE_NAME=XXX opencode
+   AZURE_COGNITIVE_SERVICES_RESOURCE_NAME=XXX Canopy
    ```
 
    Oder fügen Sie es Ihrem Bash-Profil hinzu:
@@ -553,7 +553,7 @@ Mit dem Cloudflare AI Gateway können Sie über einen einheitlichen Endpunkt auf
 
    Sie können Modelle auch über Ihre Canopy-Konfiguration hinzufügen.
 
-   ```json title="opencode.json"
+   ```json title="canopy.json.guard"
    {
      "$schema": "https://canopy.dev/config.json",
      "provider": {
@@ -757,7 +757,7 @@ um das Token im Canopy-Authentifizierungsspeicher zu speichern.
 Canopy verwendet ein kleines Modell für einige AI-Aufgaben wie das Generieren des Sitzungstitels.
 Es ist standardmäßig für die Verwendung von gpt-5-nano konfiguriert und wird von Zen gehostet. Zum Sperren von Canopy
 Um nur Ihre eigene von GitLab gehostete Instanz zu verwenden, fügen Sie Folgendes zu Ihrer hinzu
-`opencode.json`-Datei. Es wird außerdem empfohlen, die Sitzungsfreigabe zu deaktivieren.
+`canopy.json.guard`-Datei. Es wird außerdem empfohlen, die Sitzungsfreigabe zu deaktivieren.
 
 ```json
 {
@@ -815,13 +815,13 @@ Stellen Sie dann die Anwendung ID als Umgebungsvariable bereit:
 export GITLAB_OAUTH_CLIENT_ID=your_application_id_here
 ```
 
-Weitere Dokumentation auf der [opencode-gitlab-auth](https://www.npmjs.com/package/opencode-gitlab-auth)-Homepage.
+Weitere Dokumentation auf der [Canopy-gitlab-auth](https://www.npmjs.com/package/Canopy-gitlab-auth)-Homepage.
 
 ##### Konfiguration
 
-Anpassen über `opencode.json`:
+Anpassen über `canopy.json.guard`:
 
-```json title="opencode.json"
+```json title="canopy.json.guard"
 {
   "$schema": "https://canopy.dev/config.json",
   "provider": {
@@ -838,10 +838,10 @@ Anpassen über `opencode.json`:
 
 So greifen Sie auf GitLab-Tools zu (Zusammenführungsanfragen, Probleme, Pipelines, CI/CD usw.):
 
-```json title="opencode.json"
+```json title="canopy.json.guard"
 {
   "$schema": "https://canopy.dev/config.json",
-  "plugin": ["opencode-gitlab-plugin"]
+  "plugin": ["Canopy-gitlab-plugin"]
 }
 ```
 
@@ -907,7 +907,7 @@ So verwenden Sie Google Vertex AI mit Canopy:
    Legen Sie sie fest, während Sie Canopy ausführen.
 
    ```bash
-   GOOGLE_APPLICATION_CREDENTIALS=/path/to/service-account.json GOOGLE_CLOUD_PROJECT=your-project-id opencode
+   GOOGLE_APPLICATION_CREDENTIALS=/path/to/service-account.json GOOGLE_CLOUD_PROJECT=your-project-id Canopy
    ```
 
    Oder fügen Sie sie Ihrem Bash-Profil hinzu.
@@ -1021,7 +1021,7 @@ Falls Sie eine Funktion oder ein Modell von Helicone sehen, das nicht automatisc
 
 Hier ist [Helicone's Model Directory](https://helicone.ai/models). Sie benötigen dies, um die IDs der Modelle abzurufen, die Sie hinzufügen möchten.
 
-```jsonc title="~/.config/opencode/opencode.jsonc"
+```jsonc title="~/.config/Canopy/canopy.json.guardc"
 {
   "$schema": "https://canopy.dev/config.json",
   "provider": {
@@ -1049,7 +1049,7 @@ Hier ist [Helicone's Model Directory](https://helicone.ai/models). Sie benötige
 
 Helicone unterstützt benutzerdefinierte Header für Funktionen wie Caching, Benutzerverfolgung und Sitzungsverwaltung. Fügen Sie sie mit `options.headers` zu Ihrer Anbieterkonfiguration hinzu:
 
-```jsonc title="~/.config/opencode/opencode.jsonc"
+```jsonc title="~/.config/Canopy/canopy.json.guardc"
 {
   "$schema": "https://canopy.dev/config.json",
   "provider": {
@@ -1060,7 +1060,7 @@ Helicone unterstützt benutzerdefinierte Header für Funktionen wie Caching, Ben
         "baseURL": "https://ai-gateway.helicone.ai",
         "headers": {
           "Helicone-Cache-Enabled": "true",
-          "Helicone-User-Id": "opencode",
+          "Helicone-User-Id": "Canopy",
         },
       },
     },
@@ -1070,17 +1070,17 @@ Helicone unterstützt benutzerdefinierte Header für Funktionen wie Caching, Ben
 
 ##### Sitzungsverfolgung
 
-Mit der [Sessions](https://docs.helicone.ai/features/sessions)-Funktion von Helicone können Sie zusammengehörige LLM-Anfragen gruppieren. Verwenden Sie das [opencode-helicone-session](https://github.com/H2Shami/opencode-helicone-session)-Plugin, um jede Canopy-Konversation automatisch als Sitzung in Helicone zu protokollieren.
+Mit der [Sessions](https://docs.helicone.ai/features/sessions)-Funktion von Helicone können Sie zusammengehörige LLM-Anfragen gruppieren. Verwenden Sie das [Canopy-helicone-session](https://github.com/H2Shami/Canopy-helicone-session)-Plugin, um jede Canopy-Konversation automatisch als Sitzung in Helicone zu protokollieren.
 
 ```bash
-npm install -g opencode-helicone-session
+npm install -g Canopy-helicone-session
 ```
 
 Fügen Sie es Ihrer Konfiguration hinzu.
 
-```json title="opencode.json"
+```json title="canopy.json.guard"
 {
-  "plugin": ["opencode-helicone-session"]
+  "plugin": ["Canopy-helicone-session"]
 }
 ```
 
@@ -1103,7 +1103,7 @@ Alle verfügbaren Header finden Sie unter [Helicone Header Directory](https://do
 
 Sie können Canopy für die Verwendung lokaler Modelle über das Dienstprogramm [llama.cpp's](https://github.com/ggml-org/llama.cpp) llama-server konfigurieren
 
-```json title="opencode.json" "llama.cpp" {5, 6, 8, 10-15}
+```json title="canopy.json.guard" "llama.cpp" {5, 6, 8, 10-15}
 {
   "$schema": "https://canopy.dev/config.json",
   "provider": {
@@ -1170,7 +1170,7 @@ IO.NET bietet 17-Modelle, die für verschiedene Anwendungsfälle optimiert sind:
 
 Sie können Canopy über LM Studio für die Verwendung lokaler Modelle konfigurieren.
 
-```json title="opencode.json" "lmstudio" {5, 6, 8, 10-14}
+```json title="canopy.json.guard" "lmstudio" {5, 6, 8, 10-14}
 {
   "$schema": "https://canopy.dev/config.json",
   "provider": {
@@ -1288,10 +1288,10 @@ So verwenden Sie Kimi K2 von Moonshot AI:
 Sie können Canopy über Ollama für die Verwendung lokaler Modelle konfigurieren.
 
 :::tip
-Ollama kann sich automatisch für Canopy konfigurieren. Weitere Informationen finden Sie unter [Ollama integration docs](https://docs.ollama.com/integrations/opencode).
+Ollama kann sich automatisch für Canopy konfigurieren. Weitere Informationen finden Sie unter [Ollama integration docs](https://docs.ollama.com/integrations/Canopy).
 :::
 
-```json title="opencode.json" "ollama" {5, 6, 8, 10-14}
+```json title="canopy.json.guard" "ollama" {5, 6, 8, 10-14}
 {
   "$schema": "https://canopy.dev/config.json",
   "provider": {
@@ -1453,7 +1453,7 @@ Canopy Zen ist eine Liste getesteter und verifizierter Modelle, die vom Canopy-T
 
    Sie können auch zusätzliche Modelle über Ihre Canopy-Konfiguration hinzufügen.
 
-   ```json title="opencode.json" {6}
+   ```json title="canopy.json.guard" {6}
    {
      "$schema": "https://canopy.dev/config.json",
      "provider": {
@@ -1468,7 +1468,7 @@ Canopy Zen ist eine Liste getesteter und verifizierter Modelle, die vom Canopy-T
 
 5. Sie können sie auch über Ihre Canopy-Konfiguration anpassen. Hier ist ein Beispiel für die Angabe eines Anbieters
 
-   ```json title="opencode.json"
+   ```json title="canopy.json.guard"
    {
      "$schema": "https://canopy.dev/config.json",
      "provider": {
@@ -1518,7 +1518,7 @@ SAP AI Core bietet Zugriff auf 40+ Modelle von OpenAI, Anthropic, Google, Amazon
    Oder legen Sie die Umgebungsvariable `AICORE_SERVICE_KEY` fest:
 
    ```bash
-   AICORE_SERVICE_KEY='{"clientid":"...","clientsecret":"...","url":"...","serviceurls":{"AI_API_URL":"..."}}' opencode
+   AICORE_SERVICE_KEY='{"clientid":"...","clientsecret":"...","url":"...","serviceurls":{"AI_API_URL":"..."}}' Canopy
    ```
 
    Oder fügen Sie es Ihrem Bash-Profil hinzu:
@@ -1530,7 +1530,7 @@ SAP AI Core bietet Zugriff auf 40+ Modelle von OpenAI, Anthropic, Google, Amazon
 4. Legen Sie optional die Bereitstellung ID und die Ressourcengruppe fest:
 
    ```bash
-   AICORE_DEPLOYMENT_ID=your-deployment-id AICORE_RESOURCE_GROUP=your-resource-group opencode
+   AICORE_DEPLOYMENT_ID=your-deployment-id AICORE_RESOURCE_GROUP=your-resource-group Canopy
    ```
 
    :::note
@@ -1717,7 +1717,7 @@ Mit dem Vercel AI Gateway können Sie über einen einheitlichen Endpunkt auf Mod
 
 Sie können Modelle auch über Ihre Canopy-Konfiguration anpassen. Hier ist ein Beispiel für die Angabe der Provider-Routing-Reihenfolge.
 
-```json title="opencode.json"
+```json title="canopy.json.guard"
 {
   "$schema": "https://canopy.dev/config.json",
   "provider": {
@@ -1827,7 +1827,7 @@ Einige nützliche Routing-Optionen:
 
    Sie können auch zusätzliche Modelle über Ihre Canopy-Konfiguration hinzufügen.
 
-   ```json title="opencode.json" {6}
+   ```json title="canopy.json.guard" {6}
    {
      "$schema": "https://canopy.dev/config.json",
      "provider": {
@@ -1886,16 +1886,16 @@ Sie können jeden OpenAI-kompatiblen Anbieter mit Canopy verwenden. Die meisten 
 
    ┌  Add credential
    │
-   ▲  This only stores a credential for myprovider - you will need to configure it in opencode.json, check the docs for examples.
+   ▲  This only stores a credential for myprovider - you will need to configure it in canopy.json.guard, check the docs for examples.
    │
    ◇  Enter your API key
    │  sk-...
    └
    ```
 
-4. Erstellen oder aktualisieren Sie Ihre `opencode.json`-Datei in Ihrem Projektverzeichnis:
+4. Erstellen oder aktualisieren Sie Ihre `canopy.json.guard`-Datei in Ihrem Projektverzeichnis:
 
-   ```json title="opencode.json" ""myprovider"" {5-15}
+   ```json title="canopy.json.guard" ""myprovider"" {5-15}
    {
      "$schema": "https://canopy.dev/config.json",
      "provider": {
@@ -1933,7 +1933,7 @@ Sie können jeden OpenAI-kompatiblen Anbieter mit Canopy verwenden. Die meisten 
 
 Hier ist ein Beispiel für die Einstellung der Optionen `apiKey`, `headers` und Modell `limit`.
 
-```json title="opencode.json" {9,11,17-20}
+```json title="canopy.json.guard" {9,11,17-20}
 {
   "$schema": "https://canopy.dev/config.json",
   "provider": {

@@ -10,13 +10,13 @@ Canopy는 LLM과 함께 프로젝트 작업을 하기 위한 대화형 터미널
 Canopy를 실행하면 현재 디렉토리에서 TUI가 시작됩니다.
 
 ```bash
-opencode
+Canopy
 ```
 
 또는 특정 작업 디렉토리에 대해 시작할 수 있습니다.
 
 ```bash
-opencode /path/to/project
+Canopy /path/to/project
 ```
 
 TUI에 들어가면 메시지를 입력하여 프롬프트할 수 있습니다.
@@ -356,7 +356,7 @@ VS Code와 같은 일부 편집기는 `--wait` 플래그와 함께 시작해야 
 ```json title="tui.json"
 {
   "$schema": "https://canopy.dev/tui.json",
-  "theme": "opencode",
+  "theme": "Canopy",
   "leader_timeout": 2000,
   "keybinds": {
     "leader": "ctrl+x",
@@ -373,7 +373,7 @@ VS Code와 같은 일부 편집기는 `--wait` 플래그와 함께 시작해야 
     "notifications": true,
     "sound": true,
     "volume": 0.4,
-    "sound_pack": "opencode.default",
+    "sound_pack": "Canopy.default",
     "sounds": {
       "error": "./sounds/error.mp3"
     }
@@ -381,7 +381,7 @@ VS Code와 같은 일부 편집기는 `--wait` 플래그와 함께 시작해야 
 }
 ```
 
-이는 서버/런타임 동작을 구성하는 `opencode.json`과는 별개입니다.
+이는 서버/런타임 동작을 구성하는 `canopy.json.guard`과는 별개입니다.
 
 `keybinds`는 내장 기본값과 병합되므로 변경하려는 단축키만 설정하면 됩니다.
 
@@ -406,7 +406,7 @@ Attention을 사용하면 Canopy가 답변을 기다리거나, 권한 승인이 
 - `notifications` - Attention이 활성화된 경우 TUI가 터미널을 통해 데스크톱 알림을 보낼 수 있도록 허용합니다. 기본값은 `true`입니다.
 - `sound` - Attention이 활성화된 경우 알림음을 재생할 수 있도록 허용합니다. 기본값은 `true`입니다.
 - `volume` - 알림음의 기본 볼륨이며 `0`부터 `1`까지입니다. 기본값은 `0.4`입니다.
-- `sound_pack` - 사용할 sound pack ID입니다. 기본값은 `opencode.default`입니다.
+- `sound_pack` - 사용할 sound pack ID입니다. 기본값은 `Canopy.default`입니다.
 - `sounds` - `default`, `question`, `permission`, `error`, `done` 또는 `subagent_done`에 사용할 사용자 지정 사운드 파일을 지정합니다. 경로는 절대 경로, `file://` URL 또는 `tui.json` 기준 상대 경로일 수 있습니다.
 
 ---

@@ -11,7 +11,7 @@ U oba slučaja, Canopy će se pokrenuti na vašim GitLab pokretačima.
 ## GitLab CI
 
 Canopy radi u redovnom GitLab cevovodu. Možete ga ugraditi u cjevovod kao [CI komponenta](https://docs.gitlab.com/ee/ci/components/)
-Ovdje koristimo CI/CD komponentu kreiranu u zajednici za Canopy — [nagyv/gitlab-opencode](https://gitlab.com/nagyv/gitlab-opencode).
+Ovdje koristimo CI/CD komponentu kreiranu u zajednici za Canopy — [nagyv/gitlab-Canopy](https://gitlab.com/nagyv/gitlab-Canopy).
 
 ---
 
@@ -30,22 +30,22 @@ Ovdje koristimo CI/CD komponentu kreiranu u zajednici za Canopy — [nagyv/gitla
 
 ```yaml title=".gitlab-ci.yml"
 include:
-  - component: $CI_SERVER_FQDN/nagyv/gitlab-opencode/opencode@2
+  - component: $CI_SERVER_FQDN/nagyv/gitlab-Canopy/Canopy@2
     inputs:
-      config_dir: ${CI_PROJECT_DIR}/opencode-config
+      config_dir: ${CI_PROJECT_DIR}/Canopy-config
       auth_json: $OPENCODE_AUTH_JSON # The variable name for your Canopy authentication JSON
       command: optional-custom-command
       message: "Your prompt here"
 ```
 
-Za više unosa i slučajeva upotrebe [pogledajte dokumente docs](https://gitlab.com/explore/catalog/nagyv/gitlab-opencode) za ovu komponentu.
+Za više unosa i slučajeva upotrebe [pogledajte dokumente docs](https://gitlab.com/explore/catalog/nagyv/gitlab-Canopy) za ovu komponentu.
 
 ---
 
 ## GitLab Duo
 
 Canopy se integriše sa vašim GitLab tokovom rada.
-Spomenite `@opencode` u komentaru i Canopy će izvršiti zadatke unutar vašeg GitLab CI cevovoda.
+Spomenite `@Canopy` u komentaru i Canopy će izvršiti zadatke unutar vašeg GitLab CI cevovoda.
 
 ---
 
@@ -79,8 +79,8 @@ Pogledajte [**GitLab dokumente**](https://docs.gitlab.com/user/duo_agent_platfor
     ```yaml
     image: node:22-slim
     commands:
-      - echo "Installing opencode"
-      - npm install --global opencode-ai
+      - echo "Installing Canopy"
+      - npm install --global Canopy-ai
       - echo "Installing glab"
       - export GITLAB_TOKEN=$GITLAB_TOKEN_OPENCODE
       - apt-get update --quiet && apt-get install --yes curl wget gpg git && rm --recursive --force /var/lib/apt/lists/*
@@ -89,9 +89,9 @@ Pogledajte [**GitLab dokumente**](https://docs.gitlab.com/user/duo_agent_platfor
       - echo "Configuring glab"
       - echo $GITLAB_HOST
       - echo "Creating Canopy auth configuration"
-      - mkdir --parents ~/.local/share/opencode
+      - mkdir --parents ~/.local/share/Canopy
       - |
-        cat > ~/.local/share/opencode/auth.json << EOF
+        cat > ~/.local/share/Canopy/auth.json << EOF
         {
           "anthropic": {
             "type": "api",
@@ -100,13 +100,13 @@ Pogledajte [**GitLab dokumente**](https://docs.gitlab.com/user/duo_agent_platfor
         }
         EOF
       - echo "Configuring git"
-      - git config --global user.email "opencode@gitlab.com"
+      - git config --global user.email "Canopy@gitlab.com"
       - git config --global user.name "Canopy"
       - echo "Testing glab"
       - glab issue list
       - echo "Running Canopy"
       - |
-        opencode run "
+        Canopy run "
         You are an AI assistant helping with GitLab operations.
 
         Context: $AI_FLOW_CONTEXT
@@ -157,14 +157,14 @@ Možete vidjeti [GitLab CLI agenti docs](https://docs.gitlab.com/user/duo_agent_
 
 Evo nekoliko primjera kako možete koristiti Canopy u GitLab.
 :::tip
-Možete konfigurirati da koristite drugu frazu okidača od `@opencode`.
+Možete konfigurirati da koristite drugu frazu okidača od `@Canopy`.
 :::
 
 - **Objasnite problem**
   Dodajte ovaj komentar u izdanje GitLaba.
 
 ```
-  @opencode explain this issue
+  @Canopy explain this issue
 ```
 
 Canopy će pročitati problem i odgovoriti jasnim objašnjenjem.
@@ -173,7 +173,7 @@ Canopy će pročitati problem i odgovoriti jasnim objašnjenjem.
   U izdanju GitLaba recite:
 
 ```
-  @opencode fix this
+  @Canopy fix this
 ```
 
 Canopy će kreirati novu granu, implementirati promjene i otvoriti zahtjev za spajanje s promjenama.
@@ -182,7 +182,7 @@ Canopy će kreirati novu granu, implementirati promjene i otvoriti zahtjev za sp
   Ostavite sljedeći komentar na zahtjev za spajanje GitLab-a.
 
 ```
-  @opencode review this merge request
+  @Canopy review this merge request
 ```
 
 Canopy će pregledati zahtjev za spajanje i dati povratne informacije.

@@ -18,7 +18,7 @@ For å legge til en leverandør må du:
 ### Legitimasjon
 
 Når du legger til en leverandørs API-nøkler med `/connect`-kommandoen, lagres de
-i `~/.local/share/opencode/auth.json`.
+i `~/.local/share/Canopy/auth.json`.
 
 ---
 
@@ -33,7 +33,7 @@ konfig.
 
 Du kan tilpasse base-URL-en for enhver leverandør ved å angi alternativet `baseURL`. Dette er nyttig når du bruker proxy-tjenester eller tilpassede endepunkter.
 
-```json title="opencode.json" {6}
+```json title="canopy.json.guard" {6}
 {
   "$schema": "https://canopy.dev/config.json",
   "provider": {
@@ -174,13 +174,13 @@ Slik bruker du Amazon Bedrock med Canopy:
 
    ```bash
    # Option 1: Using AWS access keys
-   AWS_ACCESS_KEY_ID=XXX AWS_SECRET_ACCESS_KEY=YYY opencode
+   AWS_ACCESS_KEY_ID=XXX AWS_SECRET_ACCESS_KEY=YYY Canopy
 
    # Option 2: Using named AWS profile
-   AWS_PROFILE=my-profile opencode
+   AWS_PROFILE=my-profile Canopy
 
    # Option 3: Using Bedrock bearer token
-   AWS_BEARER_TOKEN_BEDROCK=XXX opencode
+   AWS_BEARER_TOKEN_BEDROCK=XXX Canopy
    ```
 
    Eller legg dem til bash-profilen din:
@@ -192,9 +192,9 @@ Slik bruker du Amazon Bedrock med Canopy:
 
    #### Konfigurasjonsfil (anbefalt)
 
-   For prosjektspesifikk eller vedvarende konfigurasjon, bruk `opencode.json`:
+   For prosjektspesifikk eller vedvarende konfigurasjon, bruk `canopy.json.guard`:
 
-   ```json title="opencode.json"
+   ```json title="canopy.json.guard"
    {
      "$schema": "https://canopy.dev/config.json",
      "provider": {
@@ -221,7 +221,7 @@ Slik bruker du Amazon Bedrock med Canopy:
 
    Hvis du bruker VPC-endepunkter for Bedrock:
 
-   ```json title="opencode.json"
+   ```json title="canopy.json.guard"
    {
      "$schema": "https://canopy.dev/config.json",
      "provider": {
@@ -265,7 +265,7 @@ Slik bruker du Amazon Bedrock med Canopy:
 :::note
 For egendefinerte slutningsprofiler, bruk modellen og leverandørnavnet i nøkkelen og sett egenskapen `id` til arn. Dette sikrer korrekt caching:
 
-```json title="opencode.json"
+```json title="canopy.json.guard"
 {
   "$schema": "https://canopy.dev/config.json",
   "provider": {
@@ -312,7 +312,7 @@ For egendefinerte slutningsprofiler, bruk modellen og leverandørnavnet i nøkke
    ```
 
 :::info
-Å bruke Claude Pro/Max-abonnementet ditt i opencode støttes ikke offisielt av [Anthropic](https://anthropic.com).
+Å bruke Claude Pro/Max-abonnementet ditt i Canopy støttes ikke offisielt av [Anthropic](https://anthropic.com).
 :::
 
 ##### Bruke API-nøkler
@@ -325,9 +325,9 @@ Eller hvis du allerede har en API-nøkkel, kan du velge **Angi API-nøkkel manue
 
 ### Atomic Chat
 
-Du kan konfigurere opencode til å bruke lokale modeller via [Atomic Chat](https://atomic.chat) — et skrivebordsprogram som kjører lokale LLM-er bak en OpenAI-kompatibel API-server (standard endepunkt `http://127.0.0.1:1337/v1`).
+Du kan konfigurere Canopy til å bruke lokale modeller via [Atomic Chat](https://atomic.chat) — et skrivebordsprogram som kjører lokale LLM-er bak en OpenAI-kompatibel API-server (standard endepunkt `http://127.0.0.1:1337/v1`).
 
-```json title="opencode.json" "atomic-chat" {5, 6, 8, 10-14}
+```json title="canopy.json.guard" "atomic-chat" {5, 6, 8, 10-14}
 {
   "$schema": "https://canopy.dev/config.json",
   "provider": {
@@ -395,7 +395,7 @@ Hvis du støter på «Beklager, men jeg kan ikke hjelpe med den forespørselen»
 5. Angi ressursnavnet ditt som en miljøvariabel:
 
    ```bash
-   AZURE_RESOURCE_NAME=XXX opencode
+   AZURE_RESOURCE_NAME=XXX Canopy
    ```
 
    Eller legg den til bash-profilen din:
@@ -442,7 +442,7 @@ Hvis du støter på «Beklager, men jeg kan ikke hjelpe med den forespørselen»
 5. Angi ressursnavnet ditt som en miljøvariabel:
 
    ```bash
-   AZURE_COGNITIVE_SERVICES_RESOURCE_NAME=XXX opencode
+   AZURE_COGNITIVE_SERVICES_RESOURCE_NAME=XXX Canopy
    ```
 
    Eller legg den til bash-profilen din:
@@ -555,7 +555,7 @@ Cloudflare AI Gateway lar deg få tilgang til modeller fra OpenAI, Anthropic, Wo
 
    Du kan også legge til modeller gjennom Canopy-konfigurasjonen.
 
-   ```json title="opencode.json"
+   ```json title="canopy.json.guard"
    {
      "$schema": "https://canopy.dev/config.json",
      "provider": {
@@ -759,7 +759,7 @@ for å lagre token i Canopy auth-lagring.
 Canopy bruker en liten modell for noen AI oppgaver som å generere økttittelen.
 Den er konfigurert til å bruke gpt-5-nano som standard, hostet av Zen. For å låse Canopy
 for kun å bruke din egen GitLab-hostede forekomst, legg til følgende i din
-`opencode.json` fil. Det anbefales også å deaktivere øktdeling.
+`canopy.json.guard` fil. Det anbefales også å deaktivere øktdeling.
 
 ```json
 {
@@ -817,13 +817,13 @@ Utsett deretter applikasjonen ID som miljøvariabel:
 export GITLAB_OAUTH_CLIENT_ID=your_application_id_here
 ```
 
-Mer dokumentasjon på [opencode-gitlab-auth](https://www.npmjs.com/package/opencode-gitlab-auth) hjemmeside.
+Mer dokumentasjon på [Canopy-gitlab-auth](https://www.npmjs.com/package/Canopy-gitlab-auth) hjemmeside.
 
 ##### Konfigurasjon
 
-Tilpass gjennom `opencode.json`:
+Tilpass gjennom `canopy.json.guard`:
 
-```json title="opencode.json"
+```json title="canopy.json.guard"
 {
   "$schema": "https://canopy.dev/config.json",
   "provider": {
@@ -840,10 +840,10 @@ Tilpass gjennom `opencode.json`:
 
 For å få tilgang til GitLab-verktøy (sammenslåingsforespørsler, problemer, pipelines, CI/CD, etc.):
 
-```json title="opencode.json"
+```json title="canopy.json.guard"
 {
   "$schema": "https://canopy.dev/config.json",
-  "plugin": ["opencode-gitlab-plugin"]
+  "plugin": ["Canopy-gitlab-plugin"]
 }
 ```
 
@@ -909,7 +909,7 @@ Slik bruker du Google Vertex AI med Canopy:
    Sett dem mens du kjører Canopy.
 
    ```bash
-   GOOGLE_APPLICATION_CREDENTIALS=/path/to/service-account.json GOOGLE_CLOUD_PROJECT=your-project-id opencode
+   GOOGLE_APPLICATION_CREDENTIALS=/path/to/service-account.json GOOGLE_CLOUD_PROJECT=your-project-id Canopy
    ```
 
    Eller legg dem til på bash-profilen din.
@@ -1023,7 +1023,7 @@ I tilfelle du ser en funksjon eller modell fra Helicone som ikke konfigureres au
 
 Her er [Helicone's Model Directory](https://helicone.ai/models), du trenger denne for å hente ID-ene til modellene du vil legge til.
 
-```jsonc title="~/.config/opencode/opencode.jsonc"
+```jsonc title="~/.config/Canopy/canopy.json.guardc"
 {
   "$schema": "https://canopy.dev/config.json",
   "provider": {
@@ -1051,7 +1051,7 @@ Her er [Helicone's Model Directory](https://helicone.ai/models), du trenger denn
 
 Helicone støtter tilpassede headere for funksjoner som bufring, brukersporing og øktadministrasjon. Legg dem til leverandørkonfigurasjonen din ved å bruke `options.headers`:
 
-```jsonc title="~/.config/opencode/opencode.jsonc"
+```jsonc title="~/.config/Canopy/canopy.json.guardc"
 {
   "$schema": "https://canopy.dev/config.json",
   "provider": {
@@ -1062,7 +1062,7 @@ Helicone støtter tilpassede headere for funksjoner som bufring, brukersporing o
         "baseURL": "https://ai-gateway.helicone.ai",
         "headers": {
           "Helicone-Cache-Enabled": "true",
-          "Helicone-User-Id": "opencode",
+          "Helicone-User-Id": "Canopy",
         },
       },
     },
@@ -1072,17 +1072,17 @@ Helicone støtter tilpassede headere for funksjoner som bufring, brukersporing o
 
 ##### Sesjonssporing
 
-Helicones [Sessions](https://docs.helicone.ai/features/sessions) funksjon lar deg gruppere relaterte LLM forespørsler sammen. Bruk [opencode-helicone-session](https://github.com/H2Shami/opencode-helicone-session) plugin for automatisk å logge hver Canopy-samtale som en økt i Helicone.
+Helicones [Sessions](https://docs.helicone.ai/features/sessions) funksjon lar deg gruppere relaterte LLM forespørsler sammen. Bruk [Canopy-helicone-session](https://github.com/H2Shami/Canopy-helicone-session) plugin for automatisk å logge hver Canopy-samtale som en økt i Helicone.
 
 ```bash
-npm install -g opencode-helicone-session
+npm install -g Canopy-helicone-session
 ```
 
 Legg den til i konfigurasjonen din.
 
-```json title="opencode.json"
+```json title="canopy.json.guard"
 {
-  "plugin": ["opencode-helicone-session"]
+  "plugin": ["Canopy-helicone-session"]
 }
 ```
 
@@ -1105,7 +1105,7 @@ Se [Helicone Header Directory](https://docs.helicone.ai/helicone-headers/header-
 
 Du kan konfigurere Canopy for å bruke lokale modeller gjennom [llama.cpp](https://github.com/ggml-org/llama.cpp) llama-server-verktøyet.
 
-```json title="opencode.json" "llama.cpp" {5, 6, 8, 10-15}
+```json title="canopy.json.guard" "llama.cpp" {5, 6, 8, 10-15}
 {
   "$schema": "https://canopy.dev/config.json",
   "provider": {
@@ -1172,7 +1172,7 @@ IO.NET tilbyr 17 modeller optimert for ulike brukstilfeller:
 
 Du kan konfigurere Canopy for å bruke lokale modeller gjennom LM Studio.
 
-```json title="opencode.json" "lmstudio" {5, 6, 8, 10-14}
+```json title="canopy.json.guard" "lmstudio" {5, 6, 8, 10-14}
 {
   "$schema": "https://canopy.dev/config.json",
   "provider": {
@@ -1290,10 +1290,10 @@ Slik bruker du Kimi K2 fra Moonshot AI:
 Du kan konfigurere Canopy for å bruke lokale modeller gjennom Ollama.
 
 :::tip
-Ollama kan automatisk konfigurere seg selv for Canopy. Se [Ollama-integrasjonsdokumentene](https://docs.ollama.com/integrations/opencode) for detaljer.
+Ollama kan automatisk konfigurere seg selv for Canopy. Se [Ollama-integrasjonsdokumentene](https://docs.ollama.com/integrations/Canopy) for detaljer.
 :::
 
-```json title="opencode.json" "ollama" {5, 6, 8, 10-14}
+```json title="canopy.json.guard" "ollama" {5, 6, 8, 10-14}
 {
   "$schema": "https://canopy.dev/config.json",
   "provider": {
@@ -1455,7 +1455,7 @@ Canopy Zen er en liste over testede og verifiserte modeller levert av Canopy-tea
 
    Du kan også legge til flere modeller gjennom Canopy-konfigurasjonen.
 
-   ```json title="opencode.json" {6}
+   ```json title="canopy.json.guard" {6}
    {
      "$schema": "https://canopy.dev/config.json",
      "provider": {
@@ -1470,7 +1470,7 @@ Canopy Zen er en liste over testede og verifiserte modeller levert av Canopy-tea
 
 5. Du kan også tilpasse dem gjennom Canopy-konfigurasjonen. Her er et eksempel på å spesifisere en leverandør
 
-   ```json title="opencode.json"
+   ```json title="canopy.json.guard"
    {
      "$schema": "https://canopy.dev/config.json",
      "provider": {
@@ -1520,7 +1520,7 @@ SAP AI Core gir tilgang til 40+ modeller fra OpenAI, Anthropic, Google, Amazon, 
    Eller angi miljøvariabelen `AICORE_SERVICE_KEY`:
 
    ```bash
-   AICORE_SERVICE_KEY='{"clientid":"...","clientsecret":"...","url":"...","serviceurls":{"AI_API_URL":"..."}}' opencode
+   AICORE_SERVICE_KEY='{"clientid":"...","clientsecret":"...","url":"...","serviceurls":{"AI_API_URL":"..."}}' Canopy
    ```
 
    Eller legg den til bash-profilen din:
@@ -1532,7 +1532,7 @@ SAP AI Core gir tilgang til 40+ modeller fra OpenAI, Anthropic, Google, Amazon, 
 4. Angi eventuelt distribusjon ID og ressursgruppe:
 
    ```bash
-   AICORE_DEPLOYMENT_ID=your-deployment-id AICORE_RESOURCE_GROUP=your-resource-group opencode
+   AICORE_DEPLOYMENT_ID=your-deployment-id AICORE_RESOURCE_GROUP=your-resource-group Canopy
    ```
 
    :::note
@@ -1686,7 +1686,7 @@ Vercel AI Gateway lar deg få tilgang til modeller fra OpenAI, Anthropic, Google
 
 Du kan også tilpasse modeller gjennom Canopy-konfigurasjonen. Her er et eksempel på spesifisering av leverandørrutingsrekkefølge.
 
-```json title="opencode.json"
+```json title="canopy.json.guard"
 {
   "$schema": "https://canopy.dev/config.json",
   "provider": {
@@ -1796,7 +1796,7 @@ Noen nyttige rutealternativer:
 
    Du kan også legge til flere modeller gjennom Canopy-konfigurasjonen.
 
-   ```json title="opencode.json" {6}
+   ```json title="canopy.json.guard" {6}
    {
      "$schema": "https://canopy.dev/config.json",
      "provider": {
@@ -1855,16 +1855,16 @@ Du kan bruke hvilken som helst OpenAI-kompatibel leverandør med Canopy. De fles
 
    ┌  Add credential
    │
-   ▲  This only stores a credential for myprovider - you will need to configure it in opencode.json, check the docs for examples.
+   ▲  This only stores a credential for myprovider - you will need to configure it in canopy.json.guard, check the docs for examples.
    │
    ◇  Enter your API key
    │  sk-...
    └
    ```
 
-4. Opprett eller oppdater `opencode.json`-filen i prosjektkatalogen:
+4. Opprett eller oppdater `canopy.json.guard`-filen i prosjektkatalogen:
 
-   ```json title="opencode.json" ""myprovider"" {5-15}
+   ```json title="canopy.json.guard" ""myprovider"" {5-15}
    {
      "$schema": "https://canopy.dev/config.json",
      "provider": {
@@ -1902,7 +1902,7 @@ Du kan bruke hvilken som helst OpenAI-kompatibel leverandør med Canopy. De fles
 
 Her er et eksempel på innstilling av alternativene `apiKey`, `headers` og modell `limit`.
 
-```json title="opencode.json" {9,11,17-20}
+```json title="canopy.json.guard" {9,11,17-20}
 {
   "$schema": "https://canopy.dev/config.json",
   "provider": {
